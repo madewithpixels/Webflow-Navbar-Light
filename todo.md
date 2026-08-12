@@ -117,6 +117,7 @@ Keep the current Canvas-visible, self-contained Embed as the dependable default.
 - [x] Add generated SHA-384 Subresource Integrity and `crossorigin="anonymous"`; document that CSP must allow the pinned jsDelivr style/script origin and that jsDelivr receives normal CDN request metadata.
 - [x] Add automated release checks that compare CDN artifacts with the repository build before publishing a tag/package.
 - [x] Publish and byte-verify the immutable `v0.1.0` GitHub/jsDelivr release.
+- [x] Publish and byte-verify the immutable `v0.2.0` GitHub/jsDelivr release; update the CDN component's exact URLs, SRI values and metadata.
 - [x] Create a separate `Navbar Light CDN` Webflow component and `/navbar-light-cdn` test page after backup `V1.0.0 First Release`; keep the self-contained component/page untouched.
 - [x] Add a minimal native Webflow visual baseline limited to structure, spacing, hit areas and `currentColor`; leave typography, text colour and decoration to destination-project base styles.
 - [ ] Complete the documented copy/paste acceptance test in a second backed-up Webflow project; the current MCP connection exposes only the component-library site.
@@ -191,8 +192,9 @@ Treat a mega-menu as a separate component or extension-installed premium feature
 - [x] Run the automated suite after repository synchronization (16/16 passing, including direct-file demo startup, closed nested-submenu rendering state and pinned CDN artifact/loader verification).
 - [x] Complete genuine macOS VoiceOver keyboard and spoken-output testing on the published Tablet variant: collapsed/expanded trigger announcements, closed-submenu omission, nested-link order and two-stage Escape focus restoration all pass.
 - [ ] Complete spoken-output testing with NVDA on Windows.
-- [ ] Verify submenu arrow open/close motion, reduced-motion behavior and Canvas editability in both Webflow components.
-- [ ] Verify every social/contact destination, visibility and replaceable icon-image prop in both Webflow components.
+- [x] Verify submenu arrow open/close motion, reduced-motion CSS and Canvas editability in both Webflow components and both published delivery modes.
+- [x] Verify all nine social/contact destinations and default icon Images on both published pages; audit every visibility and replaceable icon-image prop binding in both components.
+- [x] Verify `v0.2.0` at Desktop and Tablet in both delivery modes: enhancement state, outer and nested Escape focus return, loaded icon assets, hidden runtime config and zero horizontal overflow.
 - [x] Complete the full layout/motion matrix (35/35 open, presentation, geometry, overflow and re-close cases).
 - [x] Verify all three dropdown alignments and all seven centered motion presets.
 - [x] Obsolete original test component removed by the user after backup.

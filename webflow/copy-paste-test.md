@@ -20,7 +20,7 @@ Run this test against a disposable or backed-up destination Webflow project. The
 
 ## Preview checks
 
-- The exact `v0.1.0` CSS and JavaScript requests succeed from jsDelivr.
+- The exact `v0.2.0` CSS and JavaScript requests succeed from jsDelivr.
 - Both loader elements report `data-mwp-status="loaded"`; no `mwp-navbar-light:cdn-error` event is emitted.
 - Tablet starts collapsed, opens from the full trigger, closes on Escape and restores focus.
 - Desktop remains expanded; Mobile landscape and Mobile portrait remain collapsed.

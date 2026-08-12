@@ -161,11 +161,11 @@ Open [demo/index.html](demo/index.html) directly or through a local web server. 
 
 ## Optional CDN distribution
 
-The first CDN route uses exact semantic-version GitHub tags through jsDelivr. The live `v0.1.0` production files are:
+The CDN route uses exact semantic-version GitHub tags through jsDelivr. The live `v0.2.0` production files are:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.1.0/dist/navbar-light.min.css">
-<script defer src="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.1.0/dist/navbar-light.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.2.0/dist/navbar-light.min.css">
+<script defer src="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.2.0/dist/navbar-light.min.js"></script>
 ```
 
 Never use `latest`, a branch name or a version range in a production Webflow project. Exact jsDelivr versions are permanently cached, so a correction must receive a new version and tag. The generated [webflow/navbar-light-cdn-loader.html](webflow/navbar-light-cdn-loader.html) includes the exact URLs, SHA-384 integrity values, a readable runtime version and load/error state on the native link/script elements. A failed asset dispatches `mwp-navbar-light:cdn-error` and logs a diagnostic without hiding the native navigation content.
@@ -176,7 +176,7 @@ Navbar Light is released under the [MIT License](LICENSE), copyright © 2026 mad
 
 The `Navbar Light CDN` Webflow component contains this generated loader and is isolated on `/navbar-light-cdn` for testing. The original `Navbar Light` component and `/navbar-light` acceptance page retain the self-contained Embed.
 
-The browser verification matrix covers all 35 layout/motion combinations, all five collapse choices at the four core Webflow widths, all three dropdown alignments and every centered motion preset. The published acceptance build has also been verified with the independent center-alignment rule, property-bound closing duration and the complete native Webflow collapse-variant override matrix; the test instance was restored to `Tablet` after the audit.
+The browser verification matrix covers all 35 layout/motion combinations, all five collapse choices at the four core Webflow widths, all three dropdown alignments and every centered motion preset. The published `v0.2.0` acceptance build has also been verified at Desktop and Tablet in both delivery modes: nine icon links and their destinations render, all Images load, submenu arrows rotate using the bound duration, nested and outer Escape restore focus, configuration hides only after initialization, and neither page produces horizontal overflow.
 
 The published Tablet variant has passed a genuine macOS VoiceOver keyboard-and-spoken-output check. VoiceOver announced the navigation trigger as collapsed and expanded, skipped the closed nested submenu, announced `Company` and `Team` only after `More` opened, returned focus to collapsed `More` on the first Escape, and returned focus to the collapsed navigation trigger on the second Escape. Windows NVDA verification remains outstanding.
 

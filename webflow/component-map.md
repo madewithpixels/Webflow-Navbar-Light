@@ -121,4 +121,4 @@ Behavior values are strings because the current Webflow binding surface does not
 
 `webflow/navbar-light-embed.html` and `demo/navbar-light.browser.js` are generated from `src/navbar-light.css` and `src/navbar-light.js`. Never edit generated output as the source of truth; run `npm run build:webflow`, then synchronize the Embed output to Webflow.
 
-`webflow/navbar-light-cdn-loader.html` is generated from the package version and built release files. The `Navbar Light CDN` component stores that exact loader, pinned to `v0.1.0` with matching SHA-384 integrity values. It is a separate component so the dependable self-contained edition remains unchanged.
+`webflow/navbar-light-cdn-loader.html` is generated from the package version and built release files. The `Navbar Light CDN` component stores that exact loader, pinned to `v0.2.0` with matching SHA-384 integrity values. It is a separate component so the dependable self-contained edition remains available without an external runtime request.
