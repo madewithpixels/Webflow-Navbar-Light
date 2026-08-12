@@ -121,7 +121,7 @@ Keep the current Canvas-visible, self-contained Embed as the dependable default.
 - [x] Publish and byte-verify the immutable `v0.2.0` GitHub/jsDelivr release; update the CDN component's exact URLs, SRI values and metadata.
 - [x] Create a separate `Navbar Light CDN` Webflow component and `/navbar-light-cdn` test page after backup `V1.0.0 First Release`; keep the self-contained component/page untouched.
 - [x] Add a minimal native Webflow visual baseline limited to structure, spacing, hit areas and `currentColor`; leave typography, text colour and decoration to destination-project base styles.
-- [ ] Complete the documented copy/paste acceptance test in a second backed-up Webflow project; the current MCP connection exposes only the component-library site.
+- [ ] Create a clean Webflow site named `Smashburger`, add the current component, and complete the documented copy/paste acceptance test independently of the MWP Component Library.
 - [ ] Test caching, cold loads, failure handling, rollback and explicit version upgrades on cloned Webflow sites.
 - [ ] Document switching safely between self-contained Embed, pinned CDN and self-hosted delivery without rebuilding the component.
 - [ ] Let the future Designer Extension choose the delivery mode and pin the installed version explicitly.
@@ -174,6 +174,7 @@ Treat a mega-menu as a separate component or extension-installed premium feature
 
 ## 12. Verification
 
+- [ ] Publish the dedicated `Smashburger` site as the clean-install deployment target; verify native Canvas editability, property bindings, inherited destination-project styles, assets, responsive variants, Preview behavior and published behavior before treating a release as deployment-ready.
 - [x] Verify the CSS-only Tablet fallback in Webflow Preview.
 - [x] Verify keyboard open, Escape close and focus return.
 - [x] Verify ARIA state and inertness programmatically.
