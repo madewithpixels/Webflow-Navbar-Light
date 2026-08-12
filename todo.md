@@ -108,7 +108,7 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Keep collapsed variant panels visible but wrapped below the header row in Designer.
 - [x] Restore the test instance to Tablet + Dropdown documented defaults.
 - [x] User created a backup, refreshed, removed the obsolete component and published the acceptance page.
-- [x] Run the final local automated suite after repository synchronization (12/12 passing).
+- [x] Run the automated suite after repository synchronization (13/13 passing, including direct-file demo startup).
 - [ ] Complete manual screen-reader testing with VoiceOver/NVDA.
 - [ ] Complete the full visual matrix pass for every layout and motion preset.
 - [x] Obsolete original test component removed by the user after backup.
