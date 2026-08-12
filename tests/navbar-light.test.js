@@ -6,6 +6,20 @@ import { JSDOM } from 'jsdom';
 let dom;
 let NavbarLight;
 
+function waitForEvent(target, eventName, timeout = 1000) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      target.removeEventListener(eventName, onEvent);
+      reject(new Error(`Timed out waiting for ${eventName}`));
+    }, timeout);
+    const onEvent = (event) => {
+      clearTimeout(timer);
+      resolve(event);
+    };
+    target.addEventListener(eventName, onEvent, { once: true });
+  });
+}
+
 test('functional CSS keeps a closed native submenu out of the accessibility tree', () => {
   const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
   assert.match(css, /\[data-mwp-submenu\]:not\(\[open\]\) > \.mwp-css-nav_submenu-list\s*\{\s*display:\s*none;/);
@@ -69,8 +83,9 @@ test('opens, emits lifecycle events and exposes public controls', async () => {
   root.addEventListener('mwp-nav:open', () => events.push('open'));
   root.addEventListener('mwp-nav:opened', () => events.push('opened'));
 
+  const opened = waitForEvent(root, 'mwp-nav:opened');
   root.mwpNavbarLight.open();
-  await new Promise((resolve) => setTimeout(resolve, 15));
+  await opened;
 
   assert.equal(root.dataset.state, 'open');
   assert.deepEqual(events, ['open', 'opened']);
@@ -84,10 +99,12 @@ test('closes on Escape and restores focus to the trigger', async () => {
   const menu = root.querySelector('[data-mwp-menu]');
   const trigger = root.querySelector('[data-mwp-trigger]');
 
+  const opened = waitForEvent(root, 'mwp-nav:opened');
   menu.open = true;
-  await new Promise((resolve) => setTimeout(resolve, 10));
+  await opened;
+  const closed = waitForEvent(root, 'mwp-nav:closed');
   document.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-  await new Promise((resolve) => setTimeout(resolve, 15));
+  await closed;
 
   assert.equal(menu.open, false);
   assert.equal(document.activeElement, trigger);
@@ -95,13 +112,17 @@ test('closes on Escape and restores focus to the trigger', async () => {
   navbar.destroy();
 });
 
-test('closes after a navigation link click', () => {
+test('closes after a navigation link click', async () => {
   const root = document.querySelector('[data-mwp-navbar]');
   const navbar = new NavbarLight(root);
   const menu = root.querySelector('[data-mwp-menu]');
+  const opened = waitForEvent(root, 'mwp-nav:opened');
   menu.open = true;
+  await opened;
 
+  const closed = waitForEvent(root, 'mwp-nav:closed');
   root.querySelector('a').dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }));
+  await closed;
   assert.equal(menu.open, false);
   navbar.destroy();
 });
@@ -110,10 +131,13 @@ test('closes on an outside click when enabled', async () => {
   const root = document.querySelector('[data-mwp-navbar]');
   const navbar = new NavbarLight(root);
   const menu = root.querySelector('[data-mwp-menu]');
+  const opened = waitForEvent(root, 'mwp-nav:opened');
   menu.open = true;
-  await new Promise((resolve) => setTimeout(resolve, 5));
+  await opened;
 
+  const closed = waitForEvent(root, 'mwp-nav:closed');
   document.body.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }));
+  await closed;
   assert.equal(menu.open, false);
   navbar.destroy();
 });
@@ -123,10 +147,13 @@ test('backdrop closes the menu and restores trigger focus', async () => {
   const navbar = new NavbarLight(root);
   const menu = root.querySelector('[data-mwp-menu]');
   const trigger = root.querySelector('[data-mwp-trigger]');
+  const opened = waitForEvent(root, 'mwp-nav:opened');
   menu.open = true;
-  await new Promise((resolve) => setTimeout(resolve, 5));
+  await opened;
 
+  const closed = waitForEvent(root, 'mwp-nav:closed');
   root.querySelector('[data-mwp-backdrop]').dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }));
+  await closed;
   assert.equal(menu.open, false);
   assert.equal(document.activeElement, trigger);
   navbar.destroy();
@@ -139,13 +166,15 @@ test('locks scrolling for drawer layouts and restores prior styles', async () =>
   const navbar = new NavbarLight(root);
   const menu = root.querySelector('[data-mwp-menu]');
 
+  const opened = waitForEvent(root, 'mwp-nav:opened');
   menu.open = true;
-  await new Promise((resolve) => setTimeout(resolve, 5));
+  await opened;
   assert.equal(document.documentElement.dataset.mwpScrollLocked, 'true');
   assert.equal(document.documentElement.style.overflow, 'hidden');
 
+  const closed = waitForEvent(root, 'mwp-nav:closed');
   menu.open = false;
-  await new Promise((resolve) => setTimeout(resolve, 5));
+  await closed;
   assert.equal(document.documentElement.dataset.mwpScrollLocked, undefined);
   assert.equal(document.documentElement.style.overflow, 'clip');
   navbar.destroy();
