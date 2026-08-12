@@ -9,6 +9,7 @@
     "check": "node --check src/navbar-light.js"
   },
   "devDependencies": {
+    "esbuild": "0.28.2",
     "jsdom": "29.0.0"
   }
 }
