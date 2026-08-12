@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import test from 'node:test';
@@ -37,4 +38,21 @@ test('release artifacts are versioned, browser-ready and mapped to source', asyn
   assert.equal(typeof dom.window.initNavbarLight, 'function');
   assert.equal(dom.window.MWP_NAVBAR_LIGHT_VERSION, packageMetadata.version);
   dom.window.close();
+});
+
+test('CDN loader pins the release tag and authenticates the committed artifacts', async () => {
+  const packageMetadata = JSON.parse(await readFile(resolve(root, 'package.json'), 'utf8'));
+  const loader = await readFile(resolve(root, 'webflow/navbar-light-cdn-loader.html'), 'utf8');
+  const tag = `v${packageMetadata.version}`;
+  const expectedBase = `https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@${tag}/dist`;
+  const integrity = (source) => `sha384-${createHash('sha384').update(source).digest('base64')}`;
+  const css = await readFile(resolve(root, 'dist/navbar-light.min.css'));
+  const javascript = await readFile(resolve(root, 'dist/navbar-light.min.js'));
+
+  assert.match(loader, new RegExp(`${expectedBase.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}/navbar-light\\.min\\.css`));
+  assert.match(loader, new RegExp(`${expectedBase.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&')}/navbar-light\\.min\\.js`));
+  assert.match(loader, new RegExp(integrity(css).replaceAll('+', '\\+')));
+  assert.match(loader, new RegExp(integrity(javascript).replaceAll('+', '\\+')));
+  assert.doesNotMatch(loader, /@(latest|main|master)|@\d+\.x|@\^|@~/i);
+  assert.match(loader, /mwp-navbar-light:cdn-error/g);
 });

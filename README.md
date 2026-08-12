@@ -152,11 +152,15 @@ Open [demo/index.html](demo/index.html) directly or through a local web server. 
 The first CDN route will use exact semantic-version GitHub tags through jsDelivr. For a future `v0.1.0` tag, the production files will be available at:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@0.1.0/dist/navbar-light.min.css">
-<script defer src="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@0.1.0/dist/navbar-light.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.1.0/dist/navbar-light.min.css">
+<script defer src="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.1.0/dist/navbar-light.min.js"></script>
 ```
 
-Never use `latest`, a branch name or a version range in a production Webflow project. Exact jsDelivr versions are permanently cached, so a correction must receive a new version and tag. The repository remains `private: true` as an npm package; npm distribution can be reconsidered after package naming, ownership and licensing are settled. No public release should be tagged until the repository owner has selected and added a licence.
+Never use `latest`, a branch name or a version range in a production Webflow project. Exact jsDelivr versions are permanently cached, so a correction must receive a new version and tag. The generated [webflow/navbar-light-cdn-loader.html](webflow/navbar-light-cdn-loader.html) includes the exact URLs, SHA-384 integrity values, a readable runtime version and load/error state on the native link/script elements. A failed asset dispatches `mwp-navbar-light:cdn-error` and logs a diagnostic without hiding the native navigation content.
+
+Sites with a Content Security Policy must allow `https://cdn.jsdelivr.net` in `style-src` and `script-src`. The loader's inline diagnostic handlers also need the site's permitted inline-handler policy; blocking those handlers suppresses the custom diagnostic but does not itself block the external CSS or JavaScript. The CDN necessarily receives ordinary request metadata needed to serve the files. Use the self-contained Embed or self-hosted files when third-party requests or the required CSP allowances are unsuitable.
+
+The repository remains `private: true` as an npm package; npm distribution can be reconsidered after package naming, ownership and licensing are settled. No public release should be tagged until the repository owner has selected and added a licence.
 
 The browser verification matrix covers all 35 layout/motion combinations, all five collapse choices at the four core Webflow widths, all three dropdown alignments and every centered motion preset. The published acceptance build has also been verified with the independent center-alignment rule, property-bound closing duration and the complete native Webflow collapse-variant override matrix; the test instance was restored to `Tablet` after the audit.
 
@@ -179,12 +183,14 @@ The published Tablet variant has passed a genuine macOS VoiceOver keyboard-and-s
 │   └── webflow-interactions.md
 ├── scripts/build-webflow-embed.mjs
 ├── scripts/build-dist.mjs
+├── scripts/build-cdn-loader.mjs
 ├── src
 │   ├── navbar-light.css
 │   └── navbar-light.js
 ├── tests/navbar-light.test.js
 └── webflow
     ├── component-map.md
+    ├── navbar-light-cdn-loader.html
     └── navbar-light-embed.html
 ```
 

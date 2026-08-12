@@ -103,13 +103,14 @@ This checklist is the implementation plan and status record. Completed work is c
 
 Keep the current Canvas-visible, self-contained Embed as the dependable default. Add a second, explicitly optional distribution mode that loads versioned CSS and progressive-enhancement JavaScript from jsDelivr while leaving the native Webflow structure, classes, component properties and no-script behavior intact.
 
-- [ ] Use public exact-version GitHub tags for the first release; repository visibility is confirmed, while the owner must choose and add a licence before tagging. Reconsider npm after package naming and ownership are settled.
+- [x] Choose public exact-version GitHub tags for the first release; reconsider npm after package naming and ownership are settled.
+- [ ] Owner to choose and add a licence before creating the first public tag.
 - [x] Produce release-ready `dist` CSS and JavaScript files, minified files and source maps from the maintained source.
-- [ ] Use exact semantic-version URLs in production; never generate `latest`, branch or floating version-range URLs.
-- [ ] Add a small Canvas-visible CDN loader Embed with a readable runtime version and normal editable Webflow settings.
-- [ ] Preserve useful CSS/native behavior if the enhancement script is blocked, late or unavailable.
-- [ ] Define the behavior and diagnostics for CSS load failure without hiding native navigation content.
-- [ ] Evaluate Subresource Integrity, `crossorigin`, Content Security Policy and privacy implications, and document the supported configuration.
+- [x] Generate exact semantic-version URLs; never generate `latest`, branch or floating version-range URLs.
+- [x] Add a small Canvas-visible CDN loader Embed with a readable runtime version while normal editable Webflow settings remain native.
+- [x] Preserve useful CSS/native behavior if the enhancement script is blocked, late or unavailable.
+- [x] Define non-destructive CSS/JavaScript load diagnostics without hiding native navigation content.
+- [x] Add generated SHA-384 Subresource Integrity and `crossorigin="anonymous"`; document that CSP must allow the pinned jsDelivr style/script origin and that jsDelivr receives normal CDN request metadata.
 - [x] Add automated release checks that compare CDN artifacts with the repository build before publishing a tag/package.
 - [ ] Test caching, cold loads, failure handling, rollback and explicit version upgrades on cloned Webflow sites.
 - [ ] Document switching safely between self-contained Embed, pinned CDN and self-hosted delivery without rebuilding the component.
@@ -164,7 +165,7 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [x] Stack native nested-submenu links after the published matrix exposed their inline fallback.
 - [x] Restore the test instance to Tablet + Dropdown documented defaults.
 - [x] User created a backup, refreshed, removed the obsolete component and published the acceptance page.
-- [x] Run the automated suite after repository synchronization (14/14 passing, including direct-file demo startup and closed nested-submenu rendering state).
+- [x] Run the automated suite after repository synchronization (16/16 passing, including direct-file demo startup, closed nested-submenu rendering state and pinned CDN artifact/loader verification).
 - [x] Complete genuine macOS VoiceOver keyboard and spoken-output testing on the published Tablet variant: collapsed/expanded trigger announcements, closed-submenu omission, nested-link order and two-stage Escape focus restoration all pass.
 - [ ] Complete spoken-output testing with NVDA on Windows.
 - [x] Complete the full layout/motion matrix (35/35 open, presentation, geometry, overflow and re-close cases).

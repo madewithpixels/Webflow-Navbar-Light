@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "node scripts/build-all.mjs",
+    "build:cdn": "node scripts/build-cdn-loader.mjs",
     "build:dist": "node scripts/build-dist.mjs",
     "build:webflow": "node scripts/build-webflow-embed.mjs",
     "test": "node --test",
