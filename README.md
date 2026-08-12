@@ -2,10 +2,11 @@
 
 Navbar Light is a CSS-first, Webflow-native replacement for the native Navbar component. It keeps one shared set of links for expanded and collapsed layouts, exposes the useful choices as component properties, and uses JavaScript only for progressive enhancement.
 
-The maintained implementation exists in two synchronized forms:
+The maintained implementation exists in synchronized forms:
 
-1. The `Navbar Light` component in the **MWP Component Library**, tested on the **Navbar Light** page.
-2. This repository, containing the matching CSS, enhancement script, interactive reference demo, tests and generated Webflow embed.
+1. The self-contained `Navbar Light` component in the **MWP Component Library**, tested on the **Navbar Light** page.
+2. The optional pinned `Navbar Light CDN` component, isolated on the **Navbar Light CDN** page.
+3. This repository, containing the matching CSS, enhancement script, interactive reference demo, tests and generated Webflow embeds.
 
 Published acceptance build: <https://mwp-component-library.webflow.io/navbar-light>.
 
@@ -50,6 +51,12 @@ The live Webflow Canvas matrix has been checked for all five variants at Desktop
 String values use CSS syntax where appropriate, for example `280ms`, `1.5rem`, `24rem` and `cubic-bezier(0.22, 1, 0.36, 1)`.
 
 The native `Navbar Light settings` block mirrors values that the current Webflow API cannot bind directly to custom attributes. It and the enhancement Embed sit immediately below the native navbar row, deliberately visible and styleable in Designer without disrupting the navigation layout. The enhancement reads the settings and hides the block only in Preview/published runtime after initialization.
+
+### Styling and destination-project inheritance
+
+The included Webflow styles are deliberately structural: layout, spacing, touch targets, burger geometry, panel grouping, borders and small radii. Brand and navigation classes do not set typography, text colour or text decoration, so a copied component inherits those values from the destination project's body and link tag styles. The burger bars and outlined CTA use `currentColor` and follow that inherited colour automatically.
+
+This means the component can look intentionally plain in the library. Apply project-specific presentation through the existing native `mwp-css-nav_*` classes after pasting; no Embed edit or `!important` override should be necessary.
 
 ## Layout and motion presets
 
@@ -149,7 +156,7 @@ Open [demo/index.html](demo/index.html) directly or through a local web server. 
 
 ## Optional CDN distribution
 
-The first CDN route will use exact semantic-version GitHub tags through jsDelivr. For a future `v0.1.0` tag, the production files will be available at:
+The first CDN route uses exact semantic-version GitHub tags through jsDelivr. The live `v0.1.0` production files are:
 
 ```html
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.1.0/dist/navbar-light.min.css">
@@ -161,6 +168,8 @@ Never use `latest`, a branch name or a version range in a production Webflow pro
 Sites with a Content Security Policy must allow `https://cdn.jsdelivr.net` in `style-src` and `script-src`. The loader's inline diagnostic handlers also need the site's permitted inline-handler policy; blocking those handlers suppresses the custom diagnostic but does not itself block the external CSS or JavaScript. The CDN necessarily receives ordinary request metadata needed to serve the files. Use the self-contained Embed or self-hosted files when third-party requests or the required CSP allowances are unsuitable.
 
 Navbar Light is released under the [MIT License](LICENSE), copyright © 2026 madewithpixels. The repository remains `private: true` as an npm package; npm distribution can be reconsidered after package naming and ownership are settled.
+
+The `Navbar Light CDN` Webflow component contains this generated loader and is isolated on `/navbar-light-cdn` for testing. The original `Navbar Light` component and `/navbar-light` acceptance page retain the self-contained Embed.
 
 The browser verification matrix covers all 35 layout/motion combinations, all five collapse choices at the four core Webflow widths, all three dropdown alignments and every centered motion preset. The published acceptance build has also been verified with the independent center-alignment rule, property-bound closing duration and the complete native Webflow collapse-variant override matrix; the test instance was restored to `Tablet` after the audit.
 
@@ -190,12 +199,13 @@ The published Tablet variant has passed a genuine macOS VoiceOver keyboard-and-s
 ├── tests/navbar-light.test.js
 └── webflow
     ├── component-map.md
+    ├── copy-paste-test.md
     ├── navbar-light-cdn-loader.html
     └── navbar-light-embed.html
 ```
 
 ## Webflow testing safety
 
-Before structural changes, create a Webflow backup. The obsolete `CSS Navbar — Details` test component has been removed; `Navbar Light` is now the sole acceptance component on the page. Publishing remains a deliberate user-controlled release step.
+Before structural changes, create a Webflow backup. The obsolete `CSS Navbar — Details` test component has been removed; `Navbar Light` remains the sole acceptance component on its page, while the optional CDN edition is isolated on a separate page. Publishing remains a deliberate user-controlled release step.
 
 See [todo.md](todo.md) for completed work and the remaining Windows NVDA verification.

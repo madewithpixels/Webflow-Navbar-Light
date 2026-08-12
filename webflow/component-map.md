@@ -1,24 +1,31 @@
 # Webflow component map
 
-## Site and test page
+## Site and test pages
 
 - Site: `MWP Component Library`
 - Site ID: `6a0351de7c4e42148a81db6f`
-- Test page: `Navbar Light`
-- Page ID: `6a7cbbc9a6f261aef1113d91`
-- New component: `Navbar Light`
-- Component ID: `5e7a8748-7a91-3b5a-7978-b6a45d39743d`
-- Test instance ID: `b515420b-9d87-fa20-e8ef-c40cc492eb86`
+- Self-contained test page: `Navbar Light`
+- Self-contained page ID: `6a7cbbc9a6f261aef1113d91`
+- Self-contained component: `Navbar Light`
+- Self-contained component ID: `5e7a8748-7a91-3b5a-7978-b6a45d39743d`
+- Self-contained instance ID: `b515420b-9d87-fa20-e8ef-c40cc492eb86`
 - Published acceptance URL: `https://mwp-component-library.webflow.io/navbar-light`
+- CDN test page: `Navbar Light CDN`
+- CDN page ID: `6a7cf1904621e5d95556557d`
+- CDN component: `Navbar Light CDN`
+- CDN component ID: `d095c22c-0919-f8ea-3180-d7c64046c04d`
+- CDN instance ID: `9d211567-5ea9-bf0b-144d-4e9962401e75`
+- CDN Embed ID: `d095c22c-0919-f8ea-3180-d7c64046c06f`
+- Intended CDN URL: `https://mwp-component-library.webflow.io/navbar-light-cdn`
 
-The obsolete `CSS Navbar — Details` test component and instance were removed by the user after creating a backup. `Navbar Light` is the sole acceptance component on the test page.
+The obsolete `CSS Navbar — Details` test component and instance were removed by the user after creating a backup. `Navbar Light` remains the sole acceptance component on the original test page. The optional CDN edition lives alone on its separate page and differs only in its Canvas-visible Embed. Before that structural addition, the user created backup `V1.0.0 First Release`.
 
 ## Native structure
 
 ```text
 Navbar Light [header.mwp-css-nav, data-mwp-navbar]
 ├── Navbar inner [div.mwp-css-nav_inner]
-    ├── Brand [Link]
+    ├── Brand [Link.mwp-css-nav_brand]
     ├── Menu details [details.mwp-css-nav_menu, data-mwp-menu]
     │   └── Menu trigger [summary.mwp-css-nav_summary, data-mwp-trigger]
     │       ├── Menu label [Text Block, data-mwp-label]
@@ -42,6 +49,12 @@ For collapsed variants, the native authoring styles wrap `Navbar inner` and give
 
 Expanded variants must explicitly reverse inherited collapsed authoring styles when their threshold is narrower than the base Mobile landscape variant. At Mobile landscape, `Never` and `Mobile portrait` set `Navbar inner` back to `flex-wrap: nowrap` and restore `Navigation panel` to `display: flex`, `width: auto`, `flex-shrink: 1` and `flex-basis: auto`. Mobile portrait then applies its collapsed grid overrides at Mobile portrait. Do not target the removed legacy `mwp-css-nav_desktop` element.
 
+## Native visual baseline
+
+The shared Webflow classes provide only structural presentation: row/panel layout, spacing, hit areas, burger geometry, borders, radii and grouping. Brand and navigation classes intentionally do not set font family, font size, font weight, text colour or text decoration. Those properties therefore inherit from the destination project's body and link tag styles after copy/paste. Burger lines and the outlined CTA use `currentColor` so they follow the inherited text/link colour.
+
+Avoid adding visual CSS to either Embed. Project-specific presentation should remain ordinary Webflow class styling. When a deliberate component-level visual override is needed, update the existing `mwp-css-nav_*` class rather than introducing `!important` declarations.
+
 ## Collapse variants
 
 | Variant | ID |
@@ -53,6 +66,8 @@ Expanded variants must explicitly reverse inherited collapsed authoring styles w
 | Always | `1a87b135-2b26-2213-8dfc-81db05e757c7` |
 
 Variant property ID: `1a87b135-2b26-2213-8dfc-81db05e757c3`.
+
+The CDN duplicate has equivalent variants with its own generated IDs: Never `2aced186-b62e-78cf-5f54-f5097096d2d1`, Tablet `2aced186-b62e-78cf-5f54-f5097096d2d2`, Mobile landscape `base`, Mobile portrait `2aced186-b62e-78cf-5f54-f5097096d2d3`, Always `2aced186-b62e-78cf-5f54-f5097096d2d4`. Its variant property ID is `2aced186-b62e-78cf-5f54-f5097096d2d0`. The CDN test instance is set to Tablet.
 
 Webflow emits the selected marker as `data-wf--navbar-light--variant`. The CSS fallback uses that native marker, so the breakpoint choice works without JavaScript.
 
@@ -96,6 +111,8 @@ Behavior values are strings because the current Webflow binding surface does not
 - Events: `mwp-nav:open`, `mwp-nav:opened`, `mwp-nav:close`, `mwp-nav:closed`.
 - API: `element.mwpNavbarLight.open()`, `.close()`, `.toggle()`, `.destroy()`.
 
-## Generated embed
+## Generated embeds
 
 `webflow/navbar-light-embed.html` and `demo/navbar-light.browser.js` are generated from `src/navbar-light.css` and `src/navbar-light.js`. Never edit generated output as the source of truth; run `npm run build:webflow`, then synchronize the Embed output to Webflow.
+
+`webflow/navbar-light-cdn-loader.html` is generated from the package version and built release files. The `Navbar Light CDN` component stores that exact loader, pinned to `v0.1.0` with matching SHA-384 integrity values. It is a separate component so the dependable self-contained edition remains unchanged.

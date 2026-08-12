@@ -112,6 +112,10 @@ Keep the current Canvas-visible, self-contained Embed as the dependable default.
 - [x] Define non-destructive CSS/JavaScript load diagnostics without hiding native navigation content.
 - [x] Add generated SHA-384 Subresource Integrity and `crossorigin="anonymous"`; document that CSP must allow the pinned jsDelivr style/script origin and that jsDelivr receives normal CDN request metadata.
 - [x] Add automated release checks that compare CDN artifacts with the repository build before publishing a tag/package.
+- [x] Publish and byte-verify the immutable `v0.1.0` GitHub/jsDelivr release.
+- [x] Create a separate `Navbar Light CDN` Webflow component and `/navbar-light-cdn` test page after backup `V1.0.0 First Release`; keep the self-contained component/page untouched.
+- [x] Add a minimal native Webflow visual baseline limited to structure, spacing, hit areas and `currentColor`; leave typography, text colour and decoration to destination-project base styles.
+- [ ] Complete the documented copy/paste acceptance test in a second backed-up Webflow project; the current MCP connection exposes only the component-library site.
 - [ ] Test caching, cold loads, failure handling, rollback and explicit version upgrades on cloned Webflow sites.
 - [ ] Document switching safely between self-contained Embed, pinned CDN and self-hosted delivery without rebuilding the component.
 - [ ] Let the future Designer Extension choose the delivery mode and pin the installed version explicitly.
