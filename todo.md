@@ -174,4 +174,4 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [x] Publish and verify the center-alignment and close-duration Embed update.
 - [x] Audit the five native collapse variants' stored Desktop, Tablet, Mobile landscape and Mobile portrait overrides; restore the test instance to Tablet afterward.
 - [x] Replace obsolete expanded-variant mobile overrides that hid the shared panel in Never and Mobile portrait; re-run the affected Canvas cases.
-- [ ] Publish and verify the expanded-panel variant correction at Mobile landscape and Mobile portrait widths.
+- [x] Publish and verify the expanded-panel variant correction at Mobile landscape and Mobile portrait widths.
