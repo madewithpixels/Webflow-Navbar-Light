@@ -148,6 +148,8 @@ Open [demo/index.html](demo/index.html) directly or through a local web server. 
 
 The browser verification matrix covers all 35 layout/motion combinations, all five collapse choices at the four core Webflow widths, all three dropdown alignments and every centered motion preset. The published acceptance build has also been verified with the independent center-alignment rule, property-bound closing duration and the complete native Webflow collapse-variant override matrix; the test instance was restored to `Tablet` after the audit.
 
+The published Tablet variant has passed a genuine macOS VoiceOver keyboard-and-spoken-output check. VoiceOver announced the navigation trigger as collapsed and expanded, skipped the closed nested submenu, announced `Company` and `Team` only after `More` opened, returned focus to collapsed `More` on the first Escape, and returned focus to the collapsed navigation trigger on the second Escape. Windows NVDA verification remains outstanding.
+
 ## Repository map
 
 ```text
@@ -173,4 +175,4 @@ The browser verification matrix covers all 35 layout/motion combinations, all fi
 
 Before structural changes, create a Webflow backup. The obsolete `CSS Navbar — Details` test component has been removed; `Navbar Light` is now the sole acceptance component on the page. Publishing remains a deliberate user-controlled release step.
 
-See [todo.md](todo.md) for completed work and the remaining visual/assistive-technology verification.
+See [todo.md](todo.md) for completed work and the remaining Windows NVDA verification.

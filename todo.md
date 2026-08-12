@@ -164,8 +164,9 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [x] Stack native nested-submenu links after the published matrix exposed their inline fallback.
 - [x] Restore the test instance to Tablet + Dropdown documented defaults.
 - [x] User created a backup, refreshed, removed the obsolete component and published the acceptance page.
-- [x] Run the automated suite after repository synchronization (13/13 passing, including direct-file demo startup).
-- [ ] Complete spoken-output testing with VoiceOver after enabling Codex Accessibility permission and VoiceOver's AppleScript-control setting; complete NVDA testing on Windows.
+- [x] Run the automated suite after repository synchronization (14/14 passing, including direct-file demo startup and closed nested-submenu rendering state).
+- [x] Complete genuine macOS VoiceOver keyboard and spoken-output testing on the published Tablet variant: collapsed/expanded trigger announcements, closed-submenu omission, nested-link order and two-stage Escape focus restoration all pass.
+- [ ] Complete spoken-output testing with NVDA on Windows.
 - [x] Complete the full layout/motion matrix (35/35 open, presentation, geometry, overflow and re-close cases).
 - [x] Verify all three dropdown alignments and all seven centered motion presets.
 - [x] Obsolete original test component removed by the user after backup.
