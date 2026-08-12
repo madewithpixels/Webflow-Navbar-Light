@@ -89,6 +89,8 @@ The stylesheet-only fallback was verified in Webflow Preview with the script rem
 
 The `Navigation panel` is the single source of links for desktop and collapsed layouts. Edit, reorder or duplicate its native Link elements normally. The current-page class continues to be applied by Webflow.
 
+Collapsed panels use a functional grid so native panel children stack into usable rows. The matching Webflow variant styles also place the visible panel below the brand/trigger row while editing at its collapse breakpoint.
+
 The included submenu is a nested native `<details>` pattern. Duplicate the complete `Submenu details` element to add another. CTA and secondary navigation have component visibility properties.
 
 A component Slot was evaluated but not added: Webflow slots accept component instances rather than arbitrary native elements, which would make simple link editing more restrictive. Native panel regions remain the clearer default.

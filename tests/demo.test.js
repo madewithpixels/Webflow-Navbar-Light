@@ -38,5 +38,10 @@ test('demo initializes when opened directly from the filesystem', async () => {
   layout.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
   assert.equal(root.dataset.layout, 'overlay');
 
+  const collapse = dom.window.document.querySelector('[name="collapse"]');
+  collapse.value = 'always';
+  collapse.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
+  assert.equal(dom.window.getComputedStyle(root.querySelector('[data-mwp-panel]')).display, 'grid');
+
   dom.window.close();
 });

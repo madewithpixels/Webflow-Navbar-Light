@@ -137,6 +137,8 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [x] Verify editable configuration and Embed remain visible in Designer.
 - [x] Verify shared navigation entries remain visible in Desktop Designer without relying on runtime CSS.
 - [x] Keep collapsed variant panels visible but wrapped below the header row in Designer.
+- [x] Restore the collapsed variant authoring overrides after the rebuilt component lost them.
+- [x] Stack direct native panel children with the minimal functional collapsed-grid rule.
 - [x] Restore the test instance to Tablet + Dropdown documented defaults.
 - [x] User created a backup, refreshed, removed the obsolete component and published the acceptance page.
 - [x] Run the automated suite after repository synchronization (13/13 passing, including direct-file demo startup).
@@ -145,3 +147,4 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [x] Obsolete original test component removed by the user after backup.
 - [x] Verify the published Desktop acceptance build initializes, expands the Tablet variant, renders shared links and hides authoring settings.
 - [x] Verify published nested-submenu keyboard open/Escape behavior.
+- [ ] Publish and verify the collapsed-grid fix on the Webflow acceptance page.
