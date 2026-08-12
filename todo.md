@@ -103,14 +103,14 @@ This checklist is the implementation plan and status record. Completed work is c
 
 Keep the current Canvas-visible, self-contained Embed as the dependable default. Add a second, explicitly optional distribution mode that loads versioned CSS and progressive-enhancement JavaScript from jsDelivr while leaving the native Webflow structure, classes, component properties and no-script behavior intact.
 
-- [ ] Decide whether to publish through npm (preferred by jsDelivr for packages) or public tagged GitHub releases, including licence and repository visibility.
-- [ ] Produce release-ready `dist` CSS and JavaScript files, minified files and source maps from the maintained source.
+- [ ] Use public exact-version GitHub tags for the first release; repository visibility is confirmed, while the owner must choose and add a licence before tagging. Reconsider npm after package naming and ownership are settled.
+- [x] Produce release-ready `dist` CSS and JavaScript files, minified files and source maps from the maintained source.
 - [ ] Use exact semantic-version URLs in production; never generate `latest`, branch or floating version-range URLs.
 - [ ] Add a small Canvas-visible CDN loader Embed with a readable runtime version and normal editable Webflow settings.
 - [ ] Preserve useful CSS/native behavior if the enhancement script is blocked, late or unavailable.
 - [ ] Define the behavior and diagnostics for CSS load failure without hiding native navigation content.
 - [ ] Evaluate Subresource Integrity, `crossorigin`, Content Security Policy and privacy implications, and document the supported configuration.
-- [ ] Add automated release checks that compare CDN artifacts with the repository build before publishing a tag/package.
+- [x] Add automated release checks that compare CDN artifacts with the repository build before publishing a tag/package.
 - [ ] Test caching, cold loads, failure handling, rollback and explicit version upgrades on cloned Webflow sites.
 - [ ] Document switching safely between self-contained Embed, pinned CDN and self-hosted delivery without rebuilding the component.
 - [ ] Let the future Designer Extension choose the delivery mode and pin the installed version explicitly.

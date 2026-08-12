@@ -4,9 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "node scripts/build-all.mjs",
+    "build:dist": "node scripts/build-dist.mjs",
     "build:webflow": "node scripts/build-webflow-embed.mjs",
     "test": "node --test",
-    "check": "node --check src/navbar-light.js"
+    "check": "node --check src/navbar-light.js",
+    "check:dist": "node scripts/check-dist.mjs"
   },
   "devDependencies": {
     "esbuild": "0.28.2",

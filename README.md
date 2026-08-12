@@ -141,10 +141,22 @@ See [examples/gsap.js](examples/gsap.js) for a Custom-mode GSAP handoff and [exa
 npm install
 npm test
 npm run check
-npm run build:webflow
+npm run build
+npm run check:dist
 ```
 
-Open [demo/index.html](demo/index.html) directly or through a local web server. Its controls exercise every layout and motion combination. `npm run build:webflow` regenerates both `webflow/navbar-light-embed.html` and the demo's classic browser script from the maintained source files.
+Open [demo/index.html](demo/index.html) directly or through a local web server. Its controls exercise every layout and motion combination. `npm run build` regenerates the self-contained Webflow Embed, the demo's classic browser script and the release-ready `dist` files from the maintained source files. `npm run check:dist` fails when committed CDN artifacts no longer match the source.
+
+## Optional CDN distribution
+
+The first CDN route will use exact semantic-version GitHub tags through jsDelivr. For a future `v0.1.0` tag, the production files will be available at:
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@0.1.0/dist/navbar-light.min.css">
+<script defer src="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@0.1.0/dist/navbar-light.min.js"></script>
+```
+
+Never use `latest`, a branch name or a version range in a production Webflow project. Exact jsDelivr versions are permanently cached, so a correction must receive a new version and tag. The repository remains `private: true` as an npm package; npm distribution can be reconsidered after package naming, ownership and licensing are settled. No public release should be tagged until the repository owner has selected and added a licence.
 
 The browser verification matrix covers all 35 layout/motion combinations, all five collapse choices at the four core Webflow widths, all three dropdown alignments and every centered motion preset. The published acceptance build has also been verified with the independent center-alignment rule, property-bound closing duration and the complete native Webflow collapse-variant override matrix; the test instance was restored to `Tablet` after the audit.
 
@@ -156,12 +168,17 @@ The published Tablet variant has passed a genuine macOS VoiceOver keyboard-and-s
 .
 ├── README.md
 ├── todo.md
+├── dist
+│   ├── navbar-light.css
+│   ├── navbar-light.js
+│   └── minified files and source maps
 ├── demo/index.html
 ├── demo/navbar-light.browser.js
 ├── examples
 │   ├── gsap.js
 │   └── webflow-interactions.md
 ├── scripts/build-webflow-embed.mjs
+├── scripts/build-dist.mjs
 ├── src
 │   ├── navbar-light.css
 │   └── navbar-light.js
