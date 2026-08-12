@@ -7,7 +7,7 @@ The maintained implementation exists in two synchronized forms:
 1. The `Navbar Light` component in the **MWP Component Library**, tested on the **Navbar Light** page.
 2. This repository, containing the matching CSS, enhancement script, interactive reference demo, tests and generated Webflow embed.
 
-The Webflow test page has not been published by this project.
+Published acceptance build: <https://mwp-component-library.webflow.io/navbar-light>.
 
 ## Design constraints
 
@@ -158,6 +158,6 @@ Open [demo/index.html](demo/index.html) through a local web server. Its controls
 
 ## Webflow testing safety
 
-Do not refresh the **Navbar Light** Designer page without explicit approval and confirmation that a backup exists. Preview toggling is sufficient to recompile component/embed updates. Do not publish unless explicitly requested.
+Before structural changes, create a Webflow backup. The obsolete `CSS Navbar — Details` test component has been removed; `Navbar Light` is now the sole acceptance component on the page. Publishing remains a deliberate user-controlled release step.
 
 See [todo.md](todo.md) for completed work and the remaining visual/assistive-technology verification.

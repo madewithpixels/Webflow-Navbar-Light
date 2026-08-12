@@ -105,8 +105,10 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Verify editable configuration and Embed remain visible in Designer.
 - [x] Verify shared navigation entries remain visible in Desktop Designer without relying on runtime CSS.
 - [x] Restore the test instance to Tablet + Dropdown documented defaults.
-- [x] Confirm no refresh or publish action was taken during this milestone.
+- [x] User created a backup, refreshed, removed the obsolete component and published the acceptance page.
 - [x] Run the final local automated suite after repository synchronization (12/12 passing).
 - [ ] Complete manual screen-reader testing with VoiceOver/NVDA.
 - [ ] Complete the full visual matrix pass for every layout and motion preset.
-- [ ] Obtain user approval before removing the preserved original test instance.
+- [x] Obsolete original test component removed by the user after backup.
+- [x] Verify the published Desktop acceptance build initializes, expands the Tablet variant, renders shared links and hides authoring settings.
+- [x] Verify published nested-submenu keyboard open/Escape behavior.

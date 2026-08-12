@@ -9,10 +9,9 @@
 - New component: `Navbar Light`
 - Component ID: `5e7a8748-7a91-3b5a-7978-b6a45d39743d`
 - Test instance ID: `b515420b-9d87-fa20-e8ef-c40cc492eb86`
-- Preserved original component: `CSS Navbar — Details`
-- Original component ID: `1d76b426-b460-6cb4-846a-f7ccfdb84379`
+- Published acceptance URL: `https://mwp-component-library.webflow.io/navbar-light`
 
-The original and new instances both remain on the test page. Do not remove the original until the user explicitly approves replacement. Do not refresh the Designer page without explicit approval and a confirmed backup.
+The obsolete `CSS Navbar — Details` test component and instance were removed by the user after creating a backup. `Navbar Light` is the sole acceptance component on the test page.
 
 ## Native structure
 
