@@ -20,6 +20,12 @@
     [data-mwp-collapsed="true"] .mwp-css-nav_panel { align-items: stretch; display: grid; }
     [data-mwp-collapsed="true"] .mwp-css-nav_links { align-items: stretch; display: grid; }
     [data-mwp-collapsed="true"] .mwp-css-nav_submenu-list { position: static; }
+    .demo-controls { background: #f5f5f5; border: 1px solid #d9d9d9; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); margin: 2rem 0; padding: 1rem; }
+    .demo-control { display: grid; gap: .35rem; }
+    .demo-control span { font-size: .8rem; font-weight: 700; }
+    .demo-control select, .demo-control input, .demo-controls button { min-height: 2.5rem; }
+    .demo-checkbox { align-items: center; display: flex; gap: .5rem; }
+    .demo-checkbox input { min-height: auto; }
     main { padding: 4rem 1.25rem; }
   </style>
 </head>
@@ -28,7 +34,7 @@
     <div class="mwp-css-nav_inner">
       <a href="#top">Brand</a>
 
-      <details class="mwp-css-nav_menu" data-mwp-menu open>
+      <details class="mwp-css-nav_menu" data-mwp-menu>
         <summary class="mwp-css-nav_summary" data-mwp-trigger aria-label="Navigation menu">
           <span data-mwp-label>Menu</span>
           <span class="mwp-css-nav_icon" data-mwp-icon aria-hidden="true">
@@ -63,10 +69,56 @@
 
   <main id="top">
     <h1>Navbar Light</h1>
-    <p>Resize the viewport to exercise the selected collapse breakpoint.</p>
-    <p>Change the root data attributes to test layout, motion and progressive enhancement options.</p>
+    <p>Use the controls to exercise every layout and motion combination, then resize the viewport to test the selected collapse breakpoint.</p>
+
+    <form class="demo-controls" id="navbar-controls">
+      <label class="demo-control"><span>Collapse</span><select name="collapse"><option>never</option><option>tablet</option><option selected>mobile-landscape</option><option>mobile-portrait</option><option>always</option></select></label>
+      <label class="demo-control"><span>Layout</span><select name="layout"><option selected>dropdown</option><option>full-width</option><option>left</option><option>right</option><option>overlay</option></select></label>
+      <label class="demo-control"><span>Motion</span><select name="motion"><option selected>dropdown</option><option>left</option><option>right</option><option>up</option><option>fade</option><option>none</option><option>custom</option></select></label>
+      <label class="demo-control"><span>Alignment</span><select name="align"><option>left</option><option>center</option><option selected>right</option></select></label>
+      <label class="demo-control"><span>Icon lines</span><select name="iconLines"><option>2</option><option selected>3</option></select></label>
+      <label class="demo-control"><span>Panel width</span><input name="panelWidth" value="min(24rem, 100vw)"></label>
+      <label class="demo-control"><span>Opening duration</span><input name="openDuration" value="280ms"></label>
+      <label class="demo-control"><span>Closing duration</span><input name="closeDuration" value="220ms"></label>
+      <label class="demo-control"><span>Item stagger</span><input name="stagger" value="35ms"></label>
+      <label class="demo-checkbox"><input name="focusFirst" type="checkbox"> Focus first link</label>
+      <label class="demo-checkbox"><input name="closeOutside" type="checkbox" checked> Close outside</label>
+      <label class="demo-checkbox"><input name="closeLink" type="checkbox" checked> Close on link</label>
+      <button type="button" id="navbar-toggle">Toggle menu</button>
+    </form>
+
+    <p><strong>CSS-only check:</strong> remove or disable the module script. The native details trigger and selected collapse rule remain functional.</p>
   </main>
 
-  <script type="module" src="../src/navbar-light.js"></script>
+  <script>globalThis.MWP_NAVBAR_LIGHT_AUTO_INIT = false;</script>
+  <script type="module">
+    import { NavbarLight } from '../src/navbar-light.js';
+
+    const root = document.querySelector('[data-mwp-navbar]');
+    const controls = document.querySelector('#navbar-controls');
+    let navbar = new NavbarLight(root);
+
+    function update() {
+      const data = new FormData(controls);
+      navbar.destroy();
+      root.dataset.collapse = data.get('collapse');
+      root.dataset.layout = data.get('layout');
+      root.dataset.motion = data.get('motion');
+      root.dataset.align = data.get('align');
+      root.dataset.iconLines = data.get('iconLines');
+      root.dataset.panelWidth = data.get('panelWidth');
+      root.dataset.openDuration = data.get('openDuration');
+      root.dataset.closeDuration = data.get('closeDuration');
+      root.dataset.stagger = data.get('stagger');
+      root.setAttribute('data-focus-first', String(data.has('focusFirst')));
+      root.setAttribute('data-close-on-outside', String(data.has('closeOutside')));
+      root.setAttribute('data-close-on-link', String(data.has('closeLink')));
+      root.querySelector('[data-mwp-menu]').open = false;
+      navbar = new NavbarLight(root);
+    }
+
+    controls.addEventListener('change', update);
+    document.querySelector('#navbar-toggle').addEventListener('click', () => navbar.toggle({ focusFirst: false }));
+  </script>
 </body>
 </html>

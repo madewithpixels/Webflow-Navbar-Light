@@ -1,65 +1,163 @@
 # Webflow Navbar Light
 
-Navbar Light is a CSS-first replacement for Webflow's native Navbar. It is designed to retain the useful native behaviour while remaining transparent, editable and styleable in Webflow Designer.
+Navbar Light is a CSS-first, Webflow-native replacement for the native Navbar component. It keeps one shared set of links for expanded and collapsed layouts, exposes the useful choices as component properties, and uses JavaScript only for progressive enhancement.
 
-The component is being developed in two synchronized forms:
+The maintained implementation exists in two synchronized forms:
 
-1. A native component in the **MWP Component Library** Webflow site, tested on the **Navbar Light** page.
-2. A repository reference implementation containing the matching CSS, progressive JavaScript, examples and tests.
+1. The `Navbar Light` component in the **MWP Component Library**, tested on the **Navbar Light** page.
+2. This repository, containing the matching CSS, enhancement script, interactive reference demo, tests and generated Webflow embed.
 
-## Principles
+The Webflow test page has not been published by this project.
 
-- Native Webflow elements form the visible component.
-- All editable content remains visible on the Canvas.
-- Webflow classes, component variants and component properties are preferred.
-- No pseudo-elements are used.
-- CSS supplies the baseline behaviour and presentation.
-- JavaScript adds progressive enhancements such as focus management, outside-click closing and scroll locking.
-- Webflow Interactions or GSAP can replace the built-in motion without replacing state or accessibility behaviour.
+## Design constraints
 
-## Planned capabilities
+- Visible structure is made from native Webflow elements.
+- Links, submenu, CTA, secondary navigation, backdrop, icon bars, settings and embed remain visible in Designer.
+- There are no pseudo-elements.
+- Webflow classes remain responsible for visual design.
+- Custom CSS is limited to functional layout, state and motion behavior.
+- Native `<details>`/`<summary>` plus CSS provide the no-script baseline.
+- JavaScript adds state events, focus management, outside/link closing, inertness and scroll locking.
 
-- One shared navigation link set for expanded and collapsed layouts.
-- Configurable collapse breakpoint: Never, Tablet, Mobile landscape, Mobile portrait or Always.
-- Dropdown, full-width, left drawer, right drawer and full-screen layouts.
-- Dropdown, slide left, slide right, slide up, fade, none and custom motion presets.
-- Editable native burger bars with an optional Menu label and close-icon transformation.
-- Nested native-details submenus, optional CTA and secondary content regions.
-- Escape, outside-click and link-click closing.
-- Optional first-link focus and body scroll locking.
-- Reduced-motion support.
-- Stable lifecycle events and programmatic controls for Webflow Interactions and GSAP.
+## Using the Webflow component
 
-The maintained implementation checklist is in [todo.md](todo.md).
+Insert `Navbar Light`, then select its collapse variant at the Base breakpoint:
 
-## Intended repository structure
+- `Never`
+- `Tablet`
+- `Mobile landscape`
+- `Mobile portrait`
+- `Always`
+
+The variant applies across the component instance. Do not choose a different variant at each responsive breakpoint unless an intentionally different instance configuration is required.
+
+The test instance is left on `Tablet`, so it is expanded on Desktop and collapsed at Tablet and below.
+
+### Component properties
+
+| Group | Properties |
+| --- | --- |
+| Layout | Layout, Panel alignment, Panel width |
+| Motion | Motion class, Opening duration, Closing duration, Distance, Easing, Item stagger, Icon duration |
+| Trigger | Menu label, Show menu label, Icon lines |
+| Content | Show CTA, Show secondary links, Show backdrop |
+| Behavior | Focus first link, Close on outside click, Close on link click, Lock page scroll |
+
+String values use CSS syntax where appropriate, for example `280ms`, `1.5rem`, `24rem` and `cubic-bezier(0.22, 1, 0.36, 1)`.
+
+The native `Navbar Light settings` block mirrors values that the current Webflow API cannot bind directly to custom attributes. It is deliberately visible and styleable in Designer. The enhancement reads it and hides it only in Preview/published runtime after initialization.
+
+## Layout and motion presets
+
+Layouts:
+
+- `dropdown`
+- `full-width`
+- `left`
+- `right`
+- `overlay`
+
+Motion classes:
+
+- `mwp-motion-dropdown`
+- `mwp-motion-left`
+- `mwp-motion-right`
+- `mwp-motion-up`
+- `mwp-motion-fade`
+- `mwp-motion-none`
+- `mwp-motion-custom`
+
+`Custom` removes built-in panel transforms and transitions. State, ARIA, inertness, focus behavior and lifecycle events continue to work, leaving Webflow Interactions or GSAP free to own the visual animation.
+
+## CSS baseline and progressive enhancement
+
+| Capability | CSS/native | Enhancement script |
+| --- | --- | --- |
+| Selected collapse breakpoint | Yes, using Webflow's native variant marker | Observes breakpoint changes and synchronizes state |
+| Open/close from trigger | Native `<details>` | Adds lifecycle state and accessibility links |
+| Dropdown/slide/fade motion | Yes when its class/attribute is available | Applies property-bound configuration values |
+| Escape close and focus return | Browser-dependent for native details | Yes |
+| Outside/link close | No | Optional |
+| Panel inertness | No | Yes |
+| First-link focus | No | Optional |
+| Drawer/overlay scroll lock | No | Optional/automatic |
+| Lifecycle events and API | No | Yes |
+
+The stylesheet-only fallback was verified in Webflow Preview with the script removed: the Tablet variant started closed and opened using the native summary trigger.
+
+## Editing native content
+
+The `Navigation panel` is the single source of links for desktop and collapsed layouts. Edit, reorder or duplicate its native Link elements normally. The current-page class continues to be applied by Webflow.
+
+The included submenu is a nested native `<details>` pattern. Duplicate the complete `Submenu details` element to add another. CTA and secondary navigation have component visibility properties.
+
+A component Slot was evaluated but not added: Webflow slots accept component instances rather than arbitrary native elements, which would make simple link editing more restrictive. Native panel regions remain the clearer default.
+
+## Integration hooks
+
+Stable selectors:
+
+- `[data-mwp-navbar]`
+- `[data-mwp-menu]`
+- `[data-mwp-trigger]`
+- `[data-mwp-panel]`
+- `[data-mwp-item]`
+- `[data-mwp-submenu]`
+- `[data-mwp-backdrop]`
+
+Runtime `data-state` values are `expanded`, `opening`, `open`, `closing` and `closed`.
+
+Lifecycle events bubble from the root:
+
+- `mwp-nav:open`
+- `mwp-nav:opened`
+- `mwp-nav:close`
+- `mwp-nav:closed`
+
+Programmatic controls are exposed on the root:
+
+```js
+const navbar = document.querySelector('[data-mwp-navbar]').mwpNavbarLight;
+navbar.open({ focusFirst: true });
+navbar.close({ focusTrigger: true });
+navbar.toggle();
+```
+
+See [examples/gsap.js](examples/gsap.js) for a Custom-mode GSAP handoff and [examples/webflow-interactions.md](examples/webflow-interactions.md) for the Webflow Interactions setup and its event limitations.
+
+## Local development
+
+```text
+npm install
+npm test
+npm run check
+npm run build:webflow
+```
+
+Open [demo/index.html](demo/index.html) through a local web server. Its controls exercise every layout and motion combination. `npm run build:webflow` regenerates `webflow/navbar-light-embed.html` from the maintained source files.
+
+## Repository map
 
 ```text
 .
 ├── README.md
 ├── todo.md
+├── demo/index.html
+├── examples
+│   ├── gsap.js
+│   └── webflow-interactions.md
+├── scripts/build-webflow-embed.mjs
 ├── src
 │   ├── navbar-light.css
 │   └── navbar-light.js
-├── demo
-│   └── index.html
-├── tests
-│   └── navbar-light.test.js
+├── tests/navbar-light.test.js
 └── webflow
-    └── component-map.md
+    ├── component-map.md
+    └── navbar-light-embed.html
 ```
-
-## Baseline architecture
-
-The final component uses a single navigation panel rather than separate desktop and mobile link lists. At expanded breakpoints the panel participates in the header layout. At collapsed breakpoints the same panel is controlled by a native `<details>`/`<summary>` trigger and the selected CSS layout/motion preset.
-
-The embedded script does not create or replace visible elements. It only synchronises state and provides optional behaviour that CSS and native details cannot supply consistently.
 
 ## Webflow testing safety
 
-The **Navbar Light** test page must not be refreshed without the user's explicit approval and confirmation that a backup has been taken. Testing should use Webflow data/Designer operations, Preview toggling and targeted inspection without reloading the Designer document.
+Do not refresh the **Navbar Light** Designer page without explicit approval and confirmation that a backup exists. Preview toggling is sufficient to recompile component/embed updates. Do not publish unless explicitly requested.
 
-## Status
-
-Planning and repository setup are in progress. See [todo.md](todo.md) for the current checklist.
-
+See [todo.md](todo.md) for completed work and the remaining visual/assistive-technology verification.

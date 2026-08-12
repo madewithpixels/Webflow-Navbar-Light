@@ -92,6 +92,7 @@
 }
 
 [data-mwp-navbar][data-mwp-collapsed="false"] [data-mwp-panel] {
+  display: flex;
   inset: auto;
   opacity: 1;
   pointer-events: auto;
@@ -110,14 +111,16 @@
 /* Collapsed state shared by runtime detection and the standalone no-JS demo. */
 :where(
   [data-mwp-navbar][data-mwp-collapsed="true"],
-  [data-mwp-navbar][data-collapse="always"]
+  [data-mwp-navbar][data-collapse="always"],
+  [data-mwp-navbar][data-wf--navbar-light--variant="always"]
 ) [data-mwp-trigger] {
   display: flex;
 }
 
 :where(
   [data-mwp-navbar][data-mwp-collapsed="true"],
-  [data-mwp-navbar][data-collapse="always"]
+  [data-mwp-navbar][data-collapse="always"],
+  [data-mwp-navbar][data-wf--navbar-light--variant="always"]
 ) [data-mwp-panel] {
   opacity: 0;
   pointer-events: none;
@@ -136,7 +139,8 @@
 
 :where(
   [data-mwp-navbar][data-mwp-collapsed="true"],
-  [data-mwp-navbar][data-collapse="always"]
+  [data-mwp-navbar][data-collapse="always"],
+  [data-mwp-navbar][data-wf--navbar-light--variant="always"]
 ) [data-mwp-menu][open] + [data-mwp-panel] {
   opacity: 1;
   pointer-events: auto;
@@ -146,40 +150,67 @@
   visibility: visible;
 }
 
-/* Standalone CSS-only collapse choices. Webflow uses native component
- * breakpoint variants, with the script inferring collapse from trigger display. */
+/* CSS-only collapse choices. Webflow emits the variant marker used below;
+ * data-collapse provides the same behaviour in standalone markup. */
 @media screen and (max-width: 991px) {
-  [data-mwp-navbar][data-collapse="tablet"] [data-mwp-trigger] { display: flex; }
-  [data-mwp-navbar][data-collapse="tablet"] [data-mwp-panel] {
+  :where(
+    [data-mwp-navbar][data-collapse="tablet"],
+    [data-mwp-navbar][data-wf--navbar-light--variant="tablet"]
+  ) [data-mwp-trigger] { display: flex; }
+  :where(
+    [data-mwp-navbar][data-collapse="tablet"],
+    [data-mwp-navbar][data-wf--navbar-light--variant="tablet"]
+  ) [data-mwp-panel] {
     opacity: 0; pointer-events: none; position: absolute; right: 0; top: 100%;
     transform: translateY(calc(var(--mwp-nav-distance) * -1)); visibility: hidden;
     width: var(--mwp-nav-panel-width);
   }
-  [data-mwp-navbar][data-collapse="tablet"] [data-mwp-menu][open] + [data-mwp-panel] {
+  :where(
+    [data-mwp-navbar][data-collapse="tablet"],
+    [data-mwp-navbar][data-wf--navbar-light--variant="tablet"]
+  ) [data-mwp-menu][open] + [data-mwp-panel] {
     opacity: 1; pointer-events: auto; transform: none; visibility: visible;
   }
 }
 
 @media screen and (max-width: 767px) {
-  [data-mwp-navbar][data-collapse="mobile-landscape"] [data-mwp-trigger] { display: flex; }
-  [data-mwp-navbar][data-collapse="mobile-landscape"] [data-mwp-panel] {
+  :where(
+    [data-mwp-navbar][data-collapse="mobile-landscape"],
+    [data-mwp-navbar][data-wf--navbar-light--variant="mobile-landscape"]
+  ) [data-mwp-trigger] { display: flex; }
+  :where(
+    [data-mwp-navbar][data-collapse="mobile-landscape"],
+    [data-mwp-navbar][data-wf--navbar-light--variant="mobile-landscape"]
+  ) [data-mwp-panel] {
     opacity: 0; pointer-events: none; position: absolute; right: 0; top: 100%;
     transform: translateY(calc(var(--mwp-nav-distance) * -1)); visibility: hidden;
     width: var(--mwp-nav-panel-width);
   }
-  [data-mwp-navbar][data-collapse="mobile-landscape"] [data-mwp-menu][open] + [data-mwp-panel] {
+  :where(
+    [data-mwp-navbar][data-collapse="mobile-landscape"],
+    [data-mwp-navbar][data-wf--navbar-light--variant="mobile-landscape"]
+  ) [data-mwp-menu][open] + [data-mwp-panel] {
     opacity: 1; pointer-events: auto; transform: none; visibility: visible;
   }
 }
 
 @media screen and (max-width: 479px) {
-  [data-mwp-navbar][data-collapse="mobile-portrait"] [data-mwp-trigger] { display: flex; }
-  [data-mwp-navbar][data-collapse="mobile-portrait"] [data-mwp-panel] {
+  :where(
+    [data-mwp-navbar][data-collapse="mobile-portrait"],
+    [data-mwp-navbar][data-wf--navbar-light--variant="mobile-portrait"]
+  ) [data-mwp-trigger] { display: flex; }
+  :where(
+    [data-mwp-navbar][data-collapse="mobile-portrait"],
+    [data-mwp-navbar][data-wf--navbar-light--variant="mobile-portrait"]
+  ) [data-mwp-panel] {
     opacity: 0; pointer-events: none; position: absolute; right: 0; top: 100%;
     transform: translateY(calc(var(--mwp-nav-distance) * -1)); visibility: hidden;
     width: var(--mwp-nav-panel-width);
   }
-  [data-mwp-navbar][data-collapse="mobile-portrait"] [data-mwp-menu][open] + [data-mwp-panel] {
+  :where(
+    [data-mwp-navbar][data-collapse="mobile-portrait"],
+    [data-mwp-navbar][data-wf--navbar-light--variant="mobile-portrait"]
+  ) [data-mwp-menu][open] + [data-mwp-panel] {
     opacity: 1; pointer-events: auto; transform: none; visibility: visible;
   }
 }
@@ -255,7 +286,9 @@
   transform: translateY(100%);
 }
 
-[data-mwp-navbar][data-mwp-collapsed="true"]:where([data-motion="fade"], [data-motion="none"], [data-motion="custom"]) [data-mwp-panel],
+[data-mwp-navbar][data-mwp-collapsed="true"][data-motion="fade"] [data-mwp-panel],
+[data-mwp-navbar][data-mwp-collapsed="true"][data-motion="none"] [data-mwp-panel],
+[data-mwp-navbar][data-mwp-collapsed="true"][data-motion="custom"] [data-mwp-panel],
 [data-mwp-menu]:where([data-mwp-motion="mwp-motion-fade"], [data-mwp-motion="mwp-motion-none"], [data-mwp-motion="mwp-motion-custom"]) + [data-mwp-panel] {
   transform: none;
 }
@@ -270,7 +303,7 @@
   transition: none;
 }
 
-[data-mwp-navbar][data-motion="custom"] [data-mwp-panel],
+[data-mwp-navbar][data-mwp-collapsed="true"][data-motion="custom"] [data-mwp-panel],
 [data-mwp-menu][data-mwp-motion="mwp-motion-custom"] + [data-mwp-panel] {
   opacity: 1;
   pointer-events: auto;
@@ -310,6 +343,12 @@
 html[data-mwp-scroll-locked="true"],
 html[data-mwp-scroll-locked="true"] body {
   overscroll-behavior: none;
+}
+
+/* This block is deliberately visible in Webflow Designer. JavaScript hides it
+ * only at runtime after reading its property-bound native Text Blocks. */
+[data-mwp-navbar][data-mwp-ready="true"] [data-mwp-config] {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

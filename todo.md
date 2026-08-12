@@ -1,137 +1,111 @@
 # Navbar Light roadmap
 
-This checklist is the implementation plan and ongoing status record for Navbar Light. Keep it current as work progresses; completed work must be checked only after local and Webflow verification.
+This checklist is the implementation plan and status record. Completed work is checked only after source or Webflow verification.
 
 ## Project constraints
 
-- [ ] Build the visible component from native Webflow elements.
-- [ ] Keep all editable content and styling visible on the Webflow Canvas.
-- [ ] Prefer Webflow classes, variants and component properties over custom code.
-- [ ] Use no pseudo-elements.
-- [ ] Keep CSS as the functional baseline; JavaScript is progressive enhancement only.
-- [ ] Keep the component usable if JavaScript fails or is removed.
-- [ ] Allow Webflow Interactions and GSAP to replace the built-in animation.
-- [ ] Do not refresh the Webflow `Navbar Light` test page without the user's explicit approval and backup confirmation.
-- [ ] Keep this roadmap and `README.md` aligned with the implementation.
+- [x] Build visible structure from native Webflow elements.
+- [x] Keep editable content, settings and the embed visible on the Webflow Canvas.
+- [x] Prefer Webflow classes, variants and properties over custom code.
+- [x] Use no pseudo-elements.
+- [x] Keep CSS/native details as the functional baseline.
+- [x] Use JavaScript only for progressive behavior and accessibility enhancement.
+- [x] Allow Webflow Interactions and GSAP to replace built-in panel animation.
+- [x] Do not refresh the Webflow `Navbar Light` test page without explicit approval and a confirmed backup.
+- [x] Keep this roadmap and `README.md` aligned with implementation.
 
 ## 1. Foundation and shared content
 
-- [ ] Refactor desktop and collapsed navigation to use one shared set of navigation links.
-- [ ] Keep the shared navigation statically visible on wide screens.
-- [ ] Convert the same navigation into the collapsible panel at the selected breakpoint.
-- [ ] Preserve Webflow's current-page class and styling.
-- [ ] Give every structural element a clear Navigator display name.
-- [ ] Keep the panel open and fully styleable in Designer while runtime Preview starts closed.
-- [ ] Add a documented style-guide configuration that exposes every editable region.
+- [x] Use one shared set of navigation links for desktop and collapsed layouts.
+- [x] Keep the shared panel statically visible on expanded breakpoints.
+- [x] Convert the same panel to collapsed behavior at the selected breakpoint.
+- [x] Preserve Webflow's automatic current-page class behavior.
+- [x] Give structural elements clear Navigator display names.
+- [x] Keep panel content and configuration visible in Designer while Preview starts closed.
+- [x] Keep the CSS/enhancement Embed visible in Designer.
 
 ## 2. Trigger and accessibility
 
-- [ ] Use a native summary trigger with a full-size interactive hit area.
-- [ ] Build the burger from editable native divs.
-- [ ] Support two-bar and three-bar icon configurations.
-- [ ] Add an optional visible Menu label.
-- [ ] Animate the burger into a close icon with transforms only.
-- [ ] Synchronise `open`, `data-state`, `aria-expanded` and panel inertness.
-- [ ] Close on Escape and return focus to the trigger.
-- [ ] Optionally focus the first navigation link when opened.
-- [ ] Optionally close on outside click.
-- [ ] Optionally close after a navigation link is selected.
-- [ ] Optionally lock body scrolling for drawer and overlay layouts.
-- [ ] Restore body scrolling reliably on close, resize and teardown.
-- [ ] Respect `prefers-reduced-motion`.
+- [x] Use native details/summary with a full-size interactive hit area.
+- [x] Build the burger from editable native Divs.
+- [x] Support two-bar and three-bar icon configurations.
+- [x] Add an optional visible Menu label.
+- [x] Transform the burger into a close icon without pseudo-elements.
+- [x] Synchronize native open state, lifecycle state, ARIA and panel inertness.
+- [x] Close on Escape and return focus to the trigger.
+- [x] Add optional first-link focus, outside close and link close.
+- [x] Add automatic/optional body scroll locking and reliable restoration.
+- [x] Respect `prefers-reduced-motion`.
 
-## 3. Responsive behaviour
+## 3. Responsive behavior
 
-- [ ] Keep collapse breakpoint configurable through Webflow component variants.
-- [ ] Support Never, Tablet, Mobile landscape, Mobile portrait and Always.
-- [ ] Confirm each choice at every Webflow breakpoint.
-- [ ] Reset an open collapsed menu safely when crossing into the expanded layout.
+- [x] Configure collapse through native Webflow component variants.
+- [x] Support Never, Tablet, Mobile landscape, Mobile portrait and Always.
+- [x] Use Webflow's emitted variant marker for CSS-only behavior.
+- [x] Reset native open state safely when crossing between collapsed and expanded layouts.
+- [ ] Complete a visual pass of all five variants at all four core Webflow breakpoints.
 
-## 4. Layout variants
+## 4. Layouts and content
 
-- [ ] Dropdown panel.
-- [ ] Full-width panel below the header.
-- [ ] Left drawer.
-- [ ] Right drawer.
-- [ ] Full-screen overlay.
-- [ ] Left, centre and right panel alignment where applicable.
-- [ ] Configurable panel width using a Webflow component property/CSS variable.
-- [ ] Optional native backdrop element, editable on Canvas.
-- [ ] Configurable panel padding, gap, border, radius and shadow through Webflow styles.
+- [x] Dropdown, full-width, left drawer, right drawer and overlay layouts.
+- [x] Left, center and right dropdown alignment.
+- [x] Configurable panel width.
+- [x] Native editable backdrop.
+- [x] Panel padding, gap, border, radius and shadow remain normal Webflow class styles.
+- [x] Native nested-details submenu with independent Escape handling.
+- [x] Optional CTA and secondary/social regions.
+- [x] Evaluate a Component Slot. Decision: do not add one because slots accept component instances rather than arbitrary native link elements.
+- [x] Document safe link and submenu editing.
 
-## 5. Navigation content
+## 5. Built-in motion
 
-- [ ] Add a native nested-details submenu pattern.
-- [ ] Support keyboard access and independent submenu state.
-- [ ] Add an optional CTA region.
-- [ ] Add optional secondary/social navigation regions.
-- [ ] Evaluate a native Component Slot for arbitrary panel content without hiding it from Canvas.
-- [ ] Document safe duplication and editing of links and submenus.
+- [x] Dropdown, slide left, slide right, slide up, fade, none and custom presets.
+- [x] Expose opening/closing duration, distance and easing.
+- [x] Add backdrop fade, item stagger and icon duration.
+- [x] Preserve closing transitions before final closed state.
+- [x] Fix Custom/Fade specificity so external animation can fully replace drawer transforms.
 
-## 6. Built-in motion
+## 6. Webflow Interactions and GSAP
 
-- [ ] Dropdown.
-- [ ] Slide left.
-- [ ] Slide right.
-- [ ] Slide up.
-- [ ] Fade.
-- [ ] No motion.
-- [ ] Custom/externally controlled motion.
-- [ ] Expose duration, distance and easing.
-- [ ] Add separate opening and closing durations.
-- [ ] Add optional backdrop fade.
-- [ ] Add optional navigation-item stagger.
-- [ ] Add configurable burger-to-close duration.
-- [ ] Ensure visibility changes do not truncate closing transitions.
+- [x] Provide stable hooks for root, trigger, panel, backdrop and items.
+- [x] Emit open, opened, close and closed events.
+- [x] Expose open, close, toggle and destroy controls.
+- [x] Keep state and accessibility working in Custom mode.
+- [x] Document the Webflow Interactions two-click setup and its custom-event limitation.
+- [x] Supply an event-driven GSAP example.
 
-## 7. Webflow Interactions and GSAP integration
+## 7. Component properties
 
-- [ ] Provide stable `data-*` hooks for root, trigger, panel, backdrop and items.
-- [ ] Emit documented open, opened, close and closed events.
-- [ ] Expose documented `open()`, `close()` and `toggle()` controls.
-- [ ] Make Custom mode remove built-in transforms and transitions completely.
-- [ ] Keep state, accessibility and lifecycle events working in Custom mode.
-- [ ] Supply Webflow Interactions and GSAP integration examples.
+- [x] Collapse breakpoint variant.
+- [x] Layout, alignment and width.
+- [x] Motion, opening/closing duration, distance, easing and stagger.
+- [x] Menu label content/visibility and two/three icon bars.
+- [x] CTA, secondary region and backdrop visibility.
+- [x] Focus, outside close, link close and scroll-lock behavior.
+- [x] Add clear property groups and tooltips.
+- [x] Keep non-attribute-bindable values visible through native Text Blocks.
 
-## 8. Component properties
+## 8. Repository deliverables
 
-- [ ] Collapse breakpoint variant.
-- [ ] Layout class.
-- [ ] Motion class.
-- [ ] Duration, opening duration and closing duration.
-- [ ] Distance and easing.
-- [ ] Panel width and alignment.
-- [ ] Menu label visibility/content.
-- [ ] Focus-first-link toggle.
-- [ ] Outside-click toggle.
-- [ ] Link-click close toggle.
-- [ ] Scroll-lock toggle.
-- [ ] Item-stagger value.
-- [ ] Designer-open guidance and property tooltips.
+- [x] Maintain standalone CSS and progressive JavaScript sources.
+- [x] Generate the Webflow embed from those sources.
+- [x] Maintain an accessible native HTML reference implementation.
+- [x] Add an interactive demo covering all layout/motion selections.
+- [x] Add automated state, focus, outside/link close, backdrop and scroll-lock tests.
+- [x] Document structure, classes, properties, variants, hooks and integration patterns.
 
-## 9. Repository deliverables
+## 9. Verification
 
-- [ ] Maintain a standalone CSS file matching the Webflow embed CSS.
-- [ ] Maintain a standalone progressive-enhancement JavaScript file matching the Webflow embed script.
-- [ ] Maintain an accessible native HTML reference implementation.
-- [ ] Add a local test/demo page covering all layout and motion combinations.
-- [ ] Add automated DOM/state tests for open, close, focus and scroll behaviour.
-- [ ] Document Webflow structure, classes, properties, variants and integration hooks.
-
-## 10. Verification
-
-- [ ] Verify the complete component without JavaScript.
-- [ ] Verify keyboard-only operation.
-- [ ] Verify screen-reader state and focus management.
-- [ ] Verify reduced motion.
-- [ ] Verify every Webflow breakpoint and collapse variant.
-- [ ] Verify every layout and motion preset.
-- [ ] Verify outside-click, link-close and scroll-lock options.
-- [ ] Verify nested submenus.
-- [ ] Verify Custom mode with Webflow Interactions.
-- [ ] Verify Custom mode with GSAP.
-- [ ] Verify editable content remains visible in Webflow Designer.
-- [ ] Verify Preview and staging behaviour without refreshing `Navbar Light`.
-- [ ] Restore the test instance to documented defaults.
-- [ ] Confirm no publish action was taken unless explicitly requested.
-
+- [x] Verify the CSS-only Tablet fallback in Webflow Preview.
+- [x] Verify keyboard open, Escape close and focus return.
+- [x] Verify ARIA state and inertness programmatically.
+- [x] Verify drawer/fade, two-line icon, stagger, first-link focus, backdrop and scroll lock in Webflow Preview.
+- [x] Verify nested submenu Escape behavior.
+- [x] Verify Custom mode removes built-in transform and transition while state continues.
+- [x] Verify editable configuration and Embed remain visible in Designer.
+- [x] Restore the test instance to Tablet + Dropdown documented defaults.
+- [x] Confirm no refresh or publish action was taken during this milestone.
+- [ ] Run the final local automated suite after repository synchronization.
+- [ ] Complete manual screen-reader testing with VoiceOver/NVDA.
+- [ ] Complete the full visual matrix pass for every layout and motion preset.
+- [ ] Obtain user approval before removing the preserved original test instance.

@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build:webflow": "node scripts/build-webflow-embed.mjs",
     "test": "node --test",
     "check": "node --check src/navbar-light.js"
   },
