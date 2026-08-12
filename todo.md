@@ -56,7 +56,7 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Native nested-details submenu with independent Escape handling.
 - [x] Optional CTA and secondary/social regions.
 - [ ] Add a native Div chevron to each included submenu with optional visibility and configurable duration, easing and rotation.
-- [ ] Add optional native Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email links with label and destination properties.
+- [ ] Add optional native Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email links with destination properties and visibility toggles.
 - [x] Evaluate a Component Slot. Decision: do not add one because slots accept component instances rather than arbitrary native link elements.
 - [x] Document safe link and submenu editing.
 
@@ -86,7 +86,7 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Menu label content/visibility and two/three icon bars.
 - [x] CTA, secondary region and backdrop visibility.
 - [ ] Submenu arrow visibility and motion values.
-- [ ] Named social/contact link labels, destinations and individual visibility toggles.
+- [ ] Named social/contact link destinations and individual visibility toggles; keep platform labels as ordinary native text.
 - [x] Focus, outside close, link close and scroll-lock behavior.
 - [x] Add clear property groups and tooltips.
 - [x] Keep non-attribute-bindable values visible through native Text Blocks.
