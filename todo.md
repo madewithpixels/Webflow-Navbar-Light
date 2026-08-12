@@ -55,8 +55,8 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Panel padding, gap, border, radius and shadow remain normal Webflow class styles.
 - [x] Native nested-details submenu with independent Escape handling.
 - [x] Optional CTA and secondary/social regions.
-- [ ] Add a native Div chevron to each included submenu with optional visibility and configurable duration, easing and rotation.
-- [ ] Add optional native Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email Link Blocks with destination props, replaceable icon-image props and visibility toggles.
+- [x] Add a native Div chevron to each included submenu with optional visibility and configurable duration, easing and rotation.
+- [x] Add optional native Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email Link Blocks with destination props, replaceable icon-image props and visibility toggles.
 - [x] Evaluate a Component Slot. Decision: do not add one because slots accept component instances rather than arbitrary native link elements.
 - [x] Document safe link and submenu editing.
 
@@ -85,8 +85,8 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Motion, opening/closing duration, distance, easing and stagger.
 - [x] Menu label content/visibility and two/three icon bars.
 - [x] CTA, secondary region and backdrop visibility.
-- [ ] Submenu arrow visibility and motion values.
-- [ ] Named social/contact link destinations, replaceable icon Images and individual visibility toggles; keep labels as ordinary native text.
+- [x] Submenu arrow visibility and motion values.
+- [x] Named social/contact link destinations, replaceable icon Images and individual visibility toggles; keep labels as ordinary native text.
 - [x] Focus, outside close, link close and scroll-lock behavior.
 - [x] Add clear property groups and tooltips.
 - [x] Keep non-attribute-bindable values visible through native Text Blocks.
