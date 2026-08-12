@@ -13,7 +13,7 @@ Published acceptance build: <https://mwp-component-library.webflow.io/navbar-lig
 ## Design constraints
 
 - Visible structure is made from native Webflow elements.
-- Links, submenu, submenu arrow, CTA, social/contact navigation, backdrop, icon bars, settings and embed remain visible in Designer.
+- Links, submenu, submenu arrow, CTA, social/contact navigation and replaceable icon Images, backdrop, icon bars, settings and embed remain visible in Designer.
 - There are no pseudo-elements.
 - Webflow classes remain responsible for visual design.
 - Custom CSS is limited to functional layout, state and motion behavior.
@@ -45,7 +45,7 @@ The live Webflow Canvas matrix has been checked for all five variants at Desktop
 | Layout | Layout, Panel alignment, Panel width |
 | Motion | Motion class, Opening duration, Closing duration, Distance, Easing, Item stagger, Icon duration, Submenu icon duration, Submenu icon easing, Submenu icon rotation |
 | Trigger | Menu label, Show menu label, Icon lines, Show submenu arrows |
-| Content | Show CTA, Show secondary links, Show backdrop; Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email destinations and visibility |
+| Content | Show CTA, Show secondary links, Show backdrop; Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email destinations, replaceable icon Images and visibility |
 | Behavior | Focus first link, Close on outside click, Close on link click, Lock page scroll |
 
 String values use CSS syntax where appropriate, for example `280ms`, `1.5rem`, `24rem` and `cubic-bezier(0.22, 1, 0.36, 1)`.
@@ -106,7 +106,9 @@ Collapsed panels use a functional grid so native panel children stack into usabl
 
 The included submenu is a nested native `<details>` pattern. Duplicate the complete `Submenu details` element to add another. Its optional chevron is made from native Divs, uses no pseudo-elements, and follows `currentColor`; duration, easing and open-state rotation are editable properties.
 
-The secondary region contains native, individually optional Link elements for Facebook, Instagram, LinkedIn, TikTok, Threads, X and WhatsApp, plus Telephone and Email. Every entry exposes its native Webflow Link destination and a visibility toggle; the named labels remain ordinary editable native text in the component. The outer secondary region and CTA retain their own visibility properties. Webflow component properties cannot generate a repeatable list, so these named slots provide a useful default; duplicate or remove native links for a different set.
+The secondary region contains native, individually optional Link Blocks for Facebook, Instagram, LinkedIn, TikTok, Threads, X and WhatsApp, plus Telephone and Email. Every entry exposes its native Webflow Link destination, replaceable icon Image and visibility toggle; the named labels remain ordinary editable native text in the component. The outer secondary region and CTA retain their own visibility properties. Webflow component properties cannot generate a repeatable list, so these named slots provide a useful default; duplicate or remove native links for a different set.
+
+The supplied SVGs are stored as normal Webflow assets, so there is no runtime icon-CDN dependency and every Image can be replaced from the component properties. Brand defaults come from versioned Simple Icons assets except LinkedIn, which uses Font Awesome Free; Telephone and Email use Lucide. Respect each brand's usage guidelines. Simple Icons is distributed as CC0 with an explicit trademark/licensing disclaimer, Font Awesome Free Icons are CC BY 4.0, and Lucide is ISC-licensed.
 
 In Designer, submenu links remain visible so they can be selected and styled. In Preview and published output, functional CSS restores native `<details>` behavior: a closed submenu list is removed from rendering and keyboard/screen-reader order until its summary is opened.
 

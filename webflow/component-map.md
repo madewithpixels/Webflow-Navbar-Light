@@ -38,8 +38,8 @@ Navbar Light [header.mwp-css-nav, data-mwp-navbar]
     │   ├── Submenu details [nested details, data-mwp-submenu]
     │   │   └── Submenu arrow [native Div + two Div lines, data-mwp-submenu-icon]
     │   ├── Secondary navigation [native Div]
-    │   │   ├── Facebook, Instagram, LinkedIn, TikTok, Threads, X and WhatsApp [native Links]
-    │   │   └── Telephone and Email [native Links]
+    │   │   ├── Facebook, Instagram, LinkedIn, TikTok, Threads, X and WhatsApp [native Link Blocks + replaceable Images + Text Blocks]
+    │   │   └── Telephone and Email [native Link Blocks + replaceable Images + Text Blocks]
     │   └── Call to action [native Link]
 ├── Navbar Light CSS + enhancement [visible Embed]
 ├── Navbar Light settings [visible native Text Blocks, data-mwp-config]
@@ -98,6 +98,8 @@ Webflow emits the selected marker as `data-wf--navbar-light--variant`. The CSS f
 | Close on outside click | `76b3f040-5c5f-50ec-0b79-960d070ce9b6` | `true` |
 | Close on link click | `3e2a98bd-1b72-4f1c-134e-8b456c698593` | `true` |
 | Lock page scroll | `43909a2f-ec89-bc03-e6ad-ddd4dd63e2fc` | `auto` |
+
+The v0.2.0 additions use component-specific generated property IDs. Both editions expose `Show submenu arrows`, `Submenu icon duration`, `Submenu icon easing` and `Submenu icon rotation`. The `Social links` and `Contact links` groups expose a destination, replaceable icon Image and visibility toggle for each named entry: Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email. The native labels remain editable component text rather than redundant instance props.
 
 Behavior values are strings because the current Webflow binding surface does not expose those custom-attribute values as boolean bindings. The visible settings block provides the native Canvas-editable bridge.
 

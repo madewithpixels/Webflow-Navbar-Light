@@ -56,7 +56,7 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Native nested-details submenu with independent Escape handling.
 - [x] Optional CTA and secondary/social regions.
 - [ ] Add a native Div chevron to each included submenu with optional visibility and configurable duration, easing and rotation.
-- [ ] Add optional native Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email links with destination properties and visibility toggles.
+- [ ] Add optional native Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email Link Blocks with destination props, replaceable icon-image props and visibility toggles.
 - [x] Evaluate a Component Slot. Decision: do not add one because slots accept component instances rather than arbitrary native link elements.
 - [x] Document safe link and submenu editing.
 
@@ -86,7 +86,7 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Menu label content/visibility and two/three icon bars.
 - [x] CTA, secondary region and backdrop visibility.
 - [ ] Submenu arrow visibility and motion values.
-- [ ] Named social/contact link destinations and individual visibility toggles; keep platform labels as ordinary native text.
+- [ ] Named social/contact link destinations, replaceable icon Images and individual visibility toggles; keep labels as ordinary native text.
 - [x] Focus, outside close, link close and scroll-lock behavior.
 - [x] Add clear property groups and tooltips.
 - [x] Keep non-attribute-bindable values visible through native Text Blocks.
@@ -155,7 +155,22 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [ ] Prepare onboarding, documentation, error handling, privacy/security material and a demonstration for Marketplace review.
 - [ ] Pursue public Marketplace distribution only after the private extension has been tested with real users.
 
-## 11. Verification
+## 11. Optional mega-menu product track
+
+Treat a mega-menu as a separate component or extension-installed premium feature rather than adding structural complexity to Navbar Light's default instance.
+
+- [ ] Define the free/light boundary and a paid feature proposition.
+- [ ] Prototype native configurable columns, group headings, link lists and optional promotional cards.
+- [ ] Evaluate native component composition and slots without making ordinary link editing restrictive.
+- [ ] Support desktop hover/focus intent while retaining click-first keyboard and touch behavior.
+- [ ] Define collapsed reflow as nested disclosure groups rather than a desktop panel squeezed onto mobile.
+- [ ] Explore optional CMS-fed groups while keeping a useful static native-element baseline.
+- [ ] Expose layout, alignment, column count, widths, gaps and motion as ordinary Webflow styles/properties where possible.
+- [ ] Preserve the same accessibility, lifecycle events, Custom-motion handoff and progressive-enhancement contract.
+- [ ] Make the future Designer Extension own installation, validation and safe schema migrations.
+- [ ] Test whether premium value is best delivered through the extension, paid templates/components, or a hybrid.
+
+## 12. Verification
 
 - [x] Verify the CSS-only Tablet fallback in Webflow Preview.
 - [x] Verify keyboard open, Escape close and focus return.
@@ -177,7 +192,7 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [x] Complete genuine macOS VoiceOver keyboard and spoken-output testing on the published Tablet variant: collapsed/expanded trigger announcements, closed-submenu omission, nested-link order and two-stage Escape focus restoration all pass.
 - [ ] Complete spoken-output testing with NVDA on Windows.
 - [ ] Verify submenu arrow open/close motion, reduced-motion behavior and Canvas editability in both Webflow components.
-- [ ] Verify every social/contact prop destination and visibility toggle in both Webflow components.
+- [ ] Verify every social/contact destination, visibility and replaceable icon-image prop in both Webflow components.
 - [x] Complete the full layout/motion matrix (35/35 open, presentation, geometry, overflow and re-close cases).
 - [x] Verify all three dropdown alignments and all seven centered motion presets.
 - [x] Obsolete original test component removed by the user after backup.
