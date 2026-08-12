@@ -43,7 +43,7 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Support Never, Tablet, Mobile landscape, Mobile portrait and Always.
 - [x] Use Webflow's emitted variant marker for CSS-only behavior.
 - [x] Reset native open state safely when crossing between collapsed and expanded layouts.
-- [ ] Complete a visual pass of all five native Webflow variants at all four core Webflow breakpoints.
+- [x] Complete a visual pass of all five native Webflow variants at all four core Webflow breakpoints (20/20 live Canvas cases).
 - [x] Verify all five collapse modes across the four core widths in the local reference matrix (20/20 functional state cases).
 
 ## 4. Layouts and content
@@ -173,3 +173,5 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [x] Publish and verify the nested-submenu grid fix, including two-stage Escape and focus restoration.
 - [x] Publish and verify the center-alignment and close-duration Embed update.
 - [x] Audit the five native collapse variants' stored Desktop, Tablet, Mobile landscape and Mobile portrait overrides; restore the test instance to Tablet afterward.
+- [x] Replace obsolete expanded-variant mobile overrides that hid the shared panel in Never and Mobile portrait; re-run the affected Canvas cases.
+- [ ] Publish and verify the expanded-panel variant correction at Mobile landscape and Mobile portrait widths.

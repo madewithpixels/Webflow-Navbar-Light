@@ -35,6 +35,8 @@ The test instance is left on `Tablet`, so it is expanded on Desktop and collapse
 
 `Never` deliberately preserves the expanded navigation at every width. At very narrow widths, the designer must ensure the chosen links fit, wrap the native inner/panel classes, or choose a collapsing variant; Navbar Light does not silently override that selection.
 
+The live Webflow Canvas matrix has been checked for all five variants at Desktop, Tablet, Mobile landscape and Mobile portrait. Expanded variants keep the shared native panel visible; collapsed variants keep the burger and editable panel visible in their authoring layout.
+
 ### Component properties
 
 | Group | Properties |
