@@ -99,7 +99,23 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Add automated state, focus, outside/link close, backdrop and scroll-lock tests.
 - [x] Document structure, classes, properties, variants, hooks and integration patterns.
 
-## 9. Webflow app product track
+## 9. Optional jsDelivr distribution
+
+Keep the current Canvas-visible, self-contained Embed as the dependable default. Add a second, explicitly optional distribution mode that loads versioned CSS and progressive-enhancement JavaScript from jsDelivr while leaving the native Webflow structure, classes, component properties and no-script behavior intact.
+
+- [ ] Decide whether to publish through npm (preferred by jsDelivr for packages) or public tagged GitHub releases, including licence and repository visibility.
+- [ ] Produce release-ready `dist` CSS and JavaScript files, minified files and source maps from the maintained source.
+- [ ] Use exact semantic-version URLs in production; never generate `latest`, branch or floating version-range URLs.
+- [ ] Add a small Canvas-visible CDN loader Embed with a readable runtime version and normal editable Webflow settings.
+- [ ] Preserve useful CSS/native behavior if the enhancement script is blocked, late or unavailable.
+- [ ] Define the behavior and diagnostics for CSS load failure without hiding native navigation content.
+- [ ] Evaluate Subresource Integrity, `crossorigin`, Content Security Policy and privacy implications, and document the supported configuration.
+- [ ] Add automated release checks that compare CDN artifacts with the repository build before publishing a tag/package.
+- [ ] Test caching, cold loads, failure handling, rollback and explicit version upgrades on cloned Webflow sites.
+- [ ] Document switching safely between self-contained Embed, pinned CDN and self-hosted delivery without rebuilding the component.
+- [ ] Let the future Designer Extension choose the delivery mode and pin the installed version explicitly.
+
+## 10. Webflow app product track
 
 The preferred app form is a Webflow Designer Extension that installs and configures a native Navbar Light component. It must remain a generator and maintenance tool rather than a proprietary runtime widget: generated links, Divs, classes, variables, variants, properties and the Canvas-visible enhancement Embed must remain editable and continue working when the app is closed or uninstalled.
 
@@ -130,7 +146,7 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [ ] Prepare onboarding, documentation, error handling, privacy/security material and a demonstration for Marketplace review.
 - [ ] Pursue public Marketplace distribution only after the private extension has been tested with real users.
 
-## 10. Verification
+## 11. Verification
 
 - [x] Verify the CSS-only Tablet fallback in Webflow Preview.
 - [x] Verify keyboard open, Escape close and focus return.
