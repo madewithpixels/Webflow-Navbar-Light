@@ -148,4 +148,5 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [x] Obsolete original test component removed by the user after backup.
 - [x] Verify the published Desktop acceptance build initializes, expands the Tablet variant, renders shared links and hides authoring settings.
 - [x] Verify published nested-submenu keyboard open/Escape behavior.
-- [ ] Publish and verify the collapsed-grid fix on the Webflow acceptance page.
+- [x] Publish and verify the direct collapsed-grid fix at Desktop, Tablet, Mobile landscape and Mobile portrait.
+- [ ] Publish and verify the nested-submenu grid fix on the Webflow acceptance page.
