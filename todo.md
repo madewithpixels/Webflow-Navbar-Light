@@ -90,6 +90,7 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Focus, outside close, link close and scroll-lock behavior.
 - [x] Add clear property groups and tooltips.
 - [x] Keep non-attribute-bindable values visible through native Text Blocks.
+- [ ] Convert `.mwp-css-nav_config` into a compact native Details-based `Smashburger settings` inspector: collapsed by default so it stays out of the author's working Canvas, expandable for a real-time property summary, readable in the Navigator, and hidden after runtime initialization in Preview and published output.
 
 ## 8. Repository deliverables
 
