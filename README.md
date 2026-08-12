@@ -99,6 +99,8 @@ Collapsed panels use a functional grid so native panel children stack into usabl
 
 The included submenu is a nested native `<details>` pattern. Duplicate the complete `Submenu details` element to add another. CTA and secondary navigation have component visibility properties.
 
+In Designer, submenu links remain visible so they can be selected and styled. In Preview and published output, functional CSS restores native `<details>` behavior: a closed submenu list is removed from rendering and keyboard/screen-reader order until its summary is opened.
+
 A component Slot was evaluated but not added: Webflow slots accept component instances rather than arbitrary native elements, which would make simple link editing more restrictive. Native panel regions remain the clearer default.
 
 ## Integration hooks

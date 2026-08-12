@@ -42,7 +42,11 @@ test('demo initializes when opened directly from the filesystem', async () => {
   collapse.value = 'always';
   collapse.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
   assert.equal(dom.window.getComputedStyle(root.querySelector('[data-mwp-panel]')).display, 'grid');
-  assert.equal(dom.window.getComputedStyle(root.querySelector('.mwp-css-nav_submenu-list')).display, 'grid');
+  const submenu = root.querySelector('[data-mwp-submenu]');
+  const submenuList = root.querySelector('.mwp-css-nav_submenu-list');
+  assert.equal(dom.window.getComputedStyle(submenuList).display, 'none');
+  submenu.open = true;
+  assert.equal(dom.window.getComputedStyle(submenuList).display, 'grid');
 
   layout.value = 'dropdown';
   layout.dispatchEvent(new dom.window.Event('change', { bubbles: true }));

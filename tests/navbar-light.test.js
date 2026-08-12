@@ -1,9 +1,15 @@
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { afterEach, beforeEach, test } from 'node:test';
 import { JSDOM } from 'jsdom';
 
 let dom;
 let NavbarLight;
+
+test('functional CSS keeps a closed native submenu out of the accessibility tree', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  assert.match(css, /\[data-mwp-submenu\]:not\(\[open\]\) > \.mwp-css-nav_submenu-list\s*\{\s*display:\s*none;/);
+});
 
 const markup = `
   <header data-mwp-navbar data-collapse="always" data-motion="none" data-close-on-link="true" data-close-on-outside="true">

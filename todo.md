@@ -153,6 +153,8 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [x] Verify ARIA state and inertness programmatically.
 - [x] Verify drawer/fade, two-line icon, stagger, first-link focus, backdrop and scroll lock in Webflow Preview.
 - [x] Verify nested submenu Escape behavior.
+- [x] Audit collapsed/open accessibility state, ARIA relationships, focus order and focus restoration on the published component.
+- [x] Keep closed nested-submenu descendants out of rendering and keyboard/screen-reader order while preserving Canvas visibility.
 - [x] Verify Custom mode removes built-in transform and transition while state continues.
 - [x] Verify editable configuration and Embed remain visible in Designer.
 - [x] Verify shared navigation entries remain visible in Desktop Designer without relying on runtime CSS.
@@ -163,7 +165,7 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [x] Restore the test instance to Tablet + Dropdown documented defaults.
 - [x] User created a backup, refreshed, removed the obsolete component and published the acceptance page.
 - [x] Run the automated suite after repository synchronization (13/13 passing, including direct-file demo startup).
-- [ ] Complete manual screen-reader testing with VoiceOver/NVDA.
+- [ ] Complete spoken-output testing with VoiceOver after enabling Codex Accessibility permission and VoiceOver's AppleScript-control setting; complete NVDA testing on Windows.
 - [x] Complete the full layout/motion matrix (35/35 open, presentation, geometry, overflow and re-close cases).
 - [x] Verify all three dropdown alignments and all seven centered motion presets.
 - [x] Obsolete original test component removed by the user after backup.
