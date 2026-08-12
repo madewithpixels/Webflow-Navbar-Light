@@ -155,4 +155,5 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [x] Verify published nested-submenu keyboard open/Escape behavior.
 - [x] Publish and verify the direct collapsed-grid fix at Desktop, Tablet, Mobile landscape and Mobile portrait.
 - [x] Publish and verify the nested-submenu grid fix, including two-stage Escape and focus restoration.
-- [ ] Publish and verify the center-alignment and close-duration Embed update.
+- [x] Publish and verify the center-alignment and close-duration Embed update.
+- [x] Audit the five native collapse variants' stored Desktop, Tablet, Mobile landscape and Mobile portrait overrides; restore the test instance to Tablet afterward.

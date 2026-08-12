@@ -142,7 +142,7 @@ npm run build:webflow
 
 Open [demo/index.html](demo/index.html) directly or through a local web server. Its controls exercise every layout and motion combination. `npm run build:webflow` regenerates both `webflow/navbar-light-embed.html` and the demo's classic browser script from the maintained source files.
 
-The browser verification matrix covers all 35 layout/motion combinations, all five collapse choices at the four core Webflow widths, all three dropdown alignments and every centered motion preset.
+The browser verification matrix covers all 35 layout/motion combinations, all five collapse choices at the four core Webflow widths, all three dropdown alignments and every centered motion preset. The published acceptance build has also been verified with the independent center-alignment rule, property-bound closing duration and the complete native Webflow collapse-variant override matrix; the test instance was restored to `Tablet` after the audit.
 
 ## Repository map
 
