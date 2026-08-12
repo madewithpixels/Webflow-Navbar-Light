@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Navbar Light demo</title>
+  <link rel="stylesheet" href="../src/navbar-light.css">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 150vh; font: 16px/1.5 system-ui, sans-serif; }
+    .demo-nav { border-bottom: 1px solid #d9d9d9; background: white; }
+    .mwp-css-nav_inner { align-items: center; display: flex; gap: 1rem; justify-content: space-between; min-height: 4.5rem; padding: 0 1.25rem; }
+    .mwp-css-nav_summary { min-height: 2.75rem; padding: .5rem; }
+    .mwp-css-nav_icon { gap: .25rem; width: 1.5rem; }
+    .mwp-css-nav_line { background: currentColor; height: 2px; width: 100%; }
+    .mwp-css-nav_panel { align-items: center; background: white; display: flex; gap: 1rem; padding: 1rem 1.25rem; }
+    .mwp-css-nav_links { align-items: center; display: flex; gap: 1rem; }
+    .mwp-css-nav_submenu { position: relative; }
+    .mwp-css-nav_submenu-list { background: white; border: 1px solid #d9d9d9; display: grid; gap: .5rem; min-width: 12rem; padding: 1rem; position: absolute; top: 100%; }
+    [data-mwp-collapsed="true"] .mwp-css-nav_panel { align-items: stretch; display: grid; }
+    [data-mwp-collapsed="true"] .mwp-css-nav_links { align-items: stretch; display: grid; }
+    [data-mwp-collapsed="true"] .mwp-css-nav_submenu-list { position: static; }
+    main { padding: 4rem 1.25rem; }
+  </style>
+</head>
+<body>
+  <header class="mwp-css-nav demo-nav" data-mwp-navbar data-collapse="mobile-landscape" data-layout="dropdown" data-motion="dropdown" data-align="right" data-menu-label="visible" data-close-on-link="true" data-close-on-outside="true" data-focus-first="false" data-scroll-lock="auto" data-duration="280ms" data-open-duration="280ms" data-close-duration="220ms" data-distance="1.5rem" data-easing="cubic-bezier(0.22, 1, 0.36, 1)" data-panel-width="min(24rem, 100vw)" data-stagger="35ms" data-icon-duration="220ms" data-icon-lines="3">
+    <div class="mwp-css-nav_inner">
+      <a href="#top">Brand</a>
+
+      <details class="mwp-css-nav_menu" data-mwp-menu open>
+        <summary class="mwp-css-nav_summary" data-mwp-trigger aria-label="Navigation menu">
+          <span data-mwp-label>Menu</span>
+          <span class="mwp-css-nav_icon" data-mwp-icon aria-hidden="true">
+            <span class="mwp-css-nav_line" data-mwp-line></span>
+            <span class="mwp-css-nav_line" data-mwp-line></span>
+            <span class="mwp-css-nav_line" data-mwp-line></span>
+          </span>
+        </summary>
+      </details>
+
+      <nav class="mwp-css-nav_panel" data-mwp-panel aria-label="Primary navigation">
+        <div class="mwp-css-nav_links">
+          <a href="#home" data-mwp-item>Home</a>
+          <a href="#components" data-mwp-item>Components</a>
+          <details class="mwp-css-nav_submenu" data-mwp-submenu data-mwp-item>
+            <summary>About</summary>
+            <div class="mwp-css-nav_submenu-list">
+              <a href="#company">Company</a>
+              <a href="#team">Team</a>
+            </div>
+          </details>
+          <a href="#contact" data-mwp-item>Contact</a>
+        </div>
+        <div class="mwp-css-nav_secondary" aria-label="Secondary navigation">
+          <a href="#social" data-mwp-item>Social</a>
+        </div>
+        <a class="mwp-css-nav_cta" href="#cta" data-mwp-item>Call to action</a>
+      </nav>
+    </div>
+    <div class="mwp-css-nav_backdrop" data-mwp-backdrop aria-hidden="true"></div>
+  </header>
+
+  <main id="top">
+    <h1>Navbar Light</h1>
+    <p>Resize the viewport to exercise the selected collapse breakpoint.</p>
+    <p>Change the root data attributes to test layout, motion and progressive enhancement options.</p>
+  </main>
+
+  <script type="module" src="../src/navbar-light.js"></script>
+</body>
+</html>
