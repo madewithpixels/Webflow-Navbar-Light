@@ -94,4 +94,4 @@ Behavior values are strings because the current Webflow binding surface does not
 
 ## Generated embed
 
-`webflow/navbar-light-embed.html` is generated from `src/navbar-light.css` and `src/navbar-light.js`. Never edit the generated embed as the source of truth; run `npm run build:webflow`, then synchronize the resulting content to the visible Webflow Embed.
+`webflow/navbar-light-embed.html` and `demo/navbar-light.browser.js` are generated from `src/navbar-light.css` and `src/navbar-light.js`. Never edit generated output as the source of truth; run `npm run build:webflow`, then synchronize the Embed output to Webflow.

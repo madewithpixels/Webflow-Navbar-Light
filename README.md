@@ -134,7 +134,7 @@ npm run check
 npm run build:webflow
 ```
 
-Open [demo/index.html](demo/index.html) through a local web server. Its controls exercise every layout and motion combination. `npm run build:webflow` regenerates `webflow/navbar-light-embed.html` from the maintained source files.
+Open [demo/index.html](demo/index.html) directly or through a local web server. Its controls exercise every layout and motion combination. `npm run build:webflow` regenerates both `webflow/navbar-light-embed.html` and the demo's classic browser script from the maintained source files.
 
 ## Repository map
 
@@ -143,6 +143,7 @@ Open [demo/index.html](demo/index.html) through a local web server. Its controls
 ├── README.md
 ├── todo.md
 ├── demo/index.html
+├── demo/navbar-light.browser.js
 ├── examples
 │   ├── gsap.js
 │   └── webflow-interactions.md

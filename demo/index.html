@@ -91,9 +91,8 @@
   </main>
 
   <script>globalThis.MWP_NAVBAR_LIGHT_AUTO_INIT = false;</script>
-  <script type="module">
-    import { NavbarLight } from '../src/navbar-light.js';
-
+  <script src="./navbar-light.browser.js"></script>
+  <script>
     const root = document.querySelector('[data-mwp-navbar]');
     const controls = document.querySelector('#navbar-controls');
     let navbar = new NavbarLight(root);
