@@ -105,7 +105,7 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Verify editable configuration and Embed remain visible in Designer.
 - [x] Restore the test instance to Tablet + Dropdown documented defaults.
 - [x] Confirm no refresh or publish action was taken during this milestone.
-- [ ] Run the final local automated suite after repository synchronization.
+- [x] Run the final local automated suite after repository synchronization (12/12 passing).
 - [ ] Complete manual screen-reader testing with VoiceOver/NVDA.
 - [ ] Complete the full visual matrix pass for every layout and motion preset.
 - [ ] Obtain user approval before removing the preserved original test instance.
