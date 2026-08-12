@@ -11,7 +11,7 @@ Run this test against a disposable or backed-up destination Webflow project. The
 
 ## Canvas checks
 
-- The Navigator contains native Brand, details/summary trigger, editable Div burger bars, shared Link elements, submenu, secondary region, CTA, settings and Canvas-visible Embed.
+- The Navigator contains native Brand, details/summary trigger, editable Div burger bars, shared Link elements, submenu with editable Div arrow, social/contact region, CTA, settings and Canvas-visible Embed.
 - The component retains all five collapse variants and all editable component properties.
 - Brand and navigation text adopt the destination project's body/link tag styles without removing component classes.
 - Structural spacing, hit areas, burger geometry, panel grouping and CTA outline remain usable.
@@ -25,6 +25,8 @@ Run this test against a disposable or backed-up destination Webflow project. The
 - Tablet starts collapsed, opens from the full trigger, closes on Escape and restores focus.
 - Desktop remains expanded; Mobile landscape and Mobile portrait remain collapsed.
 - Nested `More` opens independently and uses two-stage Escape behavior.
+- The optional submenu arrow follows the native open state and its duration, easing and rotation properties.
+- Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email labels, destinations and visibility toggles remain editable after paste.
 - The settings block disappears only after runtime initialization.
 
 ## Failure and recovery checks

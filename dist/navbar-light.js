@@ -1,4 +1,4 @@
-/*! Navbar Light v0.1.0 */
+/*! Navbar Light v0.2.0 */
 (() => {
   // src/navbar-light.js
   var ROOT_SELECTOR = "[data-mwp-navbar]";
@@ -79,6 +79,9 @@
       const panelWidth = this.menu.dataset.mwpPanelWidth || this.root.dataset.panelWidth || value("panelWidth");
       const stagger = this.menu.dataset.mwpStagger || this.root.dataset.stagger || value("stagger");
       const iconDuration = this.menu.dataset.mwpIconDuration || this.root.dataset.iconDuration || value("iconDuration");
+      const submenuIconDuration = this.root.dataset.submenuIconDuration || value("submenuIconDuration");
+      const submenuIconEasing = this.root.dataset.submenuIconEasing || value("submenuIconEasing");
+      const submenuIconRotation = this.root.dataset.submenuIconRotation || value("submenuIconRotation");
       if (validCss("transition-duration", openDuration)) rootStyle.setProperty("--mwp-nav-duration-open", openDuration);
       if (validCss("transition-duration", closeDuration)) rootStyle.setProperty("--mwp-nav-duration-close", closeDuration);
       if (validCss("transform", `translateY(${distance})`)) rootStyle.setProperty("--mwp-nav-distance", distance);
@@ -86,6 +89,9 @@
       if (validCss("width", panelWidth)) rootStyle.setProperty("--mwp-nav-panel-width", panelWidth);
       if (validCss("transition-delay", stagger)) rootStyle.setProperty("--mwp-nav-stagger", stagger);
       if (validCss("transition-duration", iconDuration)) rootStyle.setProperty("--mwp-nav-icon-duration", iconDuration);
+      if (validCss("transition-duration", submenuIconDuration)) rootStyle.setProperty("--mwp-nav-submenu-icon-duration", submenuIconDuration);
+      if (validCss("transition-timing-function", submenuIconEasing)) rootStyle.setProperty("--mwp-nav-submenu-icon-ease", submenuIconEasing);
+      if (validCss("transform", `rotate(${submenuIconRotation})`)) rootStyle.setProperty("--mwp-nav-submenu-icon-rotation", submenuIconRotation);
       this.items.forEach((item, index) => item.style.setProperty("--mwp-item-index", index));
       this.root.dataset.mwpReady = "true";
       const collapse = this.collapsePreset();
@@ -302,5 +308,5 @@
   }
   globalThis.NavbarLight = NavbarLight;
   globalThis.initNavbarLight = initNavbarLight;
-  globalThis.MWP_NAVBAR_LIGHT_VERSION = "0.1.0";
+  globalThis.MWP_NAVBAR_LIGHT_VERSION = "0.2.0";
 })();

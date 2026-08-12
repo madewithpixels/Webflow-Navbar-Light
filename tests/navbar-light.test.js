@@ -9,6 +9,8 @@ let NavbarLight;
 test('functional CSS keeps a closed native submenu out of the accessibility tree', () => {
   const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
   assert.match(css, /\[data-mwp-submenu\]:not\(\[open\]\) > \.mwp-css-nav_submenu-list\s*\{\s*display:\s*none;/);
+  assert.match(css, /\[data-mwp-submenu\]\[open\] > summary \[data-mwp-submenu-icon\]/);
+  assert.doesNotMatch(css, /::before|::after/);
 });
 
 const markup = `
@@ -192,6 +194,9 @@ test('preserves standalone root configuration', () => {
   root.dataset.closeDuration = '12ms';
   root.dataset.stagger = '40ms';
   root.dataset.iconDuration = '180ms';
+  root.dataset.submenuIconDuration = '160ms';
+  root.dataset.submenuIconEasing = 'linear';
+  root.dataset.submenuIconRotation = '90deg';
   root.setAttribute('data-close-on-link', 'false');
   const navbar = new NavbarLight(root);
 
@@ -202,6 +207,9 @@ test('preserves standalone root configuration', () => {
   assert.equal(root.style.getPropertyValue('--mwp-nav-duration-close'), '12ms');
   assert.equal(root.style.getPropertyValue('--mwp-nav-stagger'), '40ms');
   assert.equal(root.style.getPropertyValue('--mwp-nav-icon-duration'), '180ms');
+  assert.equal(root.style.getPropertyValue('--mwp-nav-submenu-icon-duration'), '160ms');
+  assert.equal(root.style.getPropertyValue('--mwp-nav-submenu-icon-ease'), 'linear');
+  assert.equal(root.style.getPropertyValue('--mwp-nav-submenu-icon-rotation'), '90deg');
   navbar.destroy();
 });
 
@@ -215,6 +223,9 @@ test('reads Canvas-visible configuration values and normalises presets', () => {
       <div data-mwp-config-value="layout">mwp-layout-overlay</div>
       <div data-mwp-config-value="alignment">left</div>
       <div data-mwp-config-value="iconLines">2</div>
+      <div data-mwp-config-value="submenuIconDuration">240ms</div>
+      <div data-mwp-config-value="submenuIconEasing">ease-in-out</div>
+      <div data-mwp-config-value="submenuIconRotation">135deg</div>
       <div data-mwp-config-value="closeOutside">false</div>
     </div>`);
   const navbar = new NavbarLight(root);
@@ -223,6 +234,9 @@ test('reads Canvas-visible configuration values and normalises presets', () => {
   assert.equal(root.dataset.motion, 'left');
   assert.equal(root.dataset.align, 'left');
   assert.equal(root.dataset.iconLines, '2');
+  assert.equal(root.style.getPropertyValue('--mwp-nav-submenu-icon-duration'), '240ms');
+  assert.equal(root.style.getPropertyValue('--mwp-nav-submenu-icon-ease'), 'ease-in-out');
+  assert.equal(root.style.getPropertyValue('--mwp-nav-submenu-icon-rotation'), '135deg');
   assert.equal(root.getAttribute('data-close-on-outside'), 'false');
   assert.equal(root.dataset.mwpReady, 'true');
   navbar.destroy();

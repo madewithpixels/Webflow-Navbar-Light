@@ -16,6 +16,11 @@
     .mwp-css-nav_panel { align-items: center; background: white; display: flex; gap: 1rem; padding: 1rem 1.25rem; }
     .mwp-css-nav_links { align-items: center; display: flex; gap: 1rem; }
     .mwp-css-nav_submenu { position: relative; }
+    .mwp-css-nav_submenu summary { align-items: center; display: flex; gap: .5rem; }
+    .mwp-css-nav_submenu-icon { display: flex; height: .75rem; position: relative; width: .75rem; }
+    .mwp-css-nav_submenu-icon-line-left, .mwp-css-nav_submenu-icon-line-right { background: currentColor; height: 2px; position: absolute; top: 50%; width: 55%; }
+    .mwp-css-nav_submenu-icon-line-left { left: 7%; transform: rotate(45deg); }
+    .mwp-css-nav_submenu-icon-line-right { right: 7%; transform: rotate(-45deg); }
     .mwp-css-nav_submenu-list { background: white; border: 1px solid #d9d9d9; gap: .5rem; min-width: 12rem; padding: 1rem; position: absolute; top: 100%; }
     [data-mwp-collapsed="true"] .mwp-css-nav_panel { align-items: stretch; display: grid; }
     [data-mwp-collapsed="true"] .mwp-css-nav_links { align-items: stretch; display: grid; }
@@ -30,7 +35,7 @@
   </style>
 </head>
 <body>
-  <header class="mwp-css-nav demo-nav" data-mwp-navbar data-collapse="mobile-landscape" data-layout="dropdown" data-motion="dropdown" data-align="right" data-menu-label="visible" data-close-on-link="true" data-close-on-outside="true" data-focus-first="false" data-scroll-lock="auto" data-duration="280ms" data-open-duration="280ms" data-close-duration="220ms" data-distance="1.5rem" data-easing="cubic-bezier(0.22, 1, 0.36, 1)" data-panel-width="min(24rem, 100vw)" data-stagger="35ms" data-icon-duration="220ms" data-icon-lines="3">
+  <header class="mwp-css-nav demo-nav" data-mwp-navbar data-collapse="mobile-landscape" data-layout="dropdown" data-motion="dropdown" data-align="right" data-menu-label="visible" data-close-on-link="true" data-close-on-outside="true" data-focus-first="false" data-scroll-lock="auto" data-duration="280ms" data-open-duration="280ms" data-close-duration="220ms" data-distance="1.5rem" data-easing="cubic-bezier(0.22, 1, 0.36, 1)" data-panel-width="min(24rem, 100vw)" data-stagger="35ms" data-icon-duration="220ms" data-submenu-icon-duration="220ms" data-submenu-icon-easing="cubic-bezier(0.22, 1, 0.36, 1)" data-submenu-icon-rotation="180deg" data-icon-lines="3">
     <div class="mwp-css-nav_inner">
       <a href="#top">Brand</a>
 
@@ -50,7 +55,13 @@
           <a href="#home" data-mwp-item>Home</a>
           <a href="#components" data-mwp-item>Components</a>
           <details class="mwp-css-nav_submenu" data-mwp-submenu data-mwp-item>
-            <summary>About</summary>
+            <summary>
+              <span>About</span>
+              <span class="mwp-css-nav_submenu-icon" data-mwp-submenu-icon aria-hidden="true">
+                <span class="mwp-css-nav_submenu-icon-line-left"></span>
+                <span class="mwp-css-nav_submenu-icon-line-right"></span>
+              </span>
+            </summary>
             <div class="mwp-css-nav_submenu-list">
               <a href="#company">Company</a>
               <a href="#team">Team</a>
@@ -59,7 +70,15 @@
           <a href="#contact" data-mwp-item>Contact</a>
         </div>
         <div class="mwp-css-nav_secondary" aria-label="Secondary navigation">
-          <a href="#social" data-mwp-item>Social</a>
+          <a href="#facebook" data-mwp-item>Facebook</a>
+          <a href="#instagram" data-mwp-item>Instagram</a>
+          <a href="#linkedin" data-mwp-item>LinkedIn</a>
+          <a href="#tiktok" data-mwp-item>TikTok</a>
+          <a href="#threads" data-mwp-item>Threads</a>
+          <a href="#x" data-mwp-item>X</a>
+          <a href="#whatsapp" data-mwp-item>WhatsApp</a>
+          <a href="tel:+441234567890" data-mwp-item>Telephone</a>
+          <a href="mailto:hello@example.com" data-mwp-item>Email</a>
         </div>
         <a class="mwp-css-nav_cta" href="#cta" data-mwp-item>Call to action</a>
       </nav>
@@ -81,6 +100,9 @@
       <label class="demo-control"><span>Opening duration</span><input name="openDuration" value="280ms"></label>
       <label class="demo-control"><span>Closing duration</span><input name="closeDuration" value="220ms"></label>
       <label class="demo-control"><span>Item stagger</span><input name="stagger" value="35ms"></label>
+      <label class="demo-control"><span>Submenu icon duration</span><input name="submenuIconDuration" value="220ms"></label>
+      <label class="demo-control"><span>Submenu icon easing</span><input name="submenuIconEasing" value="cubic-bezier(0.22, 1, 0.36, 1)"></label>
+      <label class="demo-control"><span>Submenu icon rotation</span><input name="submenuIconRotation" value="180deg"></label>
       <label class="demo-checkbox"><input name="focusFirst" type="checkbox"> Focus first link</label>
       <label class="demo-checkbox"><input name="closeOutside" type="checkbox" checked> Close outside</label>
       <label class="demo-checkbox"><input name="closeLink" type="checkbox" checked> Close on link</label>
@@ -109,6 +131,9 @@
       root.dataset.openDuration = data.get('openDuration');
       root.dataset.closeDuration = data.get('closeDuration');
       root.dataset.stagger = data.get('stagger');
+      root.dataset.submenuIconDuration = data.get('submenuIconDuration');
+      root.dataset.submenuIconEasing = data.get('submenuIconEasing');
+      root.dataset.submenuIconRotation = data.get('submenuIconRotation');
       root.setAttribute('data-focus-first', String(data.has('focusFirst')));
       root.setAttribute('data-close-on-outside', String(data.has('closeOutside')));
       root.setAttribute('data-close-on-link', String(data.has('closeLink')));

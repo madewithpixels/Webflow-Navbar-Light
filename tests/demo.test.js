@@ -47,6 +47,8 @@ test('demo initializes when opened directly from the filesystem', async () => {
   assert.equal(dom.window.getComputedStyle(submenuList).display, 'none');
   submenu.open = true;
   assert.equal(dom.window.getComputedStyle(submenuList).display, 'grid');
+  assert.ok(submenu.querySelector('[data-mwp-submenu-icon]'));
+  assert.equal(root.querySelectorAll('.mwp-css-nav_secondary a').length, 9);
 
   layout.value = 'dropdown';
   layout.dispatchEvent(new dom.window.Event('change', { bubbles: true }));

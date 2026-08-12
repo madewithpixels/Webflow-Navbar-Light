@@ -55,6 +55,8 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Panel padding, gap, border, radius and shadow remain normal Webflow class styles.
 - [x] Native nested-details submenu with independent Escape handling.
 - [x] Optional CTA and secondary/social regions.
+- [ ] Add a native Div chevron to each included submenu with optional visibility and configurable duration, easing and rotation.
+- [ ] Add optional native Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email links with label and destination properties.
 - [x] Evaluate a Component Slot. Decision: do not add one because slots accept component instances rather than arbitrary native link elements.
 - [x] Document safe link and submenu editing.
 
@@ -83,6 +85,8 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Motion, opening/closing duration, distance, easing and stagger.
 - [x] Menu label content/visibility and two/three icon bars.
 - [x] CTA, secondary region and backdrop visibility.
+- [ ] Submenu arrow visibility and motion values.
+- [ ] Named social/contact link labels, destinations and individual visibility toggles.
 - [x] Focus, outside close, link close and scroll-lock behavior.
 - [x] Add clear property groups and tooltips.
 - [x] Keep non-attribute-bindable values visible through native Text Blocks.
@@ -172,6 +176,8 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [x] Run the automated suite after repository synchronization (16/16 passing, including direct-file demo startup, closed nested-submenu rendering state and pinned CDN artifact/loader verification).
 - [x] Complete genuine macOS VoiceOver keyboard and spoken-output testing on the published Tablet variant: collapsed/expanded trigger announcements, closed-submenu omission, nested-link order and two-stage Escape focus restoration all pass.
 - [ ] Complete spoken-output testing with NVDA on Windows.
+- [ ] Verify submenu arrow open/close motion, reduced-motion behavior and Canvas editability in both Webflow components.
+- [ ] Verify every social/contact prop destination and visibility toggle in both Webflow components.
 - [x] Complete the full layout/motion matrix (35/35 open, presentation, geometry, overflow and re-close cases).
 - [x] Verify all three dropdown alignments and all seven centered motion presets.
 - [x] Obsolete original test component removed by the user after backup.

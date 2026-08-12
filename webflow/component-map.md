@@ -36,7 +36,10 @@ Navbar Light [header.mwp-css-nav, data-mwp-navbar]
     └── Navigation panel [nav.mwp-css-nav_panel, data-mwp-panel]
     │   ├── Primary Link elements [data-mwp-item]
     │   ├── Submenu details [nested details, data-mwp-submenu]
-    │   ├── Secondary navigation [native Div + Link]
+    │   │   └── Submenu arrow [native Div + two Div lines, data-mwp-submenu-icon]
+    │   ├── Secondary navigation [native Div]
+    │   │   ├── Facebook, Instagram, LinkedIn, TikTok, Threads, X and WhatsApp [native Links]
+    │   │   └── Telephone and Email [native Links]
     │   └── Call to action [native Link]
 ├── Navbar Light CSS + enhancement [visible Embed]
 ├── Navbar Light settings [visible native Text Blocks, data-mwp-config]
@@ -51,7 +54,7 @@ Expanded variants must explicitly reverse inherited collapsed authoring styles w
 
 ## Native visual baseline
 
-The shared Webflow classes provide only structural presentation: row/panel layout, spacing, hit areas, burger geometry, borders, radii and grouping. Brand and navigation classes intentionally do not set font family, font size, font weight, text colour or text decoration. Those properties therefore inherit from the destination project's body and link tag styles after copy/paste. Burger lines and the outlined CTA use `currentColor` so they follow the inherited text/link colour.
+The shared Webflow classes provide only structural presentation: row/panel layout, spacing, hit areas, burger and submenu-chevron geometry, borders, radii and grouping. Brand and navigation classes intentionally do not set font family, font size, font weight, text colour or text decoration. Those properties therefore inherit from the destination project's body and link tag styles after copy/paste. Icon lines and the outlined CTA use `currentColor` so they follow the inherited text/link colour.
 
 Avoid adding visual CSS to either Embed. Project-specific presentation should remain ordinary Webflow class styling. When a deliberate component-level visual override is needed, update the existing `mwp-css-nav_*` class rather than introducing `!important` declarations.
 
@@ -106,6 +109,7 @@ Behavior values are strings because the current Webflow binding surface does not
 - `[data-mwp-panel]`: shared navigation panel.
 - `[data-mwp-item]`: stagger item.
 - `[data-mwp-submenu]`: nested details submenu.
+- `[data-mwp-submenu-icon]`: optional native Div chevron animated by the submenu's open state.
 - `[data-mwp-backdrop]`: native backdrop Div.
 - `data-state`: `expanded`, `opening`, `open`, `closing` or `closed`.
 - Events: `mwp-nav:open`, `mwp-nav:opened`, `mwp-nav:close`, `mwp-nav:closed`.
