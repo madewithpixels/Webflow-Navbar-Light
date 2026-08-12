@@ -33,6 +33,8 @@ The variant applies across the component instance. Do not choose a different var
 
 The test instance is left on `Tablet`, so it is expanded on Desktop and collapsed at Tablet and below.
 
+`Never` deliberately preserves the expanded navigation at every width. At very narrow widths, the designer must ensure the chosen links fit, wrap the native inner/panel classes, or choose a collapsing variant; Navbar Light does not silently override that selection.
+
 ### Component properties
 
 | Group | Properties |
@@ -68,6 +70,8 @@ Motion classes:
 - `mwp-motion-custom`
 
 `Custom` removes built-in panel transforms and transitions. State, ARIA, inertness, focus behavior and lifecycle events continue to work, leaving Webflow Interactions or GSAP free to own the visual animation.
+
+Dropdown centering uses the independent CSS `translate` property, so Custom mode can leave the animation `transform` property entirely under Webflow Interactions or GSAP control.
 
 ## CSS baseline and progressive enhancement
 
@@ -137,6 +141,8 @@ npm run build:webflow
 ```
 
 Open [demo/index.html](demo/index.html) directly or through a local web server. Its controls exercise every layout and motion combination. `npm run build:webflow` regenerates both `webflow/navbar-light-embed.html` and the demo's classic browser script from the maintained source files.
+
+The browser verification matrix covers all 35 layout/motion combinations, all five collapse choices at the four core Webflow widths, all three dropdown alignments and every centered motion preset.
 
 ## Repository map
 

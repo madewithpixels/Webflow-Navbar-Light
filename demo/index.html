@@ -117,7 +117,10 @@
     }
 
     controls.addEventListener('change', update);
-    document.querySelector('#navbar-toggle').addEventListener('click', () => navbar.toggle({ focusFirst: false }));
+    document.querySelector('#navbar-toggle').addEventListener('click', (event) => {
+      event.stopPropagation();
+      navbar.toggle({ focusFirst: false });
+    });
   </script>
 </body>
 </html>

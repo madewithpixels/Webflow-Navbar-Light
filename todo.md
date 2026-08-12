@@ -43,7 +43,8 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Support Never, Tablet, Mobile landscape, Mobile portrait and Always.
 - [x] Use Webflow's emitted variant marker for CSS-only behavior.
 - [x] Reset native open state safely when crossing between collapsed and expanded layouts.
-- [ ] Complete a visual pass of all five variants at all four core Webflow breakpoints.
+- [ ] Complete a visual pass of all five native Webflow variants at all four core Webflow breakpoints.
+- [x] Verify all five collapse modes across the four core widths in the local reference matrix (20/20 functional state cases).
 
 ## 4. Layouts and content
 
@@ -64,6 +65,7 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Add backdrop fade, item stagger and icon duration.
 - [x] Preserve closing transitions before final closed state.
 - [x] Fix Custom/Fade specificity so external animation can fully replace drawer transforms.
+- [x] Keep center alignment independent of animation transforms, including Custom mode.
 
 ## 6. Webflow Interactions and GSAP
 
@@ -92,6 +94,8 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Maintain an accessible native HTML reference implementation.
 - [x] Add an interactive demo covering all layout/motion selections.
 - [x] Make the interactive demo work when opened directly from the filesystem without ES-module/CORS failure.
+- [x] Prevent the demo's external toggle control from immediately triggering outside-close.
+- [x] Preserve standalone root `data-close-duration` configuration.
 - [x] Add automated state, focus, outside/link close, backdrop and scroll-lock tests.
 - [x] Document structure, classes, properties, variants, hooks and integration patterns.
 
@@ -144,9 +148,11 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [x] User created a backup, refreshed, removed the obsolete component and published the acceptance page.
 - [x] Run the automated suite after repository synchronization (13/13 passing, including direct-file demo startup).
 - [ ] Complete manual screen-reader testing with VoiceOver/NVDA.
-- [ ] Complete the full visual matrix pass for every layout and motion preset.
+- [x] Complete the full layout/motion matrix (35/35 open, presentation, geometry, overflow and re-close cases).
+- [x] Verify all three dropdown alignments and all seven centered motion presets.
 - [x] Obsolete original test component removed by the user after backup.
 - [x] Verify the published Desktop acceptance build initializes, expands the Tablet variant, renders shared links and hides authoring settings.
 - [x] Verify published nested-submenu keyboard open/Escape behavior.
 - [x] Publish and verify the direct collapsed-grid fix at Desktop, Tablet, Mobile landscape and Mobile portrait.
-- [ ] Publish and verify the nested-submenu grid fix on the Webflow acceptance page.
+- [x] Publish and verify the nested-submenu grid fix, including two-stage Escape and focus restoration.
+- [ ] Publish and verify the center-alignment and close-duration Embed update.

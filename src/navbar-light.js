@@ -83,7 +83,7 @@ export class NavbarLight {
     const rootStyle = this.root.style;
     const duration = this.menu.dataset.mwpDuration || this.root.dataset.duration;
     const openDuration = this.menu.dataset.mwpOpenDuration || this.root.dataset.openDuration || duration;
-    const closeDuration = this.menu.dataset.mwpCloseDuration || value('closeDuration') || duration;
+    const closeDuration = this.menu.dataset.mwpCloseDuration || this.root.dataset.closeDuration || value('closeDuration') || duration;
     const distance = this.menu.dataset.mwpDistance || this.root.dataset.distance;
     const easing = this.menu.dataset.mwpEase || this.menu.dataset.mwpEasing || this.root.dataset.easing;
     const panelWidth = this.menu.dataset.mwpPanelWidth || this.root.dataset.panelWidth || value('panelWidth');

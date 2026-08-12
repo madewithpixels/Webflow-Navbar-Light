@@ -183,6 +183,7 @@ test('preserves standalone root configuration', () => {
   root.dataset.layout = 'overlay';
   root.dataset.motion = 'fade';
   root.dataset.panelWidth = '20rem';
+  root.dataset.closeDuration = '12ms';
   root.dataset.stagger = '40ms';
   root.dataset.iconDuration = '180ms';
   root.setAttribute('data-close-on-link', 'false');
@@ -192,6 +193,7 @@ test('preserves standalone root configuration', () => {
   assert.equal(root.dataset.motion, 'fade');
   assert.equal(root.getAttribute('data-close-on-link'), 'false');
   assert.equal(root.style.getPropertyValue('--mwp-nav-panel-width'), '20rem');
+  assert.equal(root.style.getPropertyValue('--mwp-nav-duration-close'), '12ms');
   assert.equal(root.style.getPropertyValue('--mwp-nav-stagger'), '40ms');
   assert.equal(root.style.getPropertyValue('--mwp-nav-icon-duration'), '180ms');
   navbar.destroy();
