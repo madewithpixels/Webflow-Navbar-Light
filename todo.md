@@ -95,7 +95,38 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Add automated state, focus, outside/link close, backdrop and scroll-lock tests.
 - [x] Document structure, classes, properties, variants, hooks and integration patterns.
 
-## 9. Verification
+## 9. Webflow app product track
+
+The preferred app form is a Webflow Designer Extension that installs and configures a native Navbar Light component. It must remain a generator and maintenance tool rather than a proprietary runtime widget: generated links, Divs, classes, variables, variants, properties and the Canvas-visible enhancement Embed must remain editable and continue working when the app is closed or uninstalled.
+
+### Capability prototype
+
+- [ ] Scaffold a private Designer Extension with the Webflow CLI.
+- [ ] Prove end-to-end creation of native elements, existing/new classes and responsive styles.
+- [ ] Prove component creation, all five collapse variants and component property bindings.
+- [ ] Prove insertion of the Canvas-visible CSS/enhancement Embed.
+- [ ] Confirm generated output remains functional and editable without the extension running.
+- [ ] Confirm repeated installation is idempotent and does not duplicate components, classes or runtime code.
+
+### Private installer MVP
+
+- [ ] Add an Insert Navbar Light workflow.
+- [ ] Expose collapse breakpoint, layout, alignment, panel width and motion settings.
+- [ ] Expose duration, easing, distance, stagger, icon and accessibility/behaviour settings.
+- [ ] Generate a reusable native Webflow component with clear Navigator names and property groups.
+- [ ] Add installation diagnostics for missing structure, classes, attributes, props and runtime version.
+- [ ] Store an explicit Navbar Light schema/runtime version marker.
+
+### Safe maintenance and distribution
+
+- [ ] Design conservative migrations that preserve user-authored content and intentional style overrides.
+- [ ] Add a preview/diff step before modifying an existing installation.
+- [ ] Validate the installer and migrations against cloned test sites before enabling updates.
+- [ ] Decide whether licensing, hosted libraries, telemetry or managed templates justify a hybrid backend.
+- [ ] Prepare onboarding, documentation, error handling, privacy/security material and a demonstration for Marketplace review.
+- [ ] Pursue public Marketplace distribution only after the private extension has been tested with real users.
+
+## 10. Verification
 
 - [x] Verify the CSS-only Tablet fallback in Webflow Preview.
 - [x] Verify keyboard open, Escape close and focus return.
