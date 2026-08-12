@@ -104,7 +104,7 @@ This checklist is the implementation plan and status record. Completed work is c
 Keep the current Canvas-visible, self-contained Embed as the dependable default. Add a second, explicitly optional distribution mode that loads versioned CSS and progressive-enhancement JavaScript from jsDelivr while leaving the native Webflow structure, classes, component properties and no-script behavior intact.
 
 - [x] Choose public exact-version GitHub tags for the first release; reconsider npm after package naming and ownership are settled.
-- [ ] Owner to choose and add a licence before creating the first public tag.
+- [x] Owner selected and added the MIT licence before the first public tag.
 - [x] Produce release-ready `dist` CSS and JavaScript files, minified files and source maps from the maintained source.
 - [x] Generate exact semantic-version URLs; never generate `latest`, branch or floating version-range URLs.
 - [x] Add a small Canvas-visible CDN loader Embed with a readable runtime version while normal editable Webflow settings remain native.
