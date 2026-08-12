@@ -45,7 +45,7 @@ The test instance is left on `Tablet`, so it is expanded on Desktop and collapse
 
 String values use CSS syntax where appropriate, for example `280ms`, `1.5rem`, `24rem` and `cubic-bezier(0.22, 1, 0.36, 1)`.
 
-The native `Navbar Light settings` block mirrors values that the current Webflow API cannot bind directly to custom attributes. It is deliberately visible and styleable in Designer. The enhancement reads it and hides it only in Preview/published runtime after initialization.
+The native `Navbar Light settings` block mirrors values that the current Webflow API cannot bind directly to custom attributes. It and the enhancement Embed sit immediately below the native navbar row, deliberately visible and styleable in Designer without disrupting the navigation layout. The enhancement reads the settings and hides the block only in Preview/published runtime after initialization.
 
 ## Layout and motion presets
 

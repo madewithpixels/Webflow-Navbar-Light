@@ -103,6 +103,7 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Verify nested submenu Escape behavior.
 - [x] Verify Custom mode removes built-in transform and transition while state continues.
 - [x] Verify editable configuration and Embed remain visible in Designer.
+- [x] Verify shared navigation entries remain visible in Desktop Designer without relying on runtime CSS.
 - [x] Restore the test instance to Tablet + Dropdown documented defaults.
 - [x] Confirm no refresh or publish action was taken during this milestone.
 - [x] Run the final local automated suite after repository synchronization (12/12 passing).

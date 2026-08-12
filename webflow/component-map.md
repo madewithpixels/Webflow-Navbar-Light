@@ -18,7 +18,7 @@ The original and new instances both remain on the test page. Do not remove the o
 
 ```text
 Navbar Light [header.mwp-css-nav, data-mwp-navbar]
-└── Navbar inner [div.mwp-css-nav_inner]
+├── Navbar inner [div.mwp-css-nav_inner]
     ├── Brand [Link]
     ├── Menu details [details.mwp-css-nav_menu, data-mwp-menu]
     │   └── Menu trigger [summary.mwp-css-nav_summary, data-mwp-trigger]
@@ -27,17 +27,17 @@ Navbar Light [header.mwp-css-nav, data-mwp-navbar]
     │           ├── Icon line — top [Div, data-mwp-line]
     │           ├── Icon line — middle [Div, data-mwp-line]
     │           └── Icon line — bottom [Div, data-mwp-line]
-    ├── Navigation panel [nav.mwp-css-nav_panel, data-mwp-panel]
+    └── Navigation panel [nav.mwp-css-nav_panel, data-mwp-panel]
     │   ├── Primary Link elements [data-mwp-item]
     │   ├── Submenu details [nested details, data-mwp-submenu]
     │   ├── Secondary navigation [native Div + Link]
-    │   ├── Call to action [native Link]
-    │   ├── Navbar Light CSS + enhancement [visible Embed]
-    │   └── Navbar Light settings [visible native Text Blocks, data-mwp-config]
-    └── Backdrop [native Div, data-mwp-backdrop]
+    │   └── Call to action [native Link]
+├── Navbar Light CSS + enhancement [visible Embed]
+├── Navbar Light settings [visible native Text Blocks, data-mwp-config]
+└── Backdrop [native Div, data-mwp-backdrop]
 ```
 
-The panel is the single source of navigation content for desktop and collapsed layouts. The embed remains visible in Designer; Webflow displays its normal custom-code placeholder there. The settings block is visible in Designer and hidden only after runtime initialization.
+The panel is the single source of navigation content for desktop and collapsed layouts. Its Base/Desktop native style is `display: flex` and `position: static`, keeping every link visible on Canvas. The embed and settings are root-level siblings below the navbar row: they remain visible in Designer without inflating the panel, and the settings block is hidden only after runtime initialization.
 
 ## Collapse variants
 
