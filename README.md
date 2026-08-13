@@ -45,7 +45,7 @@ The live Webflow Canvas matrix has been checked for all five variants at Desktop
 | Layout | Layout, Panel alignment, Panel width |
 | Motion | Motion class, Opening duration, Closing duration, Distance, Easing, Item stagger, Icon duration, Submenu icon duration, Submenu icon easing, Submenu icon rotation |
 | Trigger | Menu label, Show menu label, Icon lines, Show submenu arrows |
-| Content | Show CTA, Show secondary links, Show backdrop; Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email destinations, replaceable icon Images and visibility |
+| Content | Show primary navigation, Show CTA, Show secondary navigation, Show socials, Show social labels, Show contact links, Show contact labels and Show backdrop; individual Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email destinations, replaceable icon Images and visibility |
 | Behavior | Focus first link, Close on outside click, Close on link click, Lock page scroll |
 
 String values use CSS syntax where appropriate, for example `280ms`, `1.5rem`, `24rem` and `cubic-bezier(0.22, 1, 0.36, 1)`.
@@ -54,9 +54,15 @@ The native `Navbar Light settings` block mirrors values that the current Webflow
 
 ### Styling and destination-project inheritance
 
-The included Webflow styles are deliberately structural: layout, spacing, touch targets, burger geometry, panel grouping, borders and small radii. Brand and navigation classes do not set typography, text colour or text decoration, so a copied component inherits those values from the destination project's body and link tag styles. The burger bars and outlined CTA use `currentColor` and follow that inherited colour automatically.
+The included Webflow styles are deliberately structural: layout, spacing, touch targets, burger geometry, panel grouping, borders and small radii. Brand and navigation classes set only a modest type scale, weight and spacing; they do not set a font family or fixed text colour. The copied component therefore inherits the destination project's font and colour from its body/link tag styles. The burger bars, panel borders and outlined CTA use `currentColor` and follow that inherited colour automatically.
 
 This means the component can look intentionally plain in the library. Apply project-specific presentation through the existing native `mwp-css-nav_*` classes after pasting; no Embed edit or `!important` override should be necessary.
+
+### MWP Component Library demo shell
+
+The source site has a deliberately separate demo theme for presenting components. Its `MWP Demo Theme` variables, `mwp-site-*` classes and `mwp-home-*` classes style the library pages, not the Navbar Light component itself. Navbar Light does not reference those theme variables.
+
+The native `/style-guide` page is both a visual reference and a class-retention page. It keeps the demo typography, semantic colours, layout primitives, buttons, pills and cards attached to real Canvas elements so Webflow's unused-class cleanup does not remove useful library-site styles. Project-specific presentation belongs on these host-page classes; portable component structure belongs on `mwp-css-nav_*`.
 
 ## Layout and motion presets
 
@@ -106,7 +112,9 @@ Collapsed panels use a functional grid so native panel children stack into usabl
 
 The included submenu is a nested native `<details>` pattern. Duplicate the complete `Submenu details` element to add another. Its optional chevron is made from native Divs, uses no pseudo-elements, and follows `currentColor`; duration, easing and open-state rotation are editable properties.
 
-The secondary region contains native, individually optional Link Blocks for Facebook, Instagram, LinkedIn, TikTok, Threads, X and WhatsApp, plus Telephone and Email. Every entry exposes its native Webflow Link destination, replaceable icon Image and visibility toggle; the named labels remain ordinary editable native text in the component. The outer secondary region and CTA retain their own visibility properties. Webflow component properties cannot generate a repeatable list, so these named slots provide a useful default; duplicate or remove native links for a different set.
+The panel has two direct, independently styleable groups: `Secondary navigation` first and `Primary navigation` second. Primary navigation contains a `Navigation links` wrapper followed by the CTA as its final child. Secondary navigation contains a seven-link `Social links` wrapper followed by a two-link `Contact links` wrapper for Telephone and Email. This predictable nesting supports flex, grid, reordering and alignment changes without editing the enhancement Embed.
+
+Every named entry keeps its native Webflow Link destination, replaceable icon Image and individual visibility toggle. `Show social labels` controls the seven native social label Divs; `Show contact labels` controls the Telephone and Email label Divs. Both controls leave their replaceable icons visible. The primary, CTA, secondary master, social and contact groups each have independent visibility properties. Webflow component properties cannot generate a repeatable list, so these named slots provide a useful default; duplicate or remove native links for a different set.
 
 The supplied SVGs are stored as normal Webflow assets, so there is no runtime icon-CDN dependency and every Image can be replaced from the component properties. Brand defaults come from versioned Simple Icons assets except LinkedIn, which uses Font Awesome Free; Telephone and Email use Lucide. Respect each brand's usage guidelines. Simple Icons is distributed as CC0 with an explicit trademark/licensing disclaimer, Font Awesome Free Icons are CC BY 4.0, and Lucide is ISC-licensed.
 

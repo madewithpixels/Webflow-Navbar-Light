@@ -48,7 +48,19 @@ test('demo initializes when opened directly from the filesystem', async () => {
   submenu.open = true;
   assert.equal(dom.window.getComputedStyle(submenuList).display, 'grid');
   assert.ok(submenu.querySelector('[data-mwp-submenu-icon]'));
-  assert.equal(root.querySelectorAll('.mwp-css-nav_secondary a').length, 9);
+  const panelGroups = [...root.querySelector('[data-mwp-panel]').children];
+  assert.deepEqual(panelGroups.map((element) => element.className), [
+    'mwp-css-nav_secondary',
+    'mwp-css-nav_primary'
+  ]);
+  assert.deepEqual([...root.querySelector('.mwp-css-nav_primary').children].map((element) => element.className), [
+    'mwp-css-nav_links',
+    'mwp-css-nav_cta'
+  ]);
+  assert.equal(root.querySelectorAll('.mwp-css-nav_socials a').length, 7);
+  assert.equal(root.querySelectorAll('.mwp-css-nav_socials .mwp-css-nav_secondary-label').length, 7);
+  assert.equal(root.querySelectorAll('.mwp-css-nav_contacts a').length, 2);
+  assert.equal(root.querySelectorAll('.mwp-css-nav_contacts a > span').length, 2);
 
   layout.value = 'dropdown';
   layout.dispatchEvent(new dom.window.Event('change', { bubbles: true }));

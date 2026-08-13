@@ -26,7 +26,9 @@ Run this test against a disposable or backed-up destination Webflow project. The
 - Desktop remains expanded; Mobile landscape and Mobile portrait remain collapsed.
 - Nested `More` opens independently and uses two-stage Escape behavior.
 - The optional submenu arrow follows the native open state and its duration, easing and rotation properties.
-- Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email native labels, destination props, replaceable icon-image props and visibility toggles remain editable after paste.
+- Secondary navigation remains first and Primary navigation second in the panel; Social/Contact and Navigation links/CTA wrappers retain their nesting and native flex/grid editability.
+- Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email native labels, destination props, replaceable icon-image props and individual visibility toggles remain editable after paste.
+- Primary, CTA, secondary master, socials, social labels, contact group and contact-label visibility toggles remain bound after paste.
 - The settings block disappears only after runtime initialization.
 
 ## Failure and recovery checks

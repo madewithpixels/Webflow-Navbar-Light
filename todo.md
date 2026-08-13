@@ -57,6 +57,8 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Optional CTA and secondary/social regions.
 - [x] Add a native Div chevron to each included submenu with optional visibility and configurable duration, easing and rotation.
 - [x] Add optional native Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email Link Blocks with destination props, replaceable icon-image props and visibility toggles.
+- [x] Restructure the panel into Secondary navigation then Primary navigation; nest Social and Contact wrappers inside Secondary, and Navigation links plus a final CTA inside Primary.
+- [x] Add independent Show primary navigation, Show CTA, Show secondary navigation, Show socials, Show social labels, Show contact links and Show contact labels properties to both delivery editions.
 - [x] Evaluate a Component Slot. Decision: do not add one because slots accept component instances rather than arbitrary native link elements.
 - [x] Document safe link and submenu editing.
 
@@ -121,6 +123,8 @@ Keep the current Canvas-visible, self-contained Embed as the dependable default.
 - [x] Publish and byte-verify the immutable `v0.2.0` GitHub/jsDelivr release; update the CDN component's exact URLs, SRI values and metadata.
 - [x] Create a separate `Navbar Light CDN` Webflow component and `/navbar-light-cdn` test page after backup `V1.0.0 First Release`; keep the self-contained component/page untouched.
 - [x] Add a minimal native Webflow visual baseline limited to structure, spacing, hit areas and `currentColor`; leave typography, text colour and decoration to destination-project base styles.
+- [x] Build a native MWP Component Library demo shell with Webflow variables, base typography, a restrained homepage and a `/style-guide` class-retention page, while keeping its theme classes out of Navbar Light.
+- [ ] Visually approve the new Home and Style Guide pages in Designer/Preview, then publish them from Webflow.
 - [ ] Create a clean Webflow site named `Smashburger`, add the current component, and complete the documented copy/paste acceptance test independently of the MWP Component Library.
 - [ ] Test caching, cold loads, failure handling, rollback and explicit version upgrades on cloned Webflow sites.
 - [ ] Document switching safely between self-contained Embed, pinned CDN and self-hosted delivery without rebuilding the component.

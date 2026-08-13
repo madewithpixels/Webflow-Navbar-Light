@@ -34,13 +34,17 @@ Navbar Light [header.mwp-css-nav, data-mwp-navbar]
     │           ├── Icon line — middle [Div, data-mwp-line]
     │           └── Icon line — bottom [Div, data-mwp-line]
     └── Navigation panel [nav.mwp-css-nav_panel, data-mwp-panel]
-    │   ├── Primary Link elements [data-mwp-item]
-    │   ├── Submenu details [nested details, data-mwp-submenu]
-    │   │   └── Submenu arrow [native Div + two Div lines, data-mwp-submenu-icon]
-    │   ├── Secondary navigation [native Div]
-    │   │   ├── Facebook, Instagram, LinkedIn, TikTok, Threads, X and WhatsApp [native Link Blocks + replaceable Images + Text Blocks]
-    │   │   └── Telephone and Email [native Link Blocks + replaceable Images + Text Blocks]
-    │   └── Call to action [native Link]
+    │   ├── Secondary navigation [div.mwp-css-nav_secondary]
+    │   │   ├── Social links [div.mwp-css-nav_socials]
+    │   │   │   └── Facebook, Instagram, LinkedIn, TikTok, Threads, X and WhatsApp [native Link Blocks + replaceable Images + div.mwp-css-nav_secondary-label]
+    │   │   └── Contact links [div.mwp-css-nav_contacts]
+    │   │       └── Telephone and Email [native Link Blocks + replaceable Images + label Divs]
+    │   └── Primary navigation [div.mwp-css-nav_primary]
+    │       ├── Navigation links [div.mwp-css-nav_links]
+    │       │   ├── Primary Link elements [data-mwp-item]
+    │       │   └── Submenu details [nested details, data-mwp-submenu]
+    │       │       └── Submenu arrow [native Div + two Div lines, data-mwp-submenu-icon]
+    │       └── Call to action [native Link, final child]
 ├── Navbar Light CSS + enhancement [visible Embed]
 ├── Navbar Light settings [visible native Text Blocks, data-mwp-config]
 └── Backdrop [native Div, data-mwp-backdrop]
@@ -93,17 +97,39 @@ Webflow emits the selected marker as `data-wf--navbar-light--variant`. The CSS f
 | Icon lines | `6cf61d70-aee7-639c-bc80-f9585c8a4e21` | `3` |
 | Show backdrop | `9871e897-6fd5-0f74-6cb5-99605db04a36` | `true` |
 | Show CTA | `7b69f228-da14-643d-f422-a3f1c6ceb79f` | `true` |
-| Show secondary links | `6ef12627-487b-0aa3-a20a-4fc4d08bddad` | `true` |
+| Show secondary navigation | `6ef12627-487b-0aa3-a20a-4fc4d08bddad` | `true` |
 | Focus first link | `3b9ea944-640f-6d21-c69f-42b92487c106` | `false` |
 | Close on outside click | `76b3f040-5c5f-50ec-0b79-960d070ce9b6` | `true` |
 | Close on link click | `3e2a98bd-1b72-4f1c-134e-8b456c698593` | `true` |
 | Lock page scroll | `43909a2f-ec89-bc03-e6ad-ddd4dd63e2fc` | `auto` |
 
-The v0.2.0 additions use component-specific generated property IDs. Both editions expose `Show submenu arrows`, `Submenu icon duration`, `Submenu icon easing` and `Submenu icon rotation`. The `Social links` and `Contact links` groups expose a destination, replaceable icon Image and visibility toggle for each named entry: Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email. The native labels remain editable component text rather than redundant instance props.
+The v0.2.0 additions use component-specific generated property IDs. Both editions expose `Show submenu arrows`, `Submenu icon duration`, `Submenu icon easing` and `Submenu icon rotation`. The `Social links` and `Contact links` groups expose a destination, replaceable icon Image and visibility toggle for each named entry: Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email.
+
+The group-layout properties also use component-specific generated IDs:
+
+| Property | Navbar Light | Navbar Light CDN | Default |
+| --- | --- | --- | --- |
+| Show primary navigation | `887a144d-f6a5-5ced-9e39-33dfd6f8b013` | `11f97cb5-b294-bf5f-24b4-47bc0b433c8d` | `true` |
+| Show socials | `c5e4eab4-1b05-9577-158d-599c7ade4290` | `37a78760-86ee-4529-6317-8c94dce2465e` | `true` |
+| Show social labels | `2f69e739-b940-f2db-6471-e753fc3c5bfb` | `e5eddf0b-ba25-9e7e-25eb-b5357ed298d2` | `true` |
+| Show contact links | `c3ed89ea-42b7-5e09-8d80-97fba2687877` | `524fd0ec-7663-4f14-f77d-6cc76c40b820` | `true` |
+| Show contact labels | `c76972e9-4881-7498-8431-481814ca0a6a` | `7e4f2445-9fdf-ced4-71ad-6920bd7bacb7` | `true` |
+
+Each social label remains ordinary editable native text inside a `mwp-css-nav_secondary-label` Div; one shared visibility property hides those seven label Divs without hiding the icon Images. Telephone and Email likewise retain native editable label Divs, with a separate shared property that hides only those two labels.
 
 Behavior values are strings because the current Webflow binding surface does not expose those custom-attribute values as boolean bindings. The visible settings block provides the native Canvas-editable bridge.
 
 ## Stable integration hooks
+
+Native layout classes:
+
+- `.mwp-css-nav_secondary`: first direct panel group and secondary master wrapper.
+- `.mwp-css-nav_socials`: seven social Link Blocks.
+- `.mwp-css-nav_contacts`: Telephone and Email Link Blocks.
+- `.mwp-css-nav_primary`: second direct panel group.
+- `.mwp-css-nav_links`: standard primary links and nested submenus.
+- `.mwp-css-nav_cta`: final child of Primary navigation.
+- `.mwp-css-nav_secondary-label`: seven social label Divs controlled by one property.
 
 - `[data-mwp-navbar]`: root and public API host.
 - `[data-mwp-menu]`: native details state owner.
