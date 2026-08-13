@@ -1,0 +1,1045 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="SMASHED. Very serious burgers. Deeply unserious website.">
+  <title>SMASHED. — Aggressively Flat Burgers</title>
+  <link rel="stylesheet" href="../src/navbar-light.css">
+  <style>
+    :root {
+      --ink: #11100e;
+      --cream: #f4edda;
+      --yellow: #ffd400;
+      --red: #f03820;
+      --pink: #ff8bac;
+      --green: #c8e53f;
+      --line: 3px solid var(--ink);
+      --shadow: 7px 7px 0 var(--ink);
+      --display: Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif;
+      --body: Arial, Helvetica, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--cream);
+      color: var(--ink);
+      margin: 0;
+      overflow-x: hidden;
+      font-family: var(--body);
+      font-size: 16px;
+      line-height: 1.35;
+    }
+    body::before {
+      background-image: radial-gradient(rgba(17, 16, 14, .16) .7px, transparent .7px);
+      background-size: 5px 5px;
+      content: "";
+      inset: 0;
+      opacity: .26;
+      pointer-events: none;
+      position: fixed;
+      z-index: 100;
+    }
+    a { color: inherit; }
+    button, input, select { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    img { display: block; max-width: 100%; }
+    section[id] { scroll-margin-top: 5rem; }
+    ::selection { background: var(--pink); color: var(--ink); }
+
+    .eyebrow {
+      font-size: .72rem;
+      font-weight: 900;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .class-joke {
+      background: var(--ink);
+      color: var(--cream);
+      display: inline-block;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: .68rem;
+      letter-spacing: 0;
+      padding: .35rem .55rem;
+      text-transform: lowercase;
+      transform: rotate(-2deg);
+    }
+
+    /* Yes, the navbar has a z-index. Groundbreaking. */
+    .site-nav {
+      background: var(--cream);
+      border-bottom: var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .mwp-css-nav_inner {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+      min-height: 5rem;
+      padding: 0 clamp(1rem, 3vw, 3rem);
+    }
+    .brand {
+      align-items: center;
+      display: inline-flex;
+      font-family: var(--display);
+      font-size: clamp(1.8rem, 4vw, 2.75rem);
+      letter-spacing: -.04em;
+      line-height: .8;
+      text-decoration: none;
+      transform: rotate(-2deg);
+    }
+    .brand-dot { color: var(--red); }
+    .brand-mini {
+      border-left: 2px solid;
+      font-family: var(--body);
+      font-size: .55rem;
+      font-weight: 900;
+      letter-spacing: .09em;
+      line-height: 1.15;
+      margin-left: .65rem;
+      padding-left: .65rem;
+      text-transform: uppercase;
+      width: 7.5rem;
+    }
+    .mwp-css-nav_menu { margin-left: auto; }
+    .mwp-css-nav_summary {
+      align-items: center;
+      background: var(--yellow);
+      border: 2px solid var(--ink);
+      display: flex;
+      gap: .65rem;
+      min-height: 2.9rem;
+      padding: .55rem .75rem;
+      text-transform: uppercase;
+    }
+    .mwp-css-nav_summary [data-mwp-label] { font-size: .7rem; font-weight: 900; letter-spacing: .08em; }
+    .mwp-css-nav_icon { gap: .25rem; width: 1.5rem; }
+    .mwp-css-nav_line { background: currentColor; height: 3px; width: 100%; }
+    .mwp-css-nav_panel {
+      align-items: center;
+      display: flex;
+      gap: 1.5rem;
+      padding-left: 1.5rem;
+    }
+    .mwp-css-nav_links { align-items: center; display: flex; gap: 1.25rem; }
+    .mwp-css-nav_links > a,
+    .mwp-css-nav_submenu > summary {
+      font-size: .75rem;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+    .mwp-css-nav_links > a:hover { text-decoration: underline 3px var(--red); text-underline-offset: 5px; }
+    .mwp-css-nav_submenu { position: relative; }
+    .mwp-css-nav_submenu summary { align-items: center; cursor: pointer; display: flex; gap: .45rem; list-style: none; }
+    .mwp-css-nav_submenu-icon { display: flex; height: .75rem; position: relative; width: .75rem; }
+    .mwp-css-nav_submenu-icon-line-left,
+    .mwp-css-nav_submenu-icon-line-right { background: currentColor; height: 2px; position: absolute; top: 50%; width: 55%; }
+    .mwp-css-nav_submenu-icon-line-left { left: 7%; transform: rotate(45deg); }
+    .mwp-css-nav_submenu-icon-line-right { right: 7%; transform: rotate(-45deg); }
+    .mwp-css-nav_submenu-list {
+      background: var(--pink);
+      border: var(--line);
+      box-shadow: var(--shadow);
+      gap: .35rem;
+      min-width: 13rem;
+      padding: .8rem;
+      position: absolute;
+      right: 0;
+      top: calc(100% + 1.4rem);
+    }
+    .mwp-css-nav_submenu-list a { font-size: .8rem; font-weight: 900; padding: .5rem; text-decoration: none; text-transform: uppercase; }
+    .mwp-css-nav_submenu-list a:hover { background: var(--cream); }
+    .mwp-css-nav_secondary { display: none; }
+    .mwp-css-nav_cta,
+    .button {
+      align-items: center;
+      background: var(--red);
+      border: var(--line);
+      box-shadow: 5px 5px 0 var(--ink);
+      color: var(--cream);
+      display: inline-flex;
+      font-size: .75rem;
+      font-weight: 900;
+      justify-content: center;
+      letter-spacing: .08em;
+      min-height: 3rem;
+      padding: .65rem 1rem;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: box-shadow .12s ease, transform .12s ease;
+    }
+    .mwp-css-nav_cta:hover,
+    .button:hover { box-shadow: 2px 2px 0 var(--ink); transform: translate(3px, 3px); }
+    .button--cream { background: var(--cream); color: var(--ink); }
+    [data-mwp-collapsed="true"] .mwp-css-nav_panel {
+      align-items: stretch;
+      background: var(--yellow);
+      border-bottom: var(--line);
+      box-shadow: 0 7px 0 var(--ink);
+      display: grid;
+      gap: .9rem;
+      padding: 1.2rem;
+      right: 0;
+      width: 100%;
+    }
+    [data-mwp-collapsed="true"] .mwp-css-nav_links { align-items: stretch; display: grid; gap: 1rem; }
+    [data-mwp-collapsed="true"] .mwp-css-nav_submenu-list { box-shadow: none; margin-top: .7rem; position: static; }
+
+    .hero {
+      background: var(--yellow);
+      border-bottom: var(--line);
+      display: grid;
+      grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+      min-height: calc(100svh - 5rem);
+      overflow: hidden;
+      position: relative;
+    }
+    .hero-copy {
+      align-content: center;
+      border-right: var(--line);
+      display: grid;
+      gap: 1.25rem;
+      padding: clamp(2rem, 5vw, 5rem) clamp(1.25rem, 4.5vw, 5rem);
+      position: relative;
+      z-index: 2;
+    }
+    .hero h1 {
+      display: grid;
+      font-family: var(--display);
+      font-size: clamp(5.25rem, 11vw, 10.5rem);
+      letter-spacing: -.065em;
+      line-height: .72;
+      margin: 0;
+      min-height: 1.48em;
+      text-transform: uppercase;
+    }
+    .hero-frame {
+      align-content: center;
+      animation: hero-copy-cycle 8s infinite;
+      display: grid;
+      grid-area: 1 / 1;
+      opacity: 0;
+    }
+    .hero-frame:nth-child(1) { animation-delay: -.25s; }
+    .hero-frame:nth-child(2) { animation-delay: 1.75s; }
+    .hero-frame:nth-child(3) { animation-delay: 3.75s; }
+    .hero-frame:nth-child(4) { animation-delay: 5.75s; }
+    .hero-line { display: block; white-space: nowrap; }
+    .hero-line--red { color: var(--red); transform: translateX(.18em) rotate(-2deg); }
+    .hero-frame--long { font-size: .72em; letter-spacing: -.045em; }
+    @keyframes hero-copy-cycle {
+      0% { opacity: 0; transform: translateY(.18em) rotate(1deg); }
+      3%, 22% { opacity: 1; transform: none; }
+      25%, 100% { opacity: 0; transform: translateY(-.14em) rotate(-1deg); }
+    }
+    .hero-intro { font-size: clamp(1rem, 1.5vw, 1.3rem); font-weight: 800; margin: 0; max-width: 31rem; }
+    .hero-actions { align-items: center; display: flex; flex-wrap: wrap; gap: 1rem; }
+    .hero-note { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .68rem; max-width: 14rem; }
+    .hero-image-wrap { min-height: 34rem; overflow: hidden; position: relative; }
+    .hero-image {
+      height: 100%;
+      object-fit: cover;
+      object-position: 52% 50%;
+      transform: scale(1.03);
+      width: 100%;
+    }
+    .sticker {
+      align-items: center;
+      aspect-ratio: 1;
+      background: var(--pink);
+      border: var(--line);
+      border-radius: 50%;
+      bottom: 4%;
+      display: flex;
+      font-size: clamp(.64rem, 1vw, .82rem);
+      font-weight: 900;
+      justify-content: center;
+      line-height: 1.05;
+      padding: 1rem;
+      position: absolute;
+      right: 5%;
+      text-align: center;
+      text-transform: uppercase;
+      transform: rotate(10deg);
+      width: clamp(6.5rem, 11vw, 9.5rem);
+    }
+    .image-caption {
+      background: var(--cream);
+      border: 2px solid var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: .65rem;
+      left: 4%;
+      padding: .45rem .6rem;
+      position: absolute;
+      top: 4%;
+      transform: rotate(-2deg);
+    }
+
+    .ticker {
+      background: var(--ink);
+      color: var(--cream);
+      display: flex;
+      font-family: var(--display);
+      font-size: clamp(1.6rem, 3vw, 2.6rem);
+      letter-spacing: .02em;
+      overflow: hidden;
+      padding: .65rem 0;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .ticker-track { animation: ticker 26s linear infinite; display: flex; flex: none; }
+    .ticker span::after { color: var(--yellow); content: " ✦ "; padding: 0 .8rem; }
+    .ticker.is-paused .ticker-track { animation-play-state: paused; }
+    .anal-trigger {
+      background: none;
+      border: 0;
+      color: inherit;
+      cursor: help;
+      font: inherit;
+      letter-spacing: inherit;
+      margin: 0;
+      padding: 0;
+      position: relative;
+      text-decoration: underline 1px dotted rgba(244, 237, 218, .38);
+      text-underline-offset: .16em;
+      text-transform: inherit;
+    }
+    .anal-trigger:hover,
+    .anal-trigger:focus-visible { color: var(--yellow); outline: 2px dashed var(--pink); outline-offset: 3px; }
+    .slop-popup {
+      background: var(--pink);
+      border: var(--line);
+      box-shadow: 9px 9px 0 var(--ink);
+      color: var(--ink);
+      display: grid;
+      gap: .8rem;
+      grid-template-columns: 7rem 1fr;
+      left: 50%;
+      opacity: 0;
+      padding: .85rem;
+      pointer-events: none;
+      position: fixed;
+      top: 50%;
+      transform: translate(-50%, calc(-100% - 1rem)) rotate(-4deg) scale(.65);
+      transform-origin: 50% 100%;
+      transition: opacity .14s ease, transform .3s cubic-bezier(.18, 1.55, .4, 1);
+      visibility: hidden;
+      width: min(22rem, calc(100vw - 2rem));
+      z-index: 120;
+    }
+    .slop-popup.is-visible {
+      opacity: 1;
+      transform: translate(-50%, calc(-100% - 1rem)) rotate(-2deg) scale(1);
+      visibility: visible;
+    }
+    .slop-popup-copy { align-content: center; display: grid; }
+    .slop-popup-label {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: .55rem;
+      font-weight: 900;
+      letter-spacing: .06em;
+      margin-bottom: .35rem;
+      text-transform: uppercase;
+    }
+    .slop-popup h3 { font-family: var(--display); font-size: 2.25rem; letter-spacing: -.035em; line-height: .78; margin: 0 0 .55rem; text-transform: uppercase; }
+    .slop-popup p { font-family: var(--body); font-size: .72rem; font-weight: 900; line-height: 1.2; margin: 0; }
+    .slop-goblin {
+      align-self: center;
+      animation: goblin-wobble .65s steps(2, end) infinite;
+      aspect-ratio: 1;
+      background: var(--yellow);
+      border: 3px solid var(--ink);
+      border-radius: 47% 53% 44% 56%;
+      position: relative;
+      transform: rotate(-5deg);
+    }
+    .slop-goblin::before,
+    .slop-goblin::after {
+      background: var(--yellow);
+      border: 3px solid var(--ink);
+      content: "";
+      height: 1.7rem;
+      position: absolute;
+      top: 1.6rem;
+      width: 1.35rem;
+      z-index: -1;
+    }
+    .slop-goblin::before { left: -1rem; transform: rotate(-32deg) skew(12deg); }
+    .slop-goblin::after { right: -1rem; transform: rotate(32deg) skew(-12deg); }
+    .goblin-eye {
+      animation: goblin-eyes .8s steps(2, end) infinite;
+      background: var(--cream);
+      border: 2px solid var(--ink);
+      border-radius: 50%;
+      height: 1.45rem;
+      position: absolute;
+      top: 1.3rem;
+      width: 1.1rem;
+    }
+    .goblin-eye::after { background: var(--ink); border-radius: 50%; content: ""; height: .52rem; left: .38rem; position: absolute; top: .42rem; width: .52rem; }
+    .goblin-eye--left { left: 1.25rem; transform: rotate(-12deg); }
+    .goblin-eye--right { right: 1.1rem; transform: rotate(14deg); }
+    .goblin-grin {
+      background: var(--cream);
+      border: 3px solid var(--ink);
+      border-radius: 18% 18% 50% 50%;
+      bottom: 1rem;
+      height: 2.45rem;
+      left: .75rem;
+      overflow: hidden;
+      position: absolute;
+      right: .65rem;
+      transform: rotate(3deg);
+    }
+    .goblin-grin::before { border-left: 2px solid var(--ink); border-right: 2px solid var(--ink); content: ""; inset: 0 30%; position: absolute; }
+    .goblin-grin::after { border-top: 2px solid var(--ink); content: ""; left: 0; position: absolute; right: 0; top: 48%; }
+    @keyframes goblin-wobble { 50% { transform: rotate(6deg) translateY(-3px); } }
+    @keyframes goblin-eyes { 50% { translate: 2px -1px; } }
+    @keyframes ticker { to { transform: translateX(-50%); } }
+
+    .section { border-bottom: var(--line); padding: clamp(4rem, 8vw, 8rem) clamp(1.25rem, 4vw, 4rem); }
+    .section-heading { align-items: end; display: flex; gap: 1rem; justify-content: space-between; margin-bottom: 2.5rem; }
+    .section-heading h2 {
+      font-family: var(--display);
+      font-size: clamp(3.5rem, 9vw, 8rem);
+      letter-spacing: -.045em;
+      line-height: .78;
+      margin: 0;
+      text-transform: uppercase;
+    }
+    .section-heading p { font-weight: 800; margin: 0; max-width: 22rem; }
+
+    .menu-section { background: var(--cream); }
+    .burger-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(3, 1fr); }
+    .burger-card {
+      border: var(--line);
+      display: grid;
+      min-height: 25rem;
+      overflow: hidden;
+      position: relative;
+      transition: transform .18s ease;
+    }
+    .burger-card:hover { transform: rotate(-1deg) translateY(-6px); }
+    .burger-card:nth-child(2):hover { transform: rotate(1deg) translateY(-6px); }
+    .burger-card:nth-child(1) { background: var(--pink); }
+    .burger-card:nth-child(2) { background: var(--green); }
+    .burger-card:nth-child(3) { background: var(--yellow); }
+    .burger-card-top { display: flex; justify-content: space-between; padding: 1rem; }
+    .burger-number { font-family: var(--display); font-size: 4rem; line-height: .8; }
+    .burger-price { background: var(--cream); border: 2px solid; font-weight: 900; height: fit-content; padding: .45rem .6rem; transform: rotate(3deg); }
+    .burger-card-copy { align-self: end; border-top: var(--line); padding: 1.25rem; }
+    .burger-card h3 { font-family: var(--display); font-size: clamp(2.5rem, 5vw, 4.5rem); letter-spacing: -.035em; line-height: .78; margin: 0 0 1rem; text-transform: uppercase; }
+    .burger-card p { font-weight: 700; margin: 0; max-width: 26rem; }
+    .ingredient-stack { display: grid; gap: .34rem; margin: auto; padding: 1rem; width: min(80%, 18rem); }
+    .ingredient-stack span { border: 2px solid; display: block; height: 1.15rem; }
+    .ingredient-stack span:nth-child(1), .ingredient-stack span:nth-child(7) { background: #d87928; border-radius: 50% 50% 20% 20%; height: 2.6rem; }
+    .ingredient-stack span:nth-child(2), .ingredient-stack span:nth-child(5) { background: #69311e; transform: skew(-9deg); }
+    .ingredient-stack span:nth-child(3), .ingredient-stack span:nth-child(6) { background: #ffc62a; clip-path: polygon(0 0, 100% 0, 82% 100%, 15% 75%); }
+    .ingredient-stack span:nth-child(4) { background: #6c8329; height: .75rem; }
+
+    .process-section { background: var(--red); color: var(--cream); }
+    .process-section .class-joke { background: var(--cream); color: var(--ink); }
+    .steps { border-top: 2px solid var(--cream); }
+    .step {
+      border-bottom: 2px solid var(--cream);
+      color: var(--cream);
+      overflow: hidden;
+      position: relative;
+    }
+    .step:last-child { border-bottom: 0; }
+    .step-summary {
+      align-items: center;
+      background: transparent;
+      border: 0;
+      color: inherit;
+      cursor: pointer;
+      display: grid;
+      font: inherit;
+      gap: 1rem;
+      grid-template-columns: 5rem minmax(0, 1fr) minmax(12rem, 18rem) 2.5rem;
+      list-style: none;
+      min-height: 7.5rem;
+      padding: 1.25rem 0;
+      position: relative;
+      text-align: left;
+      width: 100%;
+      z-index: 2;
+    }
+    .step-fill {
+      background: #8e110a;
+      bottom: 0;
+      clip-path: polygon(0 16%, 100% 0, 100% 100%, 0 100%);
+      height: 0;
+      left: 0;
+      position: absolute;
+      right: 0;
+      transition: height .52s cubic-bezier(.22, 1, .36, 1);
+      z-index: 0;
+    }
+    .step-index { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .8rem; }
+    .step h3 { font-family: var(--display); font-size: clamp(3rem, 7vw, 6.5rem); letter-spacing: -.03em; line-height: .8; margin: 0; text-transform: uppercase; }
+    .step-teaser { font-size: .75rem; font-weight: 800; margin: 0; max-width: 18rem; }
+    .swap-copy { display: grid; }
+    .swap-copy > .swap-layer {
+      grid-area: 1 / 1;
+      transition: opacity .18s ease, transform .35s cubic-bezier(.22, 1, .36, 1);
+    }
+    .swap-copy > .swap-useful { opacity: 0; transform: translateY(.28em); }
+    .swap-copy.is-useful > .swap-joke { opacity: 0; transform: translateY(-.2em); }
+    .swap-copy.is-useful > .swap-useful { opacity: 1; transform: none; }
+    .step-toggle {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 2rem;
+      line-height: 1;
+      text-align: right;
+      transition: transform .35s cubic-bezier(.22, 1, .36, 1);
+    }
+    .step-panel {
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      position: relative;
+      transform: translateY(1.5rem);
+      transition: max-height .52s cubic-bezier(.22, 1, .36, 1), opacity .22s ease, transform .42s cubic-bezier(.22, 1, .36, 1);
+      z-index: 2;
+    }
+    .step-panel-inner {
+      border-top: 1px solid rgba(244, 237, 218, .45);
+      display: grid;
+      gap: clamp(1.5rem, 5vw, 6rem);
+      grid-template-columns: minmax(0, 1fr) minmax(14rem, .6fr);
+      margin: 0 3.5rem 0 6rem;
+      padding: 1.25rem 0 2.25rem;
+    }
+    .step-panel h4 {
+      font-size: .68rem;
+      letter-spacing: .12em;
+      margin: 0 0 .65rem;
+      text-transform: uppercase;
+    }
+    .step-panel p { font-size: clamp(.9rem, 1.25vw, 1.08rem); font-weight: 800; margin: 0; max-width: 44rem; }
+    .step-code {
+      align-self: start;
+      background: var(--cream);
+      border: 2px solid var(--ink);
+      box-shadow: 4px 4px 0 var(--ink);
+      color: var(--ink);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: .7rem;
+      line-height: 1.4;
+      padding: .75rem;
+      transform: rotate(1deg);
+    }
+    .step:nth-child(2) .step-fill { clip-path: polygon(0 0, 100% 14%, 100% 100%, 0 100%); }
+    .step:nth-child(3) .step-fill { clip-path: polygon(0 12%, 62% 0, 100% 11%, 100% 100%, 0 100%); }
+    .step.is-active .step-fill { height: 100%; }
+    .step.is-active .step-panel { max-height: 18rem; opacity: 1; transform: none; }
+    .step.is-active .step-toggle { transform: rotate(45deg); }
+
+    .proof-section { background: var(--yellow); display: grid; gap: 3rem; grid-template-columns: .85fr 1.15fr; }
+    .proof-big {
+      font-family: var(--display);
+      font-size: clamp(8rem, 23vw, 21rem);
+      letter-spacing: -.08em;
+      line-height: .65;
+      margin: 0;
+    }
+    .proof-copy { align-content: center; display: grid; gap: 1.5rem; }
+    .proof-copy h2 { font-family: var(--display); font-size: clamp(3.5rem, 7vw, 7rem); letter-spacing: -.04em; line-height: .76; margin: 0; text-transform: uppercase; }
+    .proof-copy p { font-size: 1.05rem; font-weight: 800; margin: 0; max-width: 34rem; }
+    .review { background: var(--cream); border: var(--line); box-shadow: var(--shadow); font-weight: 900; padding: 1rem; transform: rotate(-1deg); width: fit-content; }
+    .review small { display: block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-weight: 500; margin-top: .5rem; }
+
+    .playground { background: var(--pink); }
+    .demo-controls { border: var(--line); display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); padding: 1.25rem; }
+    .demo-control { display: grid; gap: .35rem; }
+    .demo-control span { font-size: .68rem; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+    .demo-control select,
+    .demo-control input,
+    .demo-controls button { background: var(--cream); border: 2px solid var(--ink); min-height: 2.75rem; padding: .45rem .55rem; }
+    .demo-controls button { background: var(--yellow); box-shadow: 3px 3px 0 var(--ink); cursor: pointer; font-weight: 900; text-transform: uppercase; }
+    .demo-checkbox { align-items: center; display: flex; font-size: .75rem; font-weight: 900; gap: .5rem; text-transform: uppercase; }
+    .demo-checkbox input { min-height: auto; }
+
+    .footer {
+      background: var(--ink);
+      color: var(--cream);
+      display: grid;
+      gap: 3rem;
+      grid-template-columns: 1fr auto;
+      padding: clamp(3rem, 6vw, 6rem) clamp(1.25rem, 4vw, 4rem) 2rem;
+    }
+    .footer-title { font-family: var(--display); font-size: clamp(5rem, 17vw, 15rem); letter-spacing: -.06em; line-height: .62; margin: 0; text-transform: uppercase; }
+    .footer-meta { align-content: end; display: grid; gap: .75rem; justify-items: end; text-align: right; }
+    .footer-meta a { font-weight: 900; text-transform: uppercase; }
+    .footer-bottom { border-top: 1px solid rgba(244, 237, 218, .4); display: flex; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .68rem; grid-column: 1 / -1; justify-content: space-between; padding-top: 1rem; }
+
+    @media (max-width: 990px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-copy { border-bottom: var(--line); border-right: 0; min-height: 37rem; }
+      .hero-image-wrap { min-height: 55vw; }
+      .burger-grid { grid-template-columns: 1fr; }
+      .burger-card { grid-template-columns: .8fr 1.2fr; min-height: 18rem; }
+      .burger-card-top { grid-column: 1 / -1; position: absolute; width: 100%; z-index: 2; }
+      .proof-section { grid-template-columns: 1fr; }
+      .proof-big { font-size: 14rem; }
+    }
+
+    @media (max-width: 767px) {
+      .brand-mini { display: none; }
+      .mwp-css-nav_panel { width: min(24rem, 100vw); }
+      .section-heading { align-items: start; flex-direction: column; }
+      .burger-card { display: grid; grid-template-columns: 1fr; }
+      .ingredient-stack { margin-top: 4rem; min-height: 12rem; }
+      .step-summary { align-items: start; grid-template-columns: 2.5rem 1fr 2rem; min-height: 7rem; }
+      .step-teaser { display: none; }
+      .step-panel-inner { gap: 1rem; grid-template-columns: 1fr; margin: 0 0 0 3.5rem; padding: 0 0 1.75rem; }
+      .step.is-active .step-panel { max-height: 30rem; }
+      .footer { grid-template-columns: 1fr; }
+      .footer-meta { justify-items: start; text-align: left; }
+      .footer-bottom { align-items: start; flex-direction: column; gap: .5rem; }
+    }
+
+    @media (max-width: 479px) {
+      .hero h1 { font-size: 4.6rem; }
+      .hero-copy { min-height: 34rem; }
+      .hero-image-wrap { min-height: 28rem; }
+      .proof-big { font-size: 9rem; }
+      .footer-title { font-size: 5.8rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+      .hero-frame { animation: none !important; opacity: 0; transform: none; }
+      .hero-frame:nth-child(2) { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <header class="mwp-css-nav site-nav" data-mwp-navbar data-collapse="mobile-landscape" data-layout="dropdown" data-motion="dropdown" data-align="right" data-menu-label="visible" data-close-on-link="true" data-close-on-outside="true" data-focus-first="false" data-scroll-lock="auto" data-duration="280ms" data-open-duration="280ms" data-close-duration="220ms" data-distance="1.5rem" data-easing="cubic-bezier(0.22, 1, 0.36, 1)" data-panel-width="min(24rem, 100%)" data-stagger="35ms" data-icon-duration="220ms" data-submenu-icon-duration="220ms" data-submenu-icon-easing="cubic-bezier(0.22, 1, 0.36, 1)" data-submenu-icon-rotation="180deg" data-icon-lines="3">
+    <div class="mwp-css-nav_inner">
+      <a class="brand" href="#top" aria-label="Smashed home">SMASHED<span class="brand-dot">.</span><span class="brand-mini">Aggressively flat burgers</span></a>
+
+      <details class="mwp-css-nav_menu" data-mwp-menu>
+        <summary class="mwp-css-nav_summary" data-mwp-trigger aria-label="Navigation menu">
+          <span data-mwp-label>Menu-ish</span>
+          <span class="mwp-css-nav_icon" data-mwp-icon aria-hidden="true">
+            <span class="mwp-css-nav_line" data-mwp-line></span>
+            <span class="mwp-css-nav_line" data-mwp-line></span>
+            <span class="mwp-css-nav_line" data-mwp-line></span>
+          </span>
+        </summary>
+      </details>
+
+      <nav class="mwp-css-nav_panel" data-mwp-panel aria-label="Primary navigation">
+        <div class="mwp-css-nav_links">
+          <a href="#menu" data-mwp-item>Burgers</a>
+          <a href="#method" data-mwp-item>The violence</a>
+          <details class="mwp-css-nav_submenu" data-mwp-submenu data-mwp-item>
+            <summary>
+              <span>Corporate info</span>
+              <span class="mwp-css-nav_submenu-icon" data-mwp-submenu-icon aria-hidden="true">
+                <span class="mwp-css-nav_submenu-icon-line-left"></span>
+                <span class="mwp-css-nav_submenu-icon-line-right"></span>
+              </span>
+            </summary>
+            <div class="mwp-css-nav_submenu-list">
+              <a href="#proof">Why burger?</a>
+              <a href="#playground">Website settings</a>
+            </div>
+          </details>
+        </div>
+        <div class="mwp-css-nav_secondary" aria-label="Secondary navigation">
+          <a href="#facebook" data-mwp-item>Facebook</a>
+          <a href="#instagram" data-mwp-item>Instagram</a>
+          <a href="#linkedin" data-mwp-item>LinkedIn</a>
+          <a href="#tiktok" data-mwp-item>TikTok</a>
+          <a href="#threads" data-mwp-item>Threads</a>
+          <a href="#x" data-mwp-item>X</a>
+          <a href="#whatsapp" data-mwp-item>WhatsApp</a>
+          <a href="tel:+441234567890" data-mwp-item>Telephone</a>
+          <a href="mailto:hello@example.com" data-mwp-item>Email</a>
+        </div>
+        <a class="mwp-css-nav_cta" href="#menu" data-mwp-item>Order the obvious</a>
+      </nav>
+    </div>
+    <div class="mwp-css-nav_backdrop" data-mwp-backdrop aria-hidden="true"></div>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <div><span class="eyebrow">Burgers / British 🇬🇧 / Beautifully uneccessary branding</span></div>
+        <h1 id="hero-title" aria-label="One pound burger. Very very good. Come and have a look.">
+          <span class="hero-frame" aria-hidden="true"><span class="hero-line">1 pound</span><span class="hero-line hero-line--red">burger.</span></span>
+          <span class="hero-frame" aria-hidden="true"><span class="hero-line">Very</span><span class="hero-line hero-line--red">very good.</span></span>
+          <span class="hero-frame hero-frame--long" aria-hidden="true"><span class="hero-line">Come and</span><span class="hero-line hero-line--red">have a look.</span></span>
+          <span class="hero-frame" aria-hidden="true"><span class="hero-line">Very</span><span class="hero-line hero-line--red">very good.</span></span>
+        </h1>
+        <p class="hero-intro">Two patties. One hot plate. Absolutely no brand manifesto. Just crispy beef wearing cheese as formalwear.</p>
+        <div class="hero-actions">
+          <a class="button" href="#menu">View the burgers</a>
+          <span class="hero-note">↳ Primary CTA. Revolutionary UX thinking.</span>
+        </div>
+        <div><span class="class-joke">.hero-content_please-dont-break</span></div>
+      </div>
+      <div class="hero-image-wrap">
+        <img class="hero-image" src="./assets/smashed-hero.jpg" width="1536" height="1024" alt="A gloriously messy double smashburger with crisp beef edges, cheese and pickles">
+        <span class="image-caption">alt text: actually appetising</span>
+        <div class="sticker">100% AI slop<br>artisanally prompted</div>
+      </div>
+    </section>
+
+    <div class="ticker" aria-label="Burger facts">
+      <div class="ticker-track">
+        <span>No artis<button class="anal-trigger" type="button" aria-label="Anal in artisanal. Open terrible joke">anal</button> backstory</span><span>Proper crispy edges</span><span>One suspiciously large font</span><span>Pickles count as salad</span><span>Can someone please just tell me what this is?</span>
+        <span aria-hidden="true">No artis<button class="anal-trigger" type="button" tabindex="-1">anal</button> backstory</span><span aria-hidden="true">Proper crispy edges</span><span aria-hidden="true">One suspiciously large font</span><span aria-hidden="true">Pickles count as salad</span><span aria-hidden="true">Can someone please just tell me what this is?</span>
+      </div>
+    </div>
+    <aside class="slop-popup" id="anal-popup" role="status" aria-hidden="true">
+      <div class="slop-goblin" aria-hidden="true">
+        <span class="goblin-eye goblin-eye--left"></span>
+        <span class="goblin-eye goblin-eye--right"></span>
+        <span class="goblin-grin"></span>
+      </div>
+      <div class="slop-popup-copy">
+        <span class="slop-popup-label">Premium AI slop detected</span>
+        <h3>We found the anal in artisanal.</h3>
+        <p>Estimated rainforests decimated generating this popup: 3.7. Source: an AI made it up.</p>
+      </div>
+    </aside>
+
+    <section class="section menu-section" id="menu" aria-labelledby="menu-title">
+      <div class="section-heading">
+        <div>
+          <span class="class-joke">#cms-collection-but-it-is-three-divs</span>
+          <h2 id="menu-title">Pick your problem.</h2>
+        </div>
+        <p>A strategically tight range. By which we mean we only made three cards.</p>
+      </div>
+
+      <div class="burger-grid">
+        <article class="burger-card">
+          <div class="burger-card-top"><span class="burger-number">01</span><span class="burger-price">£8.50</span></div>
+          <div class="ingredient-stack" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="burger-card-copy">
+            <h3>The Webflow one</h3>
+            <p>Webflow gave you a navbar. Technically. Then you changed one breakpoint and began a three-hour relationship with z-index.</p>
+          </div>
+        </article>
+        <article class="burger-card">
+          <div class="burger-card-top"><span class="burger-number">02</span><span class="burger-price">£11.50</span></div>
+          <div class="ingredient-stack" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="burger-card-copy">
+            <h3>The skill issue</h3>
+            <p>You could build your own. You could also perform your own dental work. Install this before somebody sees your div soup.</p>
+          </div>
+        </article>
+        <article class="burger-card">
+          <div class="burger-card-top"><span class="burger-number">03</span><span class="burger-price">£9.75</span></div>
+          <div class="ingredient-stack" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="burger-card-copy">
+            <h3>The accessibility dweeb</h3>
+            <p>Yes yes menus should work with keyboards, screen readers and when JavaScript goes for a lie-down. Settle down - I can hear you Clem Fandango. Here’s your progressive enhancement.</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section process-section" id="method" aria-labelledby="method-title">
+      <div class="section-heading">
+        <div>
+          <span class="class-joke">.how-it-works_component</span>
+          <h2 id="method-title">Our process.<br>Very proprietary.</h2>
+        </div>
+        <p>Please do not screenshot this and start a competing burger empire.</p>
+      </div>
+      <div class="steps">
+        <article class="step" data-step>
+          <button class="step-summary" type="button" aria-expanded="false" aria-controls="step-install">
+            <span class="step-index">[01]</span>
+            <h3 class="step-title swap-copy"><span class="swap-layer swap-joke">Add beef</span><span class="swap-layer swap-useful" aria-hidden="true">Paste the component</span></h3>
+            <p class="step-teaser swap-copy"><span class="swap-layer swap-joke">We place a ball of beef on something extremely hot. Culinary theatre begins.</span><span class="swap-layer swap-useful" aria-hidden="true">Get the component into Webflow without starting a small frontend framework.</span></p>
+            <span class="step-toggle" aria-hidden="true">+</span>
+          </button>
+          <div class="step-fill" aria-hidden="true"></div>
+          <div class="step-panel" id="step-install" aria-hidden="true">
+            <div class="step-panel-inner">
+              <div>
+                <h4>Install / the two-click version</h4>
+                <p>Copy Navbar Light from the MWP Component Library and paste it into your project. Keep its one native Navigation panel: desktop and mobile share the same links, because duplicating your menu is how haunted websites begin.</p>
+              </div>
+              <div class="step-code">OPTION A → self-contained Embed<br>OPTION B → pinned v0.2.0 CDN<br>NEVER → “latest”</div>
+            </div>
+          </div>
+        </article>
+        <article class="step" data-step>
+          <button class="step-summary" type="button" aria-expanded="false" aria-controls="step-configure">
+            <span class="step-index">[02]</span>
+            <h3 class="step-title swap-copy"><span class="swap-layer swap-joke">Apply violence</span><span class="swap-layer swap-useful" aria-hidden="true">Configure the menu</span></h3>
+            <p class="step-teaser swap-copy"><span class="swap-layer swap-joke">We smash it. This is both the technique and the entire business plan.</span><span class="swap-layer swap-useful" aria-hidden="true">Choose the breakpoint, layout and motion. Try not to invent a sixth breakpoint.</span></p>
+            <span class="step-toggle" aria-hidden="true">+</span>
+          </button>
+          <div class="step-fill" aria-hidden="true"></div>
+          <div class="step-panel" id="step-configure" aria-hidden="true">
+            <div class="step-panel-inner">
+              <div>
+                <h4>Configure / the fiddly bit</h4>
+                <p>At the Base breakpoint choose when it collapses, then pick dropdown, drawer or overlay and a motion preset. Style the existing <code>mwp-css-nav_*</code> classes in Designer. Leave the data hooks alone; they are shy and structurally important.</p>
+              </div>
+              <div class="step-code">COLLAPSE → tablet / mobile / always<br>LAYOUT → dropdown / left / right / overlay<br>MOTION → built-in / custom</div>
+            </div>
+          </div>
+        </article>
+        <article class="step" data-step>
+          <button class="step-summary" type="button" aria-expanded="false" aria-controls="step-verify">
+            <span class="step-index">[03]</span>
+            <h3 class="step-title swap-copy"><span class="swap-layer swap-joke">Call it craft</span><span class="swap-layer swap-useful" aria-hidden="true">Keyboard-test it</span></h3>
+            <p class="step-teaser swap-copy"><span class="swap-layer swap-joke">Cheese, sauce, bun. Then someone in marketing says “mouthfeel”.</span><span class="swap-layer swap-useful" aria-hidden="true">Keyboard-test it once so an accessibility dweeb does not arrive with receipts.</span></p>
+            <span class="step-toggle" aria-hidden="true">+</span>
+          </button>
+          <div class="step-fill" aria-hidden="true"></div>
+          <div class="step-panel" id="step-verify" aria-hidden="true">
+            <div class="step-panel-inner">
+              <div>
+                <h4>Verify / dweeb mode engaged</h4>
+                <p>Preview the page. Tab to the menu, press Enter, open the submenu, then use Escape twice. Check the core Webflow widths and briefly remove JavaScript: the native details menu should still open instead of becoming decorative archaeology.</p>
+              </div>
+              <div class="step-code">TAB → ENTER → ESC → ESC<br>CHECK → 991 / 767 / 479<br>NO JS → still a menu</div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section proof-section" id="proof" aria-labelledby="proof-title">
+      <p class="proof-big" aria-hidden="true">0%</p>
+      <div class="proof-copy">
+        <span class="eyebrow">Our corporate responsibility pledge</span>
+        <h2 id="proof-title">Zero synergy.<br>Maximum burger.</h2>
+        <p>We have no app, no points ecosystem and no limited-edition digital pickle. You give us money. We give you a hot burger. The funnel is beautiful.</p>
+        <div class="review">“Annoyingly good.” ★★★★★<small>— someone who wanted to hate the branding</small></div>
+      </div>
+    </section>
+
+    <section class="section playground" id="playground" aria-labelledby="playground-title">
+      <div class="section-heading">
+        <div>
+          <span class="class-joke">display: grid !important &gt; confidence: 100%;</span>
+          <h2 id="playground-title">Website settings.</h2>
+        </div>
+        <p>For the person who scrolled all the way down and thought, “I wish the navigation had configuration options.”</p>
+      </div>
+      <form class="demo-controls" id="navbar-controls">
+        <label class="demo-control"><span>Collapse</span><select name="collapse"><option>never</option><option>tablet</option><option selected>mobile-landscape</option><option>mobile-portrait</option><option>always</option></select></label>
+        <label class="demo-control"><span>Layout</span><select name="layout"><option selected>dropdown</option><option>full-width</option><option>left</option><option>right</option><option>overlay</option></select></label>
+        <label class="demo-control"><span>Motion</span><select name="motion"><option selected>dropdown</option><option>left</option><option>right</option><option>up</option><option>fade</option><option>none</option><option>custom</option></select></label>
+        <label class="demo-control"><span>Alignment</span><select name="align"><option>left</option><option>center</option><option selected>right</option></select></label>
+        <label class="demo-control"><span>Icon lines</span><select name="iconLines"><option>2</option><option selected>3</option></select></label>
+        <label class="demo-control"><span>Panel width</span><input name="panelWidth" value="min(24rem, 100%)"></label>
+        <label class="demo-control"><span>Opening duration</span><input name="openDuration" value="280ms"></label>
+        <label class="demo-control"><span>Closing duration</span><input name="closeDuration" value="220ms"></label>
+        <label class="demo-control"><span>Item stagger</span><input name="stagger" value="35ms"></label>
+        <label class="demo-control"><span>Submenu icon duration</span><input name="submenuIconDuration" value="220ms"></label>
+        <label class="demo-control"><span>Submenu icon easing</span><input name="submenuIconEasing" value="cubic-bezier(0.22, 1, 0.36, 1)"></label>
+        <label class="demo-control"><span>Submenu icon rotation</span><input name="submenuIconRotation" value="180deg"></label>
+        <label class="demo-checkbox"><input name="focusFirst" type="checkbox"> Focus first link</label>
+        <label class="demo-checkbox"><input name="closeOutside" type="checkbox" checked> Close outside</label>
+        <label class="demo-checkbox"><input name="closeLink" type="checkbox" checked> Close on link</label>
+        <button type="button" id="navbar-toggle">Toggle menu dramatically</button>
+      </form>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p class="footer-title">Come<br>hungry.</p>
+    <div class="footer-meta">
+      <span class="eyebrow">Open when we are open</span>
+      <a href="mailto:feedme@smashed.example">feedme@smashed.example</a>
+      <a class="button button--cream" href="#top">Back to the huge text</a>
+    </div>
+    <div class="footer-bottom"><span>© 2026 SMASHED. Probably.</span><span>Made with beef, CSS &amp; one suspiciously high z-index.</span></div>
+  </footer>
+
+  <script>globalThis.MWP_NAVBAR_LIGHT_AUTO_INIT = false;</script>
+  <script src="./navbar-light.browser.js"></script>
+  <script>
+    const root = document.querySelector('[data-mwp-navbar]');
+    const controls = document.querySelector('#navbar-controls');
+    let navbar = new NavbarLight(root);
+
+    function update() {
+      const data = new FormData(controls);
+      navbar.destroy();
+      root.dataset.collapse = data.get('collapse');
+      root.dataset.layout = data.get('layout');
+      root.dataset.motion = data.get('motion');
+      root.dataset.align = data.get('align');
+      root.dataset.iconLines = data.get('iconLines');
+      root.dataset.panelWidth = data.get('panelWidth');
+      root.dataset.openDuration = data.get('openDuration');
+      root.dataset.closeDuration = data.get('closeDuration');
+      root.dataset.stagger = data.get('stagger');
+      root.dataset.submenuIconDuration = data.get('submenuIconDuration');
+      root.dataset.submenuIconEasing = data.get('submenuIconEasing');
+      root.dataset.submenuIconRotation = data.get('submenuIconRotation');
+      root.setAttribute('data-focus-first', String(data.has('focusFirst')));
+      root.setAttribute('data-close-on-outside', String(data.has('closeOutside')));
+      root.setAttribute('data-close-on-link', String(data.has('closeLink')));
+      root.querySelector('[data-mwp-menu]').open = false;
+      navbar = new NavbarLight(root);
+    }
+
+    controls.addEventListener('change', update);
+    document.querySelector('#navbar-toggle').addEventListener('click', (event) => {
+      event.stopPropagation();
+      navbar.toggle({ focusFirst: false });
+    });
+
+    const ticker = document.querySelector('.ticker');
+    const analPopup = document.querySelector('#anal-popup');
+    const analTriggers = [...document.querySelectorAll('.anal-trigger')];
+    let activeAnalTrigger = null;
+    let analPopupPinned = false;
+
+    function positionAnalPopup() {
+      if (!activeAnalTrigger) return;
+      const triggerRect = activeAnalTrigger.getBoundingClientRect();
+      const popupWidth = analPopup.offsetWidth;
+      const popupHeight = analPopup.offsetHeight;
+      const margin = 10;
+      const halfWidth = popupWidth / 2;
+      const centre = Math.min(window.innerWidth - halfWidth - margin, Math.max(halfWidth + margin, triggerRect.left + triggerRect.width / 2));
+      const fitsAbove = triggerRect.top - popupHeight - 16 > margin;
+      analPopup.style.left = `${centre}px`;
+      analPopup.style.top = `${fitsAbove ? triggerRect.top : triggerRect.bottom + popupHeight + 16}px`;
+    }
+
+    function showAnalPopup(trigger, pinned = false) {
+      activeAnalTrigger = trigger;
+      analPopupPinned = pinned;
+      ticker.classList.add('is-paused');
+      analPopup.classList.add('is-visible');
+      analPopup.setAttribute('aria-hidden', 'false');
+      requestAnimationFrame(positionAnalPopup);
+    }
+
+    function hideAnalPopup(force = false) {
+      if (analPopupPinned && !force) return;
+      activeAnalTrigger = null;
+      analPopupPinned = false;
+      ticker.classList.remove('is-paused');
+      analPopup.classList.remove('is-visible');
+      analPopup.setAttribute('aria-hidden', 'true');
+    }
+
+    analTriggers.forEach((trigger) => {
+      trigger.addEventListener('mouseenter', () => showAnalPopup(trigger));
+      trigger.addEventListener('mouseleave', () => hideAnalPopup());
+      trigger.addEventListener('focus', () => showAnalPopup(trigger));
+      trigger.addEventListener('blur', () => hideAnalPopup());
+      trigger.addEventListener('click', (event) => {
+        event.stopPropagation();
+        if (activeAnalTrigger === trigger && analPopupPinned) hideAnalPopup(true);
+        else showAnalPopup(trigger, true);
+      });
+      trigger.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        hideAnalPopup(true);
+        trigger.focus();
+      });
+    });
+
+    document.addEventListener('pointerdown', (event) => {
+      if (analPopupPinned && !event.target.closest('.anal-trigger')) hideAnalPopup(true);
+    });
+    window.addEventListener('scroll', () => hideAnalPopup(true), { passive: true });
+    window.addEventListener('resize', positionAnalPopup, { passive: true });
+
+    const stepRows = [...document.querySelectorAll('[data-step]')];
+    const processSection = document.querySelector('.process-section');
+    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)');
+
+    function setSwapCopy(container, useful) {
+      if (!container) return;
+      container.classList.toggle('is-useful', useful);
+      container.querySelector('.swap-joke')?.setAttribute('aria-hidden', String(useful));
+      container.querySelector('.swap-useful')?.setAttribute('aria-hidden', String(!useful));
+    }
+
+    function syncStepCopy(step) {
+      const active = step.classList.contains('is-active');
+      const sectionUseful = processSection.classList.contains('is-useful');
+      setSwapCopy(step.querySelector('.step-title'), active || sectionUseful);
+      setSwapCopy(step.querySelector('.step-teaser'), active);
+    }
+
+    function setStepState(step, active) {
+      const button = step.querySelector('.step-summary');
+      const panel = step.querySelector('.step-panel');
+      step.classList.toggle('is-active', active);
+      button.setAttribute('aria-expanded', String(active));
+      panel.setAttribute('aria-hidden', String(!active));
+      panel.inert = !active;
+      syncStepCopy(step);
+    }
+
+    stepRows.forEach((step) => {
+      const button = step.querySelector('.step-summary');
+      step.dataset.pinned = 'false';
+      setStepState(step, false);
+
+      step.addEventListener('mouseenter', () => {
+        if (canHover.matches && step.dataset.pinned !== 'true') setStepState(step, true);
+      });
+
+      step.addEventListener('mouseleave', () => {
+        if (canHover.matches && step.dataset.pinned !== 'true') setStepState(step, false);
+      });
+
+      step.addEventListener('focusin', () => {
+        if (step.dataset.pinned !== 'true') setStepState(step, true);
+      });
+
+      step.addEventListener('focusout', (event) => {
+        if (!step.contains(event.relatedTarget) && step.dataset.pinned !== 'true') setStepState(step, false);
+      });
+
+      button.addEventListener('click', () => {
+        const shouldPin = step.dataset.pinned !== 'true';
+        stepRows.forEach((row) => {
+          row.dataset.pinned = 'false';
+          setStepState(row, false);
+        });
+        step.dataset.pinned = String(shouldPin);
+        setStepState(step, shouldPin);
+      });
+
+      button.addEventListener('keydown', (event) => {
+        if (event.key !== 'Escape') return;
+        step.dataset.pinned = 'false';
+        setStepState(step, false);
+        button.focus();
+      });
+    });
+
+    processSection.addEventListener('mouseenter', () => {
+      if (!canHover.matches) return;
+      processSection.classList.add('is-useful');
+      stepRows.forEach(syncStepCopy);
+    });
+
+    processSection.addEventListener('mouseleave', () => {
+      if (!canHover.matches) return;
+      processSection.classList.remove('is-useful');
+      stepRows.forEach(syncStepCopy);
+    });
+  </script>
+</body>
+</html>
