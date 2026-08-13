@@ -92,7 +92,7 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Focus, outside close, link close and scroll-lock behavior.
 - [x] Add clear property groups and tooltips.
 - [x] Keep non-attribute-bindable values visible through native Text Blocks.
-- [ ] Convert `.mwp-css-nav_config` into a compact native Details-based `Smashburger settings` inspector: collapsed by default so it stays out of the author's working Canvas, expandable for a real-time property summary, readable in the Navigator, and hidden after runtime initialization in Preview and published output.
+- [x] Convert `.mwp-css-nav_config` into a compact native Details-based `Smashburger settings` inspector: collapsed by default so it stays out of the author's working Canvas, expandable for a real-time property summary, readable in the Navigator, and hidden after runtime initialization in Preview and published output.
 
 ## 8. Repository deliverables
 
@@ -125,10 +125,21 @@ Keep the current Canvas-visible, self-contained Embed as the dependable default.
 - [x] Add a minimal native Webflow visual baseline limited to structure, spacing, hit areas and `currentColor`; leave typography, text colour and decoration to destination-project base styles.
 - [x] Build a native MWP Component Library demo shell with Webflow variables, base typography, a restrained homepage and a `/style-guide` class-retention page, while keeping its theme classes out of Navbar Light.
 - [ ] Visually approve the new Home and Style Guide pages in Designer/Preview, then publish them from Webflow.
-- [ ] Create a clean Webflow site named `Smashburger`, add the current component, and complete the documented copy/paste acceptance test independently of the MWP Component Library.
+- [x] Create a clean Webflow site named `Smashburger` and install `SmashBurger CDN` from the shared MWP Component Library. Verify that component identity, all five variants, all 57 property values/bindings, native Canvas rendering and nine remapped SVG assets survive; confirm ordinary clipboard paste is flattened and is not the supported installation route.
 - [ ] Test caching, cold loads, failure handling, rollback and explicit version upgrades on cloned Webflow sites.
 - [ ] Document switching safely between self-contained Embed, pinned CDN and self-hosted delivery without rebuilding the component.
 - [ ] Let the future Designer Extension choose the delivery mode and pin the installed version explicitly.
+
+### SmashBurger repository and local-folder rename
+
+- [ ] Commit and push all current portability, Library-installation and cleanup documentation before changing repository identity.
+- [ ] Create `madewithpixels/SmashBurger-Webflow-Navbar` as the new canonical GitHub repository with the complete Git history; use `smashburger-webflow-navbar` for the package name.
+- [ ] Keep `madewithpixels/Webflow-Navbar-Light` available as an archived compatibility repository so existing immutable `v0.1.0` and `v0.2.0` jsDelivr URLs continue to resolve; do not rely on GitHub repository redirects for the third-party CDN contract.
+- [ ] Update repository, package, documentation, generator and test references to the new canonical name without changing the established `mwp-*` public integration hooks.
+- [ ] Build, test and publish a new semantic release from `SmashBurger-Webflow-Navbar`; generate exact new jsDelivr URLs and SHA-384 integrity values.
+- [ ] Update both MWP Component Library editions and the `Smashburger` clean-install instance through the Library workflow; verify properties, variants, assets, CDN loading, rollback and update linkage.
+- [ ] Archive the old compatibility repository only after the new release and old pinned URLs have both been independently verified.
+- [ ] Rename the local folder last to `/Users/michaelauty/Work on Macbook/SmashBurger Webflow Navbar`, update the Git remote and reopen Codex from the new workspace path.
 
 ## 10. Webflow app product track
 
@@ -178,7 +189,7 @@ Treat a mega-menu as a separate component or extension-installed premium feature
 
 ## 12. Verification
 
-- [ ] Publish the dedicated `Smashburger` site as the clean-install deployment target; verify native Canvas editability, property bindings, inherited destination-project styles, assets, responsive variants, Preview behavior and published behavior before treating a release as deployment-ready.
+- [ ] Publish the dedicated `Smashburger` site as the clean-install deployment target. Library installation, native Canvas editability, property bindings, inherited destination-project styles, assets and responsive variants are verified; complete published behavior, cold-load and failure-recovery checks before treating a release as deployment-ready.
 - [x] Verify the CSS-only Tablet fallback in Webflow Preview.
 - [x] Verify keyboard open, Escape close and focus return.
 - [x] Verify ARIA state and inertness programmatically.

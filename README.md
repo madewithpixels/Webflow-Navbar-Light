@@ -22,6 +22,8 @@ Published acceptance build: <https://mwp-component-library.webflow.io/navbar-lig
 
 ## Using the Webflow component
 
+For cross-project installation, share the MWP Component Library with the destination site and insert `SmashBurger` or `SmashBurger CDN` from Webflow Libraries. This preserves component identity, all five variants, the complete property surface and replaceable icon bindings. Ordinary cross-site clipboard paste is only a flattened fallback: it transfers native elements and assets but does not preserve component properties or variants.
+
 Insert `Navbar Light`, then select its collapse variant at the Base breakpoint:
 
 - `Never`
@@ -54,7 +56,7 @@ The native `Navbar Light settings` block mirrors values that the current Webflow
 
 ### Styling and destination-project inheritance
 
-The included Webflow styles are deliberately structural: layout, spacing, touch targets, burger geometry, panel grouping, borders and small radii. Brand and navigation classes set only a modest type scale, weight and spacing; they do not set a font family or fixed text colour. The copied component therefore inherits the destination project's font and colour from its body/link tag styles. The burger bars, panel borders and outlined CTA use `currentColor` and follow that inherited colour automatically.
+The included Webflow styles are deliberately structural: layout, spacing, touch targets, burger geometry, panel grouping, borders and small radii. Brand and navigation classes set only a modest type scale, weight and spacing; they do not set a font family or fixed text colour. The installed component therefore inherits the destination project's font and colour from its body/link tag styles. The burger bars, panel borders and outlined CTA use `currentColor` and follow that inherited colour automatically.
 
 This means the component can look intentionally plain in the library. Apply project-specific presentation through the existing native `mwp-css-nav_*` classes after pasting; no Embed edit or `!important` override should be necessary.
 
