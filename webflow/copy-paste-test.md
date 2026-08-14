@@ -52,4 +52,6 @@ Record the destination site/page, date, browser, copied component variant, obser
 - Canvas: destination inheritance, native structure, label/group toggles and responsive variant controls worked.
 - Clipboard comparison: the same component pasted as ordinary elements without warning, but lost component identity, variants and property bindings; this flattened copy was removed.
 - Cleanup: the nine clipboard-import SVG duplicates were deleted after confirming the Library instance referenced a separate remapped nine-asset set; all active icons were then verified individually and visually.
-- Remaining acceptance: publish the destination and complete cold-load, CDN failure/recovery and published accessibility checks.
+- Published acceptance: complete on 14 August 2026. The Tablet instance was restored to show primary navigation, published, and verified at 1280px, 984px, 767px and 393px with zero overflow, correct collapse state, synchronized ARIA/inert state, two-stage Escape focus restoration, loaded icons and hidden runtime settings.
+- Delivery acceptance: cache-bypassed CDN downloads matched the committed `v0.2.0` bytes; both loader elements reported `loaded`. Automated failure handlers reported CSS/JavaScript errors while preserving the native content, followed by successful published recovery.
+- Library parity: the source and destination still expose the same five variants and all 57 property IDs/defaults; destination-local icon asset mappings remain intact.

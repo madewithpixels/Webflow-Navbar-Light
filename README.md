@@ -8,7 +8,10 @@ The maintained implementation exists in synchronized forms:
 2. The optional pinned `Navbar Light CDN` component, isolated on the **Navbar Light CDN** page.
 3. This repository, containing the matching CSS, enhancement script, interactive reference demo, tests and generated Webflow embeds.
 
-Published acceptance build: <https://mwp-component-library.webflow.io/navbar-light>.
+Published acceptance builds:
+
+- Source library: <https://mwp-component-library.webflow.io/navbar-light>
+- Clean Library installation: <https://smashburger-4b8f18.webflow.io/>
 
 ## Design constraints
 
@@ -182,11 +185,23 @@ Never use `latest`, a branch name or a version range in a production Webflow pro
 
 Sites with a Content Security Policy must allow `https://cdn.jsdelivr.net` in `style-src` and `script-src`. The loader's inline diagnostic handlers also need the site's permitted inline-handler policy; blocking those handlers suppresses the custom diagnostic but does not itself block the external CSS or JavaScript. The CDN necessarily receives ordinary request metadata needed to serve the files. Use the self-contained Embed or self-hosted files when third-party requests or the required CSP allowances are unsuitable.
 
+### Switching delivery without rebuilding the navigation
+
+The native Webflow structure and component properties are independent of the delivery choice. Change only the Canvas-visible delivery Embed; do not recreate the Brand, trigger, panel, links, wrappers, settings or backdrop.
+
+- **Self-contained:** use [webflow/navbar-light-embed.html](webflow/navbar-light-embed.html). It carries the functional CSS and progressive-enhancement script together and makes no third-party runtime request.
+- **Pinned CDN:** use [webflow/navbar-light-cdn-loader.html](webflow/navbar-light-cdn-loader.html). It loads the exact versioned `dist` files with Subresource Integrity.
+- **Self-hosted:** upload or serve the matching `dist/navbar-light.min.css` and `dist/navbar-light.min.js`, then change only the two URLs in the CDN-shaped Embed. Keep the version markers, load/error state and diagnostic handlers; generate new integrity values whenever the bytes or origin change.
+
+Never leave two delivery Embeds active. After switching, publish and verify `data-mwp-ready="true"`, the hidden runtime settings block, the expected asset requests and native open/close fallback. In a shared Library installation, make the Embed change in a versioned source component and apply the Library update; the future Designer Extension will automate this safely.
+
 Navbar Light is released under the [MIT License](LICENSE), copyright © 2026 madewithpixels. The repository remains `private: true` as an npm package; npm distribution can be reconsidered after package naming and ownership are settled.
 
 The `Navbar Light CDN` Webflow component contains this generated loader and is isolated on `/navbar-light-cdn` for testing. The original `Navbar Light` component and `/navbar-light` acceptance page retain the self-contained Embed.
 
 The browser verification matrix covers all 35 layout/motion combinations, all five collapse choices at the four core Webflow widths, all three dropdown alignments and every centered motion preset. The published `v0.2.0` acceptance build has also been verified at Desktop and Tablet in both delivery modes: nine icon links and their destinations render, all Images load, submenu arrows rotate using the bound duration, nested and outer Escape restore focus, configuration hides only after initialization, and neither page produces horizontal overflow.
+
+The dedicated `Smashburger` clean-install site has now passed the POC release check at 1280px, 984px, 767px and 393px. The Library-installed Tablet variant expands on Desktop, collapses below 991px, keeps zero horizontal overflow, loads all nine remapped icons, initializes both pinned CDN assets with their exact SRI metadata and hides the settings inspector only after `data-mwp-ready="true"`. A cache-bypassed download confirmed that both jsDelivr files are byte-identical to the committed release. Nested and outer Escape restore focus in two stages; closed panels use matching `aria-hidden` and `inert` state. The automated suite also exercises reduced-motion timing and CDN error diagnostics while confirming native fallback content remains present. See [webflow/smashburger-poc-acceptance.md](webflow/smashburger-poc-acceptance.md).
 
 The published Tablet variant has passed a genuine macOS VoiceOver keyboard-and-spoken-output check. VoiceOver announced the navigation trigger as collapsed and expanded, skipped the closed nested submenu, announced `Company` and `Team` only after `More` opened, returned focus to collapsed `More` on the first Escape, and returned focus to the collapsed navigation trigger on the second Escape. Windows NVDA verification remains outstanding.
 
@@ -223,4 +238,4 @@ The published Tablet variant has passed a genuine macOS VoiceOver keyboard-and-s
 
 Before structural changes, create a Webflow backup. The obsolete `CSS Navbar — Details` test component has been removed; `Navbar Light` remains the sole acceptance component on its page, while the optional CDN edition is isolated on a separate page. Publishing remains a deliberate user-controlled release step.
 
-See [todo.md](todo.md) for completed work and the remaining Windows NVDA verification.
+See [todo.md](todo.md) for completed work, the future explicit version-upgrade/rollback exercise and the remaining Windows NVDA verification.

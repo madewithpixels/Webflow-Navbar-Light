@@ -126,13 +126,14 @@ Keep the current Canvas-visible, self-contained Embed as the dependable default.
 - [x] Build a native MWP Component Library demo shell with Webflow variables, base typography, a restrained homepage and a `/style-guide` class-retention page, while keeping its theme classes out of Navbar Light.
 - [ ] Visually approve the new Home and Style Guide pages in Designer/Preview, then publish them from Webflow.
 - [x] Create a clean Webflow site named `Smashburger` and install `SmashBurger CDN` from the shared MWP Component Library. Verify that component identity, all five variants, all 57 property values/bindings, native Canvas rendering and nine remapped SVG assets survive; confirm ordinary clipboard paste is flattened and is not the supported installation route.
-- [ ] Test caching, cold loads, failure handling, rollback and explicit version upgrades on cloned Webflow sites.
-- [ ] Document switching safely between self-contained Embed, pinned CDN and self-hosted delivery without rebuilding the component.
+- [x] Test the pinned `v0.2.0` cold-load path on the clean `Smashburger` site, byte-compare cache-bypassed jsDelivr responses, exercise CSS/JavaScript error diagnostics without removing native fallback content, and confirm successful published recovery.
+- [ ] Test an explicit rollback and semantic-version upgrade on cloned Webflow sites after the first release from the renamed canonical repository.
+- [x] Document switching safely between self-contained Embed, pinned CDN and self-hosted delivery without rebuilding the component.
 - [ ] Let the future Designer Extension choose the delivery mode and pin the installed version explicitly.
 
 ### SmashBurger repository and local-folder rename
 
-- [ ] Commit and push all current portability, Library-installation and cleanup documentation before changing repository identity.
+- [x] Commit and push all current portability, Library-installation and cleanup documentation before changing repository identity (`58e1407`).
 - [ ] Create `madewithpixels/SmashBurger-Webflow-Navbar` as the new canonical GitHub repository with the complete Git history; use `smashburger-webflow-navbar` for the package name.
 - [ ] Keep `madewithpixels/Webflow-Navbar-Light` available as an archived compatibility repository so existing immutable `v0.1.0` and `v0.2.0` jsDelivr URLs continue to resolve; do not rely on GitHub repository redirects for the third-party CDN contract.
 - [ ] Update repository, package, documentation, generator and test references to the new canonical name without changing the established `mwp-*` public integration hooks.
@@ -189,7 +190,7 @@ Treat a mega-menu as a separate component or extension-installed premium feature
 
 ## 12. Verification
 
-- [ ] Publish the dedicated `Smashburger` site as the clean-install deployment target. Library installation, native Canvas editability, property bindings, inherited destination-project styles, assets and responsive variants are verified; complete published behavior, cold-load and failure-recovery checks before treating a release as deployment-ready.
+- [x] Publish the dedicated `Smashburger` site as the clean-install deployment target. Library installation, native Canvas editability, all 57 property bindings, five variants, inherited destination-project styles, nine remapped assets, responsive behavior, cold-load bytes, CDN failure diagnostics and recovery are verified.
 - [x] Verify the CSS-only Tablet fallback in Webflow Preview.
 - [x] Verify keyboard open, Escape close and focus return.
 - [x] Verify ARIA state and inertness programmatically.
@@ -206,7 +207,7 @@ Treat a mega-menu as a separate component or extension-installed premium feature
 - [x] Stack native nested-submenu links after the published matrix exposed their inline fallback.
 - [x] Restore the test instance to Tablet + Dropdown documented defaults.
 - [x] User created a backup, refreshed, removed the obsolete component and published the acceptance page.
-- [x] Run the automated suite after repository synchronization (16/16 passing, including direct-file demo startup, closed nested-submenu rendering state and pinned CDN artifact/loader verification).
+- [x] Run the automated suite after repository synchronization (18/18 passing, including direct-file demo startup, closed nested-submenu rendering state, pinned CDN artifact/loader verification, reduced-motion timing and CDN failure fallback).
 - [x] Complete genuine macOS VoiceOver keyboard and spoken-output testing on the published Tablet variant: collapsed/expanded trigger announcements, closed-submenu omission, nested-link order and two-stage Escape focus restoration all pass.
 - [ ] Complete spoken-output testing with NVDA on Windows.
 - [x] Verify submenu arrow open/close motion, reduced-motion CSS and Canvas editability in both Webflow components and both published delivery modes.
@@ -223,3 +224,7 @@ Treat a mega-menu as a separate component or extension-installed premium feature
 - [x] Audit the five native collapse variants' stored Desktop, Tablet, Mobile landscape and Mobile portrait overrides; restore the test instance to Tablet afterward.
 - [x] Replace obsolete expanded-variant mobile overrides that hid the shared panel in Never and Mobile portrait; re-run the affected Canvas cases.
 - [x] Publish and verify the expanded-panel variant correction at Mobile landscape and Mobile portrait widths.
+- [x] Restore the clean-install instance's unintended hidden-primary-navigation test override while retaining the user-selected Tablet variant.
+- [x] Verify the published `Smashburger` clean install at 1280px, 984px, 767px and 393px: correct collapse state, zero overflow, loaded icons, hidden runtime settings, ARIA/inert synchronization, nested/outer Escape focus restoration and clean console.
+- [x] Compare the MWP Library source and destination component schemas: the same five variants and 57 property IDs/defaults remain linked, with destination-local icon asset remapping intact.
+- [x] Declare the Navbar Light/SmashBurger POC ready to hand over to the Webflow Designer Extension phase; keep Windows NVDA and the first real version rollback/upgrade as explicit product-phase validation.

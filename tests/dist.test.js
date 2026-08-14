@@ -56,3 +56,26 @@ test('CDN loader pins the release tag and authenticates the committed artifacts'
   assert.doesNotMatch(loader, /@(latest|main|master)|@\d+\.x|@\^|@~/i);
   assert.match(loader, /mwp-navbar-light:cdn-error/g);
 });
+
+test('CDN loader reports failures without removing native navigation content', async () => {
+  const loader = await readFile(resolve(root, 'webflow/navbar-light-cdn-loader.html'), 'utf8');
+  const nativeMarkup = '<details data-mwp-menu><summary>Menu</summary><nav data-mwp-panel>Native fallback</nav></details>';
+  const dom = new JSDOM(`<!doctype html><html><head>${loader}</head><body>${nativeMarkup}</body></html>`, {
+    runScripts: 'dangerously',
+    url: 'https://example.test/'
+  });
+  const failures = [];
+  dom.window.addEventListener('mwp-navbar-light:cdn-error', (event) => failures.push(event.detail));
+
+  const assets = [...dom.window.document.querySelectorAll('[data-mwp-navbar-light-cdn]')];
+  assets.forEach((asset) => asset.dispatchEvent(new dom.window.Event('error')));
+
+  assert.deepEqual(JSON.parse(JSON.stringify(failures)), [
+    { asset: 'css', version: '0.2.0' },
+    { asset: 'javascript', version: '0.2.0' }
+  ]);
+  assert.deepEqual(assets.map((asset) => asset.dataset.mwpStatus), ['error', 'error']);
+  assert.equal(dom.window.document.querySelector('[data-mwp-menu] summary').textContent, 'Menu');
+  assert.equal(dom.window.document.querySelector('[data-mwp-panel]').textContent, 'Native fallback');
+  dom.window.close();
+});

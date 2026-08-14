@@ -242,6 +242,23 @@ test('preserves standalone root configuration', () => {
   navbar.destroy();
 });
 
+test('removes JavaScript transition waits when reduced motion is requested', () => {
+  globalThis.matchMedia = (query) => ({
+    matches: query === '(prefers-reduced-motion: reduce)',
+    addEventListener() {},
+    removeEventListener() {}
+  });
+  const root = document.querySelector('[data-mwp-navbar]');
+  root.dataset.motion = 'dropdown';
+  root.style.setProperty('--mwp-nav-duration-open', '280ms');
+  root.style.setProperty('--mwp-nav-duration-close', '220ms');
+  const navbar = new NavbarLight(root);
+
+  assert.equal(navbar.motionDuration('open'), 0);
+  assert.equal(navbar.motionDuration('close'), 0);
+  navbar.destroy();
+});
+
 test('reads Canvas-visible configuration values and normalises presets', () => {
   const root = document.querySelector('[data-mwp-navbar]');
   root.dataset.collapse = 'always';
