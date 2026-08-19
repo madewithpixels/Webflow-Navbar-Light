@@ -12,6 +12,7 @@
       --cream: #f4edda;
       --yellow: #ffd400;
       --red: #f03820;
+      --cyan: #22c8ce;
       --pink: #ff8bac;
       --green: #c8e53f;
       --line: 3px solid var(--ink);
@@ -45,7 +46,7 @@
     button, input, select { font: inherit; }
     button, a { -webkit-tap-highlight-color: transparent; }
     img { display: block; max-width: 100%; }
-    section[id] { scroll-margin-top: 5rem; }
+    :where(section, main)[id] { scroll-margin-top: 5rem; }
     ::selection { background: var(--pink); color: var(--ink); }
 
     .eyebrow {
@@ -249,8 +250,131 @@
       height: 100%;
       object-fit: cover;
       object-position: 52% 50%;
+      position: relative;
       transform: scale(1.03);
+      transition: filter .35s ease, object-position .35s ease;
       width: 100%;
+      z-index: 1;
+    }
+    .hero-image-ghost {
+      filter: grayscale(1) contrast(1.8) sepia(1) saturate(8) hue-rotate(140deg);
+      inset: 0;
+      mix-blend-mode: screen;
+      object-fit: cover;
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+      transform: translate(8px, -5px) scale(1.045);
+      transition: opacity .25s ease;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+    }
+    .hero-image-wrap::before {
+      background-image: radial-gradient(var(--ink) 1px, transparent 1.5px);
+      background-size: 6px 6px;
+      content: "";
+      inset: 0;
+      mix-blend-mode: multiply;
+      opacity: 0;
+      pointer-events: none;
+      position: absolute;
+      transition: opacity .25s ease;
+      z-index: 3;
+    }
+    .hero-image-wrap[data-art-mode="riso"] { background: var(--yellow); }
+    .hero-image-wrap[data-art-mode="riso"] .hero-image {
+      filter: grayscale(1) contrast(1.65) sepia(1) saturate(7) hue-rotate(333deg);
+      mix-blend-mode: multiply;
+      object-position: 52% 50%;
+    }
+    .hero-image-wrap[data-art-mode="riso"] .hero-image-ghost { opacity: .48; }
+    .hero-image-wrap[data-art-mode="riso"]::before { opacity: .34; }
+    .hero-image-wrap[data-art-mode="spoon"] .hero-image { filter: contrast(1.12) saturate(.9); object-position: 61% 50%; }
+    .hero-image-wrap[data-art-mode="idol"] .hero-image { filter: contrast(1.08) saturate(1.12); object-position: 58% 50%; }
+    .hero-image-wrap[data-art-mode="hybrid"] { background: var(--red); }
+    .hero-image-wrap[data-art-mode="hybrid"] .hero-image {
+      filter: contrast(1.18) saturate(.88);
+      object-position: 61% 50%;
+    }
+    .hero-image-wrap[data-art-mode="hybrid"] .hero-image-ghost {
+      filter: grayscale(1) contrast(1.65) sepia(1) saturate(7) hue-rotate(132deg);
+      mix-blend-mode: screen;
+      opacity: .17;
+      transform: translate(4px, -2px) scale(1.037);
+    }
+    .hero-image-wrap[data-art-mode="hybrid"]::before {
+      background-size: 8px 8px;
+      opacity: .13;
+    }
+    .hero-mode-mark {
+      align-content: center;
+      aspect-ratio: 1;
+      background: var(--yellow);
+      clip-path: polygon(50% 0, 61% 15%, 78% 5%, 82% 24%, 100% 25%, 90% 43%, 100% 57%, 82% 64%, 78% 84%, 60% 76%, 50% 100%, 39% 79%, 21% 91%, 20% 69%, 0 63%, 13% 47%, 0 32%, 20% 27%, 24% 7%, 41% 17%);
+      color: var(--ink);
+      display: grid;
+      font-family: var(--display);
+      font-size: clamp(1.8rem, 4vw, 3.6rem);
+      justify-items: center;
+      line-height: .75;
+      opacity: 0;
+      padding: 1.25rem;
+      position: absolute;
+      right: 4%;
+      text-transform: uppercase;
+      top: 5%;
+      transform: rotate(16deg) scale(.5);
+      transition: opacity .2s ease, transform .35s cubic-bezier(.18, 1.55, .4, 1);
+      width: clamp(7rem, 12vw, 10rem);
+      z-index: 7;
+    }
+    .hero-mode-mark small { font-family: var(--body); font-size: .48rem; font-weight: 900; letter-spacing: .06em; line-height: 1; max-width: 7rem; text-align: center; }
+    .hero-image-wrap:is([data-art-mode="spoon"], [data-art-mode="idol"], [data-art-mode="hybrid"]) .hero-mode-mark { opacity: 1; transform: rotate(8deg) scale(1); }
+    .hero-art-controls {
+      align-items: center;
+      background: var(--cream);
+      border: 2px solid var(--ink);
+      bottom: 4%;
+      display: flex;
+      gap: .3rem;
+      left: 4%;
+      padding: .35rem;
+      position: absolute;
+      transform: rotate(-1deg);
+      z-index: 8;
+    }
+    .hero-art-button {
+      align-items: center;
+      background: transparent;
+      border: 0;
+      color: var(--ink);
+      cursor: pointer;
+      display: flex;
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: .62rem;
+      font-weight: 900;
+      height: 2rem;
+      justify-content: center;
+      min-width: 2rem;
+      padding: .25rem .45rem;
+    }
+    .hero-art-button:hover { background: var(--pink); }
+    .hero-art-button[aria-pressed="true"] { background: var(--ink); color: var(--cream); transform: rotate(3deg); }
+    .hero-art-button:focus-visible { outline: 3px solid var(--red); outline-offset: 2px; }
+    .hero-art-mode {
+      background: var(--ink);
+      color: var(--cream);
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: .56rem;
+      left: 4%;
+      letter-spacing: .04em;
+      padding: .38rem .5rem;
+      position: absolute;
+      text-transform: uppercase;
+      top: calc(4% + 2.5rem);
+      transform: rotate(1deg);
+      z-index: 7;
     }
     .sticker {
       align-items: center;
@@ -271,6 +395,7 @@
       text-transform: uppercase;
       transform: rotate(10deg);
       width: clamp(6.5rem, 11vw, 9.5rem);
+      z-index: 6;
     }
     .image-caption {
       background: var(--cream);
@@ -282,6 +407,7 @@
       position: absolute;
       top: 4%;
       transform: rotate(-2deg);
+      z-index: 7;
     }
 
     .ticker {
@@ -433,21 +559,68 @@
     .burger-card:nth-child(1) { background: var(--pink); }
     .burger-card:nth-child(2) { background: var(--green); }
     .burger-card:nth-child(3) { background: var(--yellow); }
-    .burger-card-top { display: flex; justify-content: space-between; padding: 1rem; }
+    .burger-card-top { display: flex; justify-content: space-between; padding: 1rem; position: relative; z-index: 3; }
     .burger-number { font-family: var(--display); font-size: 4rem; line-height: .8; }
     .burger-price { background: var(--cream); border: 2px solid; font-weight: 900; height: fit-content; padding: .45rem .6rem; transform: rotate(3deg); }
-    .burger-card-copy { align-self: end; border-top: var(--line); padding: 1.25rem; }
+    .burger-card-copy { align-self: end; background: inherit; border-top: var(--line); padding: 1.25rem; position: relative; z-index: 3; }
     .burger-card h3 { font-family: var(--display); font-size: clamp(2.5rem, 5vw, 4.5rem); letter-spacing: -.035em; line-height: .78; margin: 0 0 1rem; text-transform: uppercase; }
     .burger-card p { font-weight: 700; margin: 0; max-width: 26rem; }
-    .ingredient-stack { display: grid; gap: .34rem; margin: auto; padding: 1rem; width: min(80%, 18rem); }
+    .ingredient-stack { display: grid; gap: .34rem; margin: auto; padding: 1rem; position: relative; width: min(80%, 18rem); z-index: 2; }
     .ingredient-stack span { border: 2px solid; display: block; height: 1.15rem; }
     .ingredient-stack span:nth-child(1), .ingredient-stack span:nth-child(7) { background: #d87928; border-radius: 50% 50% 20% 20%; height: 2.6rem; }
     .ingredient-stack span:nth-child(2), .ingredient-stack span:nth-child(5) { background: #69311e; transform: skew(-9deg); }
     .ingredient-stack span:nth-child(3), .ingredient-stack span:nth-child(6) { background: #ffc62a; clip-path: polygon(0 0, 100% 0, 82% 100%, 15% 75%); }
     .ingredient-stack span:nth-child(4) { background: #6c8329; height: .75rem; }
+    .card-glyph {
+      color: var(--ink);
+      height: 12rem;
+      left: 50%;
+      opacity: .14;
+      pointer-events: none;
+      position: absolute;
+      top: 4.25rem;
+      transform: translateX(-50%) rotate(-8deg) scale(.85);
+      transition: opacity .2s ease, transform .35s cubic-bezier(.22, 1, .36, 1);
+      width: 15rem;
+      z-index: 1;
+    }
+    .burger-card:nth-child(2) .card-glyph { transform: translateX(-50%) rotate(6deg) scale(.88); }
+    .burger-card:nth-child(3) .card-glyph { transform: translateX(-50%) rotate(-3deg) scale(.82); }
+    .burger-card:hover .card-glyph { opacity: .32; transform: translateX(-50%) rotate(1deg) scale(1); }
+    .card-glyph * { vector-effect: non-scaling-stroke; }
 
     .process-section { background: var(--red); color: var(--cream); }
     .process-section .class-joke { background: var(--cream); color: var(--ink); }
+
+    /* 05: the greasy spoon went near a printer and came back with opinions. */
+    body[data-art-mode="hybrid"]::before {
+      background-image: radial-gradient(rgba(17, 16, 14, .2) .75px, transparent .9px);
+      background-size: 7px 7px;
+      opacity: .34;
+    }
+    body[data-art-mode="hybrid"] .section-heading h2,
+    body[data-art-mode="hybrid"] .proof-big,
+    body[data-art-mode="hybrid"] .proof-copy h2,
+    body[data-art-mode="hybrid"] .footer-title {
+      text-shadow: 2px 1px 0 rgba(34, 200, 206, .34), -2px -1px 0 rgba(240, 56, 32, .26);
+    }
+    body[data-art-mode="hybrid"] .class-joke { box-shadow: 3px 2px 0 var(--cyan); }
+    body[data-art-mode="hybrid"] .ticker { box-shadow: inset 0 3px 0 var(--red), inset 0 -3px 0 var(--yellow); }
+    body[data-art-mode="hybrid"] .ticker-track { text-shadow: 2px 0 0 rgba(34, 200, 206, .52), -1px 0 0 rgba(240, 56, 32, .56); }
+    body[data-art-mode="hybrid"] .burger-card {
+      background-image: radial-gradient(rgba(17, 16, 14, .13) .75px, transparent .9px);
+      background-size: 7px 7px;
+      box-shadow: 4px 3px 0 rgba(34, 200, 206, .8), -3px -2px 0 rgba(240, 56, 32, .62);
+    }
+    body[data-art-mode="hybrid"] .burger-card:nth-child(2) { box-shadow: -4px 3px 0 rgba(240, 56, 32, .62), 3px -2px 0 rgba(34, 200, 206, .8); }
+    body[data-art-mode="hybrid"] .process-section {
+      background-image: radial-gradient(rgba(17, 16, 14, .16) .8px, transparent 1px);
+      background-size: 9px 9px;
+    }
+    body[data-art-mode="hybrid"] .proof-section {
+      background-image: radial-gradient(rgba(240, 56, 32, .17) .8px, transparent 1px);
+      background-size: 8px 8px;
+    }
     .steps { border-top: 2px solid var(--cream); }
     .step {
       border-bottom: 2px solid var(--cream);
@@ -625,7 +798,7 @@
     }
   </style>
 </head>
-<body>
+<body data-art-mode="hybrid">
   <header class="mwp-css-nav site-nav" data-mwp-navbar data-collapse="mobile-landscape" data-layout="dropdown" data-motion="dropdown" data-align="right" data-menu-label="visible" data-close-on-link="true" data-close-on-outside="true" data-focus-first="false" data-scroll-lock="auto" data-duration="280ms" data-open-duration="280ms" data-close-duration="220ms" data-distance="1.5rem" data-easing="cubic-bezier(0.22, 1, 0.36, 1)" data-panel-width="min(24rem, 100%)" data-stagger="35ms" data-icon-duration="220ms" data-submenu-icon-duration="220ms" data-submenu-icon-easing="cubic-bezier(0.22, 1, 0.36, 1)" data-submenu-icon-rotation="180deg" data-icon-lines="3">
     <div class="mwp-css-nav_inner">
       <a class="brand" href="#top" aria-label="Smashed home">SMASHED<span class="brand-dot">.</span><span class="brand-mini">Aggressively flat burgers</span></a>
@@ -699,9 +872,19 @@
         </div>
         <div><span class="class-joke">.hero-content_please-dont-break</span></div>
       </div>
-      <div class="hero-image-wrap">
-        <img class="hero-image" src="./assets/smashed-hero.jpg" width="1536" height="1024" alt="A gloriously messy double smashburger with crisp beef edges, cheese and pickles">
+      <div class="hero-image-wrap" data-art-mode="hybrid">
+        <img class="hero-image" id="hero-art-image" src="./assets/smashed-greasy-spoon.jpg" width="1536" height="1024" alt="A messy double smashburger photographed on a scratched red café counter with subtle misregistered print texture">
+        <img class="hero-image-ghost" src="./assets/smashed-greasy-spoon.jpg" width="1536" height="1024" alt="" aria-hidden="true">
+        <div class="hero-mode-mark" aria-hidden="true"><span>99p</span><small>artistically bankrupt</small></div>
         <span class="image-caption">alt text: actually appetising</span>
+        <span class="hero-art-mode" aria-live="polite">05 / greasy print hybrid</span>
+        <div class="hero-art-controls" role="group" aria-label="Choose a hero art direction">
+          <button class="hero-art-button" type="button" data-art-choice="flash" aria-label="Show the flash-fried original" aria-pressed="false">01</button>
+          <button class="hero-art-button" type="button" data-art-choice="riso" aria-label="Show the misregistered pop-print treatment" aria-pressed="false">02</button>
+          <button class="hero-art-button" type="button" data-art-choice="spoon" aria-label="Show the British greasy-spoon photograph" aria-pressed="false">03</button>
+          <button class="hero-art-button" type="button" data-art-choice="idol" aria-label="Show the fairground burger-idol photograph" aria-pressed="false">04</button>
+          <button class="hero-art-button" type="button" data-art-choice="hybrid" aria-label="Show the greasy-spoon pop-print hybrid" aria-pressed="true">05</button>
+        </div>
         <div class="sticker">100% AI slop<br>artisanally prompted</div>
       </div>
     </section>
@@ -737,6 +920,10 @@
       <div class="burger-grid">
         <article class="burger-card">
           <div class="burger-card-top"><span class="burger-number">01</span><span class="burger-price">£8.50</span></div>
+          <svg class="card-glyph" viewBox="0 0 240 180" aria-hidden="true">
+            <path d="M18 35 63 145 111 38 150 145 222 22" fill="none" stroke="currentColor" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="17"/>
+            <path d="M28 154h184" fill="none" stroke="currentColor" stroke-width="7"/>
+          </svg>
           <div class="ingredient-stack" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
           <div class="burger-card-copy">
             <h3>The Webflow one</h3>
@@ -745,6 +932,12 @@
         </article>
         <article class="burger-card">
           <div class="burger-card-top"><span class="burger-number">02</span><span class="burger-price">£11.50</span></div>
+          <svg class="card-glyph" viewBox="0 0 240 180" aria-hidden="true">
+            <rect x="16" y="20" width="208" height="140" fill="none" stroke="currentColor" stroke-width="8"/>
+            <rect x="46" y="45" width="148" height="91" fill="none" stroke="currentColor" stroke-width="8"/>
+            <rect x="76" y="67" width="88" height="48" fill="none" stroke="currentColor" stroke-width="8"/>
+            <path d="m64 58-25 31 25 31m112-62 25 31-25 31" fill="none" stroke="currentColor" stroke-linecap="square" stroke-width="10"/>
+          </svg>
           <div class="ingredient-stack" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
           <div class="burger-card-copy">
             <h3>The skill issue</h3>
@@ -753,6 +946,12 @@
         </article>
         <article class="burger-card">
           <div class="burger-card-top"><span class="burger-number">03</span><span class="burger-price">£9.75</span></div>
+          <svg class="card-glyph" viewBox="0 0 240 180" aria-hidden="true">
+            <rect x="25" y="21" width="190" height="138" rx="13" fill="none" stroke="currentColor" stroke-dasharray="12 9" stroke-width="8"/>
+            <circle cx="120" cy="88" r="47" fill="none" stroke="currentColor" stroke-width="9"/>
+            <circle cx="120" cy="88" r="14" fill="currentColor"/>
+            <path d="m151 112 52 39-22 4-11 21-19-64Z" fill="currentColor" stroke="currentColor" stroke-linejoin="round" stroke-width="5"/>
+          </svg>
           <div class="ingredient-stack" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
           <div class="burger-card-copy">
             <h3>The accessibility dweeb</h3>
@@ -910,6 +1109,75 @@
     document.querySelector('#navbar-toggle').addEventListener('click', (event) => {
       event.stopPropagation();
       navbar.toggle({ focusFirst: false });
+    });
+
+    const heroArtModes = {
+      flash: {
+        src: './assets/smashed-hero.jpg',
+        label: '01 / flash-fried original',
+        alt: 'A gloriously messy double smashburger with crisp beef edges, cheese and pickles'
+      },
+      riso: {
+        src: './assets/smashed-hero.jpg',
+        label: '02 / misregistered pop print',
+        alt: 'A smashburger rendered as a rough misregistered halftone print'
+      },
+      spoon: {
+        src: './assets/smashed-greasy-spoon.jpg',
+        label: '03 / British greasy spoon',
+        alt: 'A messy double smashburger photographed with direct flash on a scratched red café counter'
+      },
+      idol: {
+        src: './assets/smashed-fairground-idol.jpg',
+        label: '04 / fairground burger idol',
+        alt: 'A grinning hand-painted burger mascot sculpture against a hot-pink backdrop'
+      },
+      hybrid: {
+        src: './assets/smashed-greasy-spoon.jpg',
+        ghostSrc: './assets/smashed-greasy-spoon.jpg',
+        label: '05 / greasy print hybrid',
+        alt: 'A messy double smashburger photographed on a scratched red café counter with subtle misregistered print texture'
+      }
+    };
+    const heroArtWrap = document.querySelector('.hero-image-wrap');
+    const heroArtImage = document.querySelector('#hero-art-image');
+    const heroArtGhost = document.querySelector('.hero-image-ghost');
+    const heroArtLabel = document.querySelector('.hero-art-mode');
+    const heroArtButtons = [...document.querySelectorAll('[data-art-choice]')];
+
+    Object.values(heroArtModes).forEach(({ src }) => {
+      const preload = new Image();
+      preload.src = src;
+    });
+
+    function setHeroArtMode(mode) {
+      const art = heroArtModes[mode];
+      if (!art) return;
+      heroArtWrap.dataset.artMode = mode;
+      document.body.dataset.artMode = mode;
+      heroArtImage.src = art.src;
+      heroArtGhost.src = art.ghostSrc || art.src;
+      heroArtImage.alt = art.alt;
+      heroArtLabel.textContent = art.label;
+      heroArtButtons.forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.artChoice === mode)));
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && heroArtImage.animate) {
+        heroArtImage.animate([
+          { clipPath: 'inset(0 0 0 100%)', opacity: .45 },
+          { clipPath: 'inset(0)', opacity: 1 }
+        ], { duration: 420, easing: 'cubic-bezier(.22, 1, .36, 1)' });
+      }
+    }
+
+    heroArtButtons.forEach((button, index) => {
+      button.addEventListener('click', () => setHeroArtMode(button.dataset.artChoice));
+      button.addEventListener('keydown', (event) => {
+        if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+        event.preventDefault();
+        const direction = event.key === 'ArrowRight' ? 1 : -1;
+        const next = heroArtButtons[(index + direction + heroArtButtons.length) % heroArtButtons.length];
+        next.focus();
+        setHeroArtMode(next.dataset.artChoice);
+      });
     });
 
     const ticker = document.querySelector('.ticker');
