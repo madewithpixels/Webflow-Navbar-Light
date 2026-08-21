@@ -225,13 +225,14 @@ Keep the current Canvas-visible, self-contained Embed as the dependable default.
 
 ## 11. Webflow app product track
 
-The preferred app form is a Webflow Designer Extension that installs and configures a native SmashBurger component. It must remain a generator and maintenance tool rather than a proprietary runtime widget: generated links, Divs, classes, variables, variants, properties and the Canvas-visible enhancement Embed must remain editable and continue working when the app is closed or uninstalled.
+The preferred app form is a Webflow Designer Extension that installs and configures a native SmashBurger component. It must remain a generator and maintenance tool rather than a proprietary runtime widget: generated links, Divs, classes, variables, variants, properties and the Canvas-visible enhancement Embed must remain editable and continue working when the app is closed or uninstalled. A headline differentiator should be helping an author graduate a managed or adapted SmashBurger instance into a clean project-native component rather than merely installing it.
 
 ### Capability prototype
 
 - [ ] Scaffold a private Designer Extension with the Webflow CLI.
 - [ ] Prove end-to-end creation of native elements, existing/new classes and responsive styles.
 - [ ] Prove component creation, all five collapse variants and component property bindings.
+- [ ] Prove the Extension API can inspect a selected linked or unlinked instance, create a project-level component, create and group properties, and reconnect those properties to existing elements. Document any Designer-only steps immediately if the API cannot perform them safely.
 - [ ] Prove insertion of the Canvas-visible CSS/enhancement Embed.
 - [ ] Confirm generated output remains functional and editable without the extension running.
 - [ ] Confirm repeated installation is idempotent and does not duplicate components, classes or runtime code.
@@ -244,6 +245,18 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [ ] Generate a reusable native Webflow component whose semantic `sb-*` classes remain visible in the Navigator, with no custom structural display names masking them; keep property groups clear and purposeful.
 - [ ] Add installation diagnostics for missing structure, classes, attributes, props and runtime version.
 - [ ] Store an explicit SmashBurger schema/runtime version marker while preserving compatibility with established runtime hooks.
+
+### Make local / project adoption
+
+- [ ] Add a `Make local` workflow for authors who have configured or structurally adapted SmashBurger and want to turn it into their own maintainable project-level component.
+- [ ] Support both a still-linked Library instance and an already-unlinked native structure. Never discard the static values Webflow creates when props, variants and slots are unlinked.
+- [ ] Inspect the selected instance and consolidate behavioural configuration such as collapse, layout, motion, backdrop and closing behaviour onto the outer `sb-nav` element where Webflow supports the relevant settings or custom attributes.
+- [ ] Distinguish site-wide content that belongs in the local main component from the small set of values that genuinely need to vary per instance. Propose a minimal property set instead of recreating every Library property automatically.
+- [ ] Create the project-level component, recreate and group the approved properties, and reconnect them to the correct existing elements while preserving content, destinations, images, classes, styles, accessibility attributes and runtime hooks.
+- [ ] Present a preflight summary and before/after diff covering the proposed component name, behavioural attributes, properties, groups, bindings and any unsupported manual steps before changing the selected structure.
+- [ ] Provide rollback or a recoverable duplicate until the converted component passes structural, responsive, keyboard, focus, ARIA/inert, asset and runtime-version checks.
+- [ ] Confirm the resulting local component remains fully editable and functional after the Extension is closed or uninstalled, with no app-owned runtime dependency or duplicate source of truth.
+- [ ] Use the MWP'26 adoption as the first real fixture, then repeat the workflow on a clean clone and a deliberately rearranged native Navbar replacement.
 
 ### Safe maintenance and distribution
 
