@@ -1,4 +1,4 @@
-/*! Navbar Light v0.2.0 */
+/*! Navbar Light v0.2.1 */
 (() => {
   // src/navbar-light.js
   var ROOT_SELECTOR = "[data-mwp-navbar]";
@@ -308,5 +308,5 @@
   }
   globalThis.NavbarLight = NavbarLight;
   globalThis.initNavbarLight = initNavbarLight;
-  globalThis.MWP_NAVBAR_LIGHT_VERSION = "0.2.0";
+  globalThis.MWP_NAVBAR_LIGHT_VERSION = "0.2.1";
 })();

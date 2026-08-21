@@ -27,6 +27,24 @@ test('functional CSS keeps a closed native submenu out of the accessibility tree
   assert.doesNotMatch(css, /::before|::after/);
 });
 
+test('panel layout defaults stay below ordinary Webflow class styles', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  const panelLayoutProperty = /(?:^|;)\s*(?:display|position|inset|top|right|bottom|left|width|max-width|translate|transform-origin)\s*:/m;
+  const rulePattern = /([^{}]+)\{([^{}]*)\}/g;
+  const layoutRules = [...css.matchAll(rulePattern)]
+    .map(([, selector, declarations]) => ({
+      selector: selector.replaceAll(/\/\*[\s\S]*?\*\//g, '').trim(),
+      declarations
+    }))
+    .filter(({ selector, declarations }) => selector.includes('[data-mwp-panel]') && panelLayoutProperty.test(declarations));
+
+  assert.ok(layoutRules.length > 0);
+  for (const { selector } of layoutRules) {
+    assert.match(selector, /^:where\(/, `Panel layout selector must have zero specificity: ${selector}`);
+  }
+  assert.doesNotMatch(css.replaceAll(/\/\*[\s\S]*?\*\//g, ''), /!important/);
+});
+
 const markup = `
   <header data-mwp-navbar data-collapse="always" data-motion="none" data-close-on-link="true" data-close-on-outside="true">
     <div>

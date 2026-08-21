@@ -58,6 +58,7 @@ test('CDN loader pins the release tag and authenticates the committed artifacts'
 });
 
 test('CDN loader reports failures without removing native navigation content', async () => {
+  const packageMetadata = JSON.parse(await readFile(resolve(root, 'package.json'), 'utf8'));
   const loader = await readFile(resolve(root, 'webflow/navbar-light-cdn-loader.html'), 'utf8');
   const nativeMarkup = '<details data-mwp-menu><summary>Menu</summary><nav data-mwp-panel>Native fallback</nav></details>';
   const dom = new JSDOM(`<!doctype html><html><head>${loader}</head><body>${nativeMarkup}</body></html>`, {
@@ -71,8 +72,8 @@ test('CDN loader reports failures without removing native navigation content', a
   assets.forEach((asset) => asset.dispatchEvent(new dom.window.Event('error')));
 
   assert.deepEqual(JSON.parse(JSON.stringify(failures)), [
-    { asset: 'css', version: '0.2.0' },
-    { asset: 'javascript', version: '0.2.0' }
+    { asset: 'css', version: packageMetadata.version },
+    { asset: 'javascript', version: packageMetadata.version }
   ]);
   assert.deepEqual(assets.map((asset) => asset.dataset.mwpStatus), ['error', 'error']);
   assert.equal(dom.window.document.querySelector('[data-mwp-menu] summary').textContent, 'Menu');

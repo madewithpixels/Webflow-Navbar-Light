@@ -1,11 +1,11 @@
-# Webflow Navbar Light
+# SmashBurger
 
-Navbar Light is a CSS-first, Webflow-native replacement for the native Navbar component. It keeps one shared set of links for expanded and collapsed layouts, exposes the useful choices as component properties, and uses JavaScript only for progressive enhancement.
+SmashBurger is a CSS-first, Webflow-native replacement for the native Navbar component. It keeps one shared set of links for expanded and collapsed layouts, exposes the useful choices as component properties, and uses JavaScript only for progressive enhancement. The current `v0.2.1` files and compatibility API retain their original `Navbar Light` implementation names until the planned repository and package migration is released.
 
 The maintained implementation exists in synchronized forms:
 
-1. The self-contained `Navbar Light` component in the **MWP Component Library**, tested on the **Navbar Light** page.
-2. The optional pinned `Navbar Light CDN` component, isolated on the **Navbar Light CDN** page.
+1. The self-contained `SmashBurger` component in the **MWP Component Library**, tested on the legacy **Navbar Light** acceptance page.
+2. The optional pinned `SmashBurger CDN` component, isolated on the legacy **Navbar Light CDN** acceptance page.
 3. This repository, containing the matching CSS, enhancement script, interactive reference demo, tests and generated Webflow embeds.
 
 Published acceptance builds:
@@ -27,7 +27,7 @@ Published acceptance builds:
 
 For cross-project installation, share the MWP Component Library with the destination site and insert `SmashBurger` or `SmashBurger CDN` from Webflow Libraries. This preserves component identity, all five variants, the complete property surface and replaceable icon bindings. Ordinary cross-site clipboard paste is only a flattened fallback: it transfers native elements and assets but does not preserve component properties or variants.
 
-Insert `Navbar Light`, then select its collapse variant at the Base breakpoint:
+Insert `SmashBurger` or `SmashBurger CDN`, then select its collapse variant at the Base breakpoint:
 
 - `Never`
 - `Tablet`
@@ -61,7 +61,15 @@ The native `Navbar Light settings` block mirrors values that the current Webflow
 
 The included Webflow styles are deliberately structural: layout, spacing, touch targets, burger geometry, panel grouping, borders and small radii. Brand and navigation classes set only a modest type scale, weight and spacing; they do not set a font family or fixed text colour. The installed component therefore inherits the destination project's font and colour from its body/link tag styles. The burger bars, panel borders and outlined CTA use `currentColor` and follow that inherited colour automatically.
 
-This means the component can look intentionally plain in the library. Apply project-specific presentation through the existing native `mwp-css-nav_*` classes after pasting; no Embed edit or `!important` override should be necessary.
+This means the component can look intentionally plain in the library. Apply project-specific presentation through the existing native `mwp-css-nav_*` classes after pasting; do not edit the delivery Embed or use `!important`. The legacy `v0.2.0` stylesheet had one cascade exception: its collapsed-panel placement and width selector tied a single Webflow class and won because the CDN loaded later. `v0.2.1` demotes panel display, placement, insets, alignment, width and transform-origin to zero-specificity fallbacks so the ordinary panel class can override them directly.
+
+### Replacing an existing Webflow Navbar
+
+A live migration trial has confirmed that SmashBurger can replace an already styled and rearranged native Webflow Navbar without reproducing that Navbar's dropdown structure. The dependable workflow is to configure the Library instance first, unlink it, retain the functional data hooks and delivery Embed, then move project-specific presentation and utility links onto the native SmashBurger elements.
+
+The current release has one important structural constraint: `Menu details` and `Navigation panel` must remain adjacent, direct children of `Navbar inner`. Its CSS-only open state currently relies on that relationship. Style or reposition those elements with Flex, Grid, ordering and normal classes rather than wrapping the menu trigger separately. A future hardening release is planned to make enhanced open-state presentation respond directly to the panel's runtime `data-state` while preserving the canonical no-script structure.
+
+Existing fixed or sticky page content can also paint over an otherwise open panel. Give the SmashBurger root a deliberate stacking level above normal page content before changing overflow or containment. See [the Webflow migration guide](webflow/migration-guide.md) for the complete public checklist, Webflow-native element restrictions and accessibility checks.
 
 ### MWP Component Library demo shell
 
@@ -174,11 +182,11 @@ Open [demo/index.html](demo/index.html) directly or through a local web server. 
 
 ## Optional CDN distribution
 
-The CDN route uses exact semantic-version GitHub tags through jsDelivr. The live `v0.2.0` production files are:
+The CDN route uses exact semantic-version GitHub tags through jsDelivr. The live `v0.2.1` production files are:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.2.0/dist/navbar-light.min.css">
-<script defer src="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.2.0/dist/navbar-light.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.2.1/dist/navbar-light.min.css">
+<script defer src="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.2.1/dist/navbar-light.min.js"></script>
 ```
 
 Never use `latest`, a branch name or a version range in a production Webflow project. Exact jsDelivr versions are permanently cached, so a correction must receive a new version and tag. The generated [webflow/navbar-light-cdn-loader.html](webflow/navbar-light-cdn-loader.html) includes the exact URLs, SHA-384 integrity values, a readable runtime version and load/error state on the native link/script elements. A failed asset dispatches `mwp-navbar-light:cdn-error` and logs a diagnostic without hiding the native navigation content.
@@ -230,6 +238,7 @@ The published Tablet variant has passed a genuine macOS VoiceOver keyboard-and-s
 └── webflow
     ├── component-map.md
     ├── copy-paste-test.md
+    ├── migration-guide.md
     ├── navbar-light-cdn-loader.html
     └── navbar-light-embed.html
 ```
@@ -238,4 +247,6 @@ The published Tablet variant has passed a genuine macOS VoiceOver keyboard-and-s
 
 Before structural changes, create a Webflow backup. The obsolete `CSS Navbar — Details` test component has been removed; `Navbar Light` remains the sole acceptance component on its page, while the optional CDN edition is isolated on a separate page. Publishing remains a deliberate user-controlled release step.
 
-See [todo.md](todo.md) for completed work, the future explicit version-upgrade/rollback exercise and the remaining Windows NVDA verification.
+When testing an unlinked Library instance, do not use MCP name-only style replacement if imported and local selectors share the same Designer name. The current element-style action cannot distinguish those records by style ID or Library scope. Use the verified Designer cleanup workflow from [webflow/migration-guide.md](webflow/migration-guide.md), and confirm the actual element classes after every batch.
+
+See [todo.md](todo.md) for the migration-hardening and public-clonable roadmap, the future explicit version-upgrade/rollback exercise and the remaining Windows NVDA verification.

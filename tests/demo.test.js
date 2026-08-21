@@ -41,12 +41,12 @@ test('demo initializes when opened directly from the filesystem', async () => {
   const collapse = dom.window.document.querySelector('[name="collapse"]');
   collapse.value = 'always';
   collapse.dispatchEvent(new dom.window.Event('change', { bubbles: true }));
-  assert.equal(dom.window.getComputedStyle(root.querySelector('[data-mwp-panel]')).display, 'grid');
+  assert.notEqual(dom.window.getComputedStyle(root.querySelector('[data-mwp-panel]')).display, 'none');
   const submenu = root.querySelector('[data-mwp-submenu]');
   const submenuList = root.querySelector('.mwp-css-nav_submenu-list');
   assert.equal(dom.window.getComputedStyle(submenuList).display, 'none');
   submenu.open = true;
-  assert.equal(dom.window.getComputedStyle(submenuList).display, 'grid');
+  assert.notEqual(dom.window.getComputedStyle(submenuList).display, 'none');
   assert.ok(submenu.querySelector('[data-mwp-submenu-icon]'));
   const panelGroups = [...root.querySelector('[data-mwp-panel]').children];
   assert.deepEqual(panelGroups.map((element) => element.className), [
