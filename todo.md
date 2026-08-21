@@ -37,7 +37,7 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Keep the shared panel statically visible on expanded breakpoints.
 - [x] Convert the same panel to collapsed behavior at the selected breakpoint.
 - [x] Preserve Webflow's automatic current-page class behavior.
-- [x] Give structural elements clear Navigator display names.
+- [x] Initially give structural elements custom Navigator display names. The later real-site integration showed that these labels obscure the selectors authors actually need; future Webflow releases will remove them.
 - [x] Keep panel content and configuration visible in Designer while Preview starts closed.
 - [x] Keep the CSS/enhancement Embed visible in Designer.
 
@@ -158,7 +158,9 @@ Keep the current Canvas-visible, self-contained Embed as the dependable default.
 - [x] Commit and push all current portability, Library-installation and cleanup documentation before changing repository identity (`58e1407`).
 - [ ] Create `madewithpixels/SmashBurger-Webflow-Navbar` as the new canonical GitHub repository with the complete Git history; use `smashburger-webflow-navbar` for the package name.
 - [ ] Keep `madewithpixels/Webflow-Navbar-Light` available as an archived compatibility repository so existing immutable `v0.1.0` and `v0.2.0` jsDelivr URLs continue to resolve; do not rely on GitHub repository redirects for the third-party CDN contract.
-- [ ] Update repository, package, documentation, generator and test references to the new canonical name without changing the established `mwp-*` public integration hooks.
+- [ ] Rename every portable component class from the legacy `mwp-*` / `mwp-css-nav_*` namespace to a documented `sb-*` namespace (`SmashBurger`) as part of the canonical repository rename. Update source HTML/CSS/JavaScript, generated Embeds, demos, Webflow components, clonable, documentation and tests together; treat this as an explicit versioned class migration rather than silently changing an existing release. Reserve `SmashBurger Lite` for the free clonable's product name, not its class prefix.
+- [ ] Audit non-class public hooks separately during the rename. Do not assume that `data-mwp-*` attributes, `--mwp-*` custom properties or JavaScript compatibility aliases must change merely because the Webflow class namespace moves to `sb-*`; document the retained compatibility contract and any later migration deliberately.
+- [ ] Add a generated-output assertion that a clean renamed release contains no legacy `mwp-*` class tokens while still rejecting accidental changes to retained runtime attributes or compatibility hooks.
 - [ ] Audit public-facing HTML, CSS and JavaScript comments, diagnostics, demo copy and generated banners for stale `Navbar Light` wording. Use `SmashBurger` for the product name while retaining versioned filenames, CDN URLs, Webflow variant markers and compatibility API aliases until an explicitly tested migration can replace them.
 - [ ] Build, test and publish a new semantic release from `SmashBurger-Webflow-Navbar`; generate exact new jsDelivr URLs and SHA-384 integrity values.
 - [ ] Update both MWP Component Library editions and the `Smashburger` clean-install instance through the Library workflow; verify properties, variants, assets, CDN loading, rollback and update linkage.
@@ -197,6 +199,8 @@ Keep the current Canvas-visible, self-contained Embed as the dependable default.
 
 ### Canvas authoring experience
 
+- [ ] Remove custom Navigator display names from portable Webflow release elements so Webflow shows the actual `sb-*` class names authors need for styling and structural work. Make the class names themselves clear enough to describe the element.
+- [ ] Verify the source Library, linked clean-install instance, unlinked/local instance and public clonable all expose the expected class names directly in the Navigator, without friendly labels masking their selectors.
 - [ ] Prototype moving the Canvas-visible Code Embed inside one compact `SmashBurger infrastructure` or settings Details element, collapsed by default, and verify that its style/script output still executes and its property-bound configuration remains readable in Preview and published output.
 - [ ] Remove the settings inspector Div from normal Canvas flow when it is not being used. Keep it compact/collapsible, selectable from the Navigator and available on demand without letting its summary or property rows push page content down while the navigation is styled.
 - [ ] Test Webflow's `Keep in HTML when hidden` behavior before relying on a hidden authoring wrapper; the runtime must never disappear because an author hid the Canvas helper.
@@ -211,6 +215,7 @@ Keep the current Canvas-visible, self-contained Embed as the dependable default.
 - [ ] Define a deliberately basic clonable scope that demonstrates SmashBurger without turning the Library component into a site-specific header system.
 - [ ] Supply a preconfigured, editable local Webflow component so clonable users do not need to install, configure and unlink a shared-Library instance first.
 - [ ] Ensure the clonable's local component does not ship with the Library unlink workflow's generated `.always*` combo-class trail; retain only deliberately named, explainable classes.
+- [ ] Leave structural elements on their default class-based Navigator labels; do not add custom display names that hide the clonable's `sb-*` selectors.
 - [ ] Include a plain baseline and a separately styled example, with one shared set of native links and no duplicated desktop/mobile navigation.
 - [ ] Include the Navbar workbench with prepared closed/open examples and a backdrop reference so common styling work does not obstruct the clonable's real pages.
 - [ ] Install one exact-version pinned CDN Embed with integrity metadata and keep the settings/structure understandable on the Canvas.
@@ -236,7 +241,7 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [ ] Add an Insert SmashBurger workflow.
 - [ ] Expose collapse breakpoint, layout, alignment, panel width and motion settings.
 - [ ] Expose duration, easing, distance, stagger, icon and accessibility/behaviour settings.
-- [ ] Generate a reusable native Webflow component with clear Navigator names and property groups.
+- [ ] Generate a reusable native Webflow component whose semantic `sb-*` classes remain visible in the Navigator, with no custom structural display names masking them; keep property groups clear and purposeful.
 - [ ] Add installation diagnostics for missing structure, classes, attributes, props and runtime version.
 - [ ] Store an explicit SmashBurger schema/runtime version marker while preserving compatibility with established runtime hooks.
 

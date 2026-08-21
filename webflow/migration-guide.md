@@ -83,6 +83,8 @@ The Backdrop should remain a sibling within the SmashBurger root and retain `[da
 
 The settings inspector and Embed remain visible on the Designer Canvas. The enhancement hides the settings inspector only after initialization in Preview or published output. A more compact authoring-infrastructure treatment is planned so the settings Div and Embed can remain selectable without occupying normal page layout while the navigation is styled.
 
+Custom Navigator display names can make a polished component demo easier to scan, but they hide the class selectors authors need while adapting a real navigation. Future Webflow releases and the public clonable will therefore leave structural elements on Webflow's class-based Navigator labels. Their planned `sb-*` class names must be descriptive enough to serve as both the styling API and the useful Navigator label.
+
 Use exactly one delivery mode:
 
 - Self-contained Embed.
@@ -109,4 +111,4 @@ Finish functional structure, CSS, destinations, accessible names and breakpoint 
 
 ## Planned public clonable
 
-A free Webflow clonable is on the roadmap as an early public introduction to SmashBurger. It will avoid making new users repeat the Library-to-unlinked migration and will include a preconfigured editable local component, a plain baseline, a styled example, the pinned delivery Embed, a short safe-editing guide and a clone/install verification pass. A dedicated workbench will keep prepared closed/open examples and a backdrop reference away from real page layouts, allowing shared Webflow classes to be styled without leaving production instances obstructing the Canvas.
+A free Webflow clonable, provisionally named `SmashBurger Lite`, is on the roadmap as an early public introduction to SmashBurger. It will avoid making new users repeat the Library-to-unlinked migration and will include a preconfigured editable local component, a plain baseline, a styled example, the pinned delivery Embed, a short safe-editing guide and a clone/install verification pass. Its structural `sb-*` classes will remain visible directly in the Navigator rather than being masked by custom display names. A dedicated workbench will keep prepared closed/open examples and a backdrop reference away from real page layouts, allowing shared Webflow classes to be styled without leaving production instances obstructing the Canvas.
