@@ -58,8 +58,10 @@
   transition-timing-function: var(--mwp-nav-ease);
 }
 
+/* Default shift matches the native bar thickness plus its vertical gap.
+ * Set --mwp-nav-icon-shift when a destination project changes that spacing. */
 [data-mwp-menu][open] [data-mwp-line]:nth-child(1) {
-  transform: translateY(var(--mwp-nav-icon-shift, 0.375rem)) rotate(45deg);
+  transform: translateY(var(--mwp-nav-icon-shift, 0.4375rem)) rotate(45deg);
 }
 
 [data-mwp-menu][open] [data-mwp-line]:nth-child(2) {
@@ -67,11 +69,19 @@
 }
 
 [data-mwp-menu][open] [data-mwp-line]:nth-child(3) {
-  transform: translateY(calc(var(--mwp-nav-icon-shift, 0.375rem) * -1)) rotate(-45deg);
+  transform: translateY(calc(var(--mwp-nav-icon-shift, 0.4375rem) * -1)) rotate(-45deg);
 }
 
 [data-mwp-navbar][data-icon-lines="2"] [data-mwp-line]:nth-child(2) {
   display: none;
+}
+
+[data-mwp-navbar][data-icon-lines="2"] [data-mwp-menu][open] [data-mwp-line]:nth-child(1) {
+  transform: translateY(calc(var(--mwp-nav-icon-shift, 0.4375rem) * 0.5)) rotate(45deg);
+}
+
+[data-mwp-navbar][data-icon-lines="2"] [data-mwp-menu][open] [data-mwp-line]:nth-child(3) {
+  transform: translateY(calc(var(--mwp-nav-icon-shift, 0.4375rem) * -0.5)) rotate(-45deg);
 }
 
 :where([data-mwp-panel]) {

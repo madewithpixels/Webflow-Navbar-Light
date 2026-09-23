@@ -1,4 +1,4 @@
-/*! Navbar Light v0.2.1 */
+/*! Navbar Light v0.2.2 */
 /* src/navbar-light.css */
 :where([data-mwp-navbar]) {
   --mwp-nav-duration-open: 280ms;
@@ -47,16 +47,22 @@
   transition-timing-function: var(--mwp-nav-ease);
 }
 [data-mwp-menu][open] [data-mwp-line]:nth-child(1) {
-  transform: translateY(var(--mwp-nav-icon-shift, 0.375rem)) rotate(45deg);
+  transform: translateY(var(--mwp-nav-icon-shift, 0.4375rem)) rotate(45deg);
 }
 [data-mwp-menu][open] [data-mwp-line]:nth-child(2) {
   opacity: 0;
 }
 [data-mwp-menu][open] [data-mwp-line]:nth-child(3) {
-  transform: translateY(calc(var(--mwp-nav-icon-shift, 0.375rem) * -1)) rotate(-45deg);
+  transform: translateY(calc(var(--mwp-nav-icon-shift, 0.4375rem) * -1)) rotate(-45deg);
 }
 [data-mwp-navbar][data-icon-lines="2"] [data-mwp-line]:nth-child(2) {
   display: none;
+}
+[data-mwp-navbar][data-icon-lines="2"] [data-mwp-menu][open] [data-mwp-line]:nth-child(1) {
+  transform: translateY(calc(var(--mwp-nav-icon-shift, 0.4375rem) * 0.5)) rotate(45deg);
+}
+[data-mwp-navbar][data-icon-lines="2"] [data-mwp-menu][open] [data-mwp-line]:nth-child(3) {
+  transform: translateY(calc(var(--mwp-nav-icon-shift, 0.4375rem) * -0.5)) rotate(-45deg);
 }
 :where([data-mwp-panel]) {
   will-change: opacity, transform;
