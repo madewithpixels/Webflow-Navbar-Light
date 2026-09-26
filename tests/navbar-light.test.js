@@ -45,6 +45,12 @@ test('panel layout defaults stay below ordinary Webflow class styles', () => {
   assert.doesNotMatch(css.replaceAll(/\/\*[\s\S]*?\*\//g, ''), /!important/);
 });
 
+test('custom motion keeps the panel hidden when closed and reserves time for GSAP', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  assert.match(css, /\[data-motion="custom"\] \[data-mwp-panel\],[\s\S]*?opacity:\s*0;[\s\S]*?visibility:\s*hidden;/);
+  assert.match(css, /\[data-state="closed"\] \[data-mwp-panel\]\s*\{[\s\S]*?visibility:\s*hidden;/);
+});
+
 const markup = `
   <header data-mwp-navbar data-collapse="always" data-motion="none" data-close-on-link="true" data-close-on-outside="true">
     <div>
@@ -274,6 +280,18 @@ test('removes JavaScript transition waits when reduced motion is requested', () 
 
   assert.equal(navbar.motionDuration('open'), 0);
   assert.equal(navbar.motionDuration('close'), 0);
+  navbar.destroy();
+});
+
+test('custom motion uses configured timing so a GSAP close can finish', () => {
+  const root = document.querySelector('[data-mwp-navbar]');
+  root.dataset.motion = 'custom';
+  root.style.setProperty('--mwp-nav-duration-open', '280ms');
+  root.style.setProperty('--mwp-nav-duration-close', '220ms');
+  const navbar = new NavbarLight(root);
+
+  assert.equal(navbar.motionDuration('open'), 280);
+  assert.equal(navbar.motionDuration('close'), 220);
   navbar.destroy();
 });
 

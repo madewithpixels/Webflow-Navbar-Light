@@ -2,7 +2,7 @@
 /*
  * Navbar Light
  * Functional state plus low-specificity structural defaults.
- * Visual design belongs in Webflow classes.
+ * Neutral layout presets use overridable colour and spacing tokens.
  * No pseudo-elements are used.
  */
 
@@ -18,11 +18,20 @@
   --mwp-nav-submenu-icon-rotation: 180deg;
   --mwp-nav-stagger: 0ms;
   --mwp-nav-backdrop-opacity: 0.45;
+  --mwp-nav-z-index: 100;
   position: relative;
   isolation: isolate;
+  z-index: var(--mwp-nav-z-index);
 }
 
 :where([data-mwp-navbar] .mwp-css-nav_inner) {
+  position: relative;
+  z-index: 2;
+}
+
+/* The native component has the same hooks even when a shared Library prefixes
+ * its Webflow class names. */
+:where([data-mwp-inner]) {
   position: relative;
   z-index: 2;
 }
@@ -186,6 +195,13 @@
   visibility: hidden;
 }
 
+[data-mwp-navbar][data-mwp-collapsed="true"][data-state="closed"] [data-mwp-panel] {
+  opacity: 0;
+  pointer-events: none;
+  transition: none;
+  visibility: hidden;
+}
+
 :where(
   [data-mwp-navbar][data-mwp-collapsed="true"],
   [data-mwp-navbar][data-collapse="always"],
@@ -314,10 +330,87 @@
 }
 
 /* Layouts */
+[data-mwp-navbar][data-mwp-collapsed="true"] [data-mwp-panel] {
+  background: var(--mwp-nav-panel-surface, #fff);
+  border: 1px solid var(--mwp-nav-panel-border, rgb(0 0 0 / 0.14));
+  box-shadow: var(--mwp-nav-panel-shadow, 0 1rem 2.5rem rgb(0 0 0 / 0.12));
+  box-sizing: border-box;
+  color: var(--mwp-nav-panel-ink, #1d2022);
+  gap: clamp(1rem, 2vw, 2rem);
+  max-height: calc(100dvh - var(--mwp-nav-header-height, 4.5rem));
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: clamp(1rem, 2vw, 2rem);
+  z-index: 2;
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"] [data-mwp-primary],
+[data-mwp-navbar][data-mwp-collapsed="true"] [data-mwp-links] {
+  align-items: stretch;
+  display: grid;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"] [data-mwp-primary] { order: 0; }
+
+[data-mwp-navbar][data-mwp-collapsed="true"] [data-mwp-links] > * {
+  min-width: 0;
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"] [data-mwp-links] > a,
+[data-mwp-navbar][data-mwp-collapsed="true"] [data-mwp-links] > [data-mwp-submenu] > summary {
+  align-items: center;
+  color: inherit;
+  display: flex;
+  min-height: 2.75rem;
+  padding: 0.5rem 0;
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"] [data-mwp-secondary] {
+  border-top: 1px solid var(--mwp-nav-panel-border, rgb(0 0 0 / 0.14));
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+  order: 1;
+  padding-top: 1rem;
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"] [data-mwp-secondary] > * {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+:where([data-mwp-navbar][data-mwp-collapsed="true"][data-layout="dropdown"] [data-mwp-panel]) {
+  width: min(var(--mwp-nav-panel-width), calc(100vw - 1rem));
+}
+
 :where([data-mwp-navbar][data-mwp-collapsed="true"][data-layout="full-width"] [data-mwp-panel]) {
-  left: 0;
-  right: 0;
-  width: 100%;
+  left: 50%;
+  right: auto;
+  translate: -50% 0;
+  width: 100vw;
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"][data-layout="full-width"] [data-mwp-panel] {
+  border-left: 0;
+  border-right: 0;
+  box-shadow: var(--mwp-nav-panel-shadow, 0 1rem 2.5rem rgb(0 0 0 / 0.12));
+  grid-template-columns: minmax(0, 2fr) minmax(12rem, 1fr);
+  max-height: calc(100dvh - var(--mwp-nav-header-height, 4.5rem));
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"][data-layout="full-width"] [data-mwp-links] {
+  grid-template-columns: repeat(auto-fit, minmax(min(10rem, 100%), 1fr));
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"][data-layout="full-width"] [data-mwp-secondary] {
+  border-left: 1px solid var(--mwp-nav-panel-border, rgb(0 0 0 / 0.14));
+  border-top: 0;
+  padding-left: clamp(1rem, 2vw, 2rem);
+  padding-top: 0;
 }
 
 :where(
@@ -329,6 +422,21 @@
   max-width: 100%;
   position: fixed;
   top: 0;
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"]:is([data-layout="left"], [data-layout="right"]) [data-mwp-panel] {
+  align-content: start;
+  grid-template-rows: auto 1fr;
+  height: 100dvh;
+  max-height: 100dvh;
+}
+
+:where([data-mwp-navbar][data-mwp-collapsed="true"]:is([data-layout="left"], [data-layout="right"]) [data-mwp-panel]) {
+  width: min(var(--mwp-nav-panel-width), 100vw);
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"]:is([data-layout="left"], [data-layout="right"]) [data-mwp-secondary] {
+  align-self: end;
 }
 
 :where([data-mwp-navbar][data-mwp-collapsed="true"][data-layout="left"] [data-mwp-panel]) {
@@ -356,6 +464,71 @@
 
 [data-mwp-navbar][data-mwp-collapsed="true"][data-layout="overlay"] [data-mwp-panel] {
   transform: translateY(100%);
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"][data-layout="overlay"] [data-mwp-panel] {
+  align-content: center;
+  background: var(--mwp-nav-overlay-surface, #1d2022);
+  border: 0;
+  color: var(--mwp-nav-overlay-ink, #fff);
+  gap: clamp(1.5rem, 4vw, 3rem);
+  height: 100dvh;
+  justify-items: center;
+  max-height: 100dvh;
+  padding: clamp(5rem, 8vw, 8rem) clamp(1rem, 6vw, 5rem);
+  text-align: center;
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"][data-layout="overlay"] [data-mwp-links] {
+  justify-items: center;
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"][data-layout="overlay"] [data-mwp-links] > a,
+[data-mwp-navbar][data-mwp-collapsed="true"][data-layout="overlay"] [data-mwp-links] > [data-mwp-submenu] > summary {
+  font-size: clamp(1.5rem, 4vw, 3.5rem);
+  line-height: 1.1;
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"][data-layout="overlay"] [data-mwp-secondary] {
+  justify-items: center;
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"][data-layout="overlay"] [data-mwp-secondary] img {
+  filter: var(--mwp-nav-overlay-icon-filter, brightness(0) invert(1));
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"]:is([data-layout="left"], [data-layout="right"], [data-layout="overlay"]):is([data-state="opening"], [data-state="open"], [data-state="closing"]) [data-mwp-menu] {
+  position: fixed;
+  right: clamp(1rem, 2vw, 2rem);
+  top: 1rem;
+  z-index: 4;
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"][data-layout="left"]:is([data-state="opening"], [data-state="open"], [data-state="closing"]) [data-mwp-menu] {
+  left: clamp(1rem, 2vw, 2rem);
+  right: auto;
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"]:is([data-layout="left"], [data-layout="right"], [data-layout="overlay"]):is([data-state="opening"], [data-state="open"], [data-state="closing"]) [data-mwp-trigger] {
+  background: var(--mwp-nav-close-surface, #1d2022);
+  border: 1px solid var(--mwp-nav-close-border, rgb(255 255 255 / 0.3));
+  border-radius: 999px;
+  color: var(--mwp-nav-close-ink, #fff);
+  min-height: 2.75rem;
+  min-width: 2.75rem;
+}
+
+@media screen and (max-width: 767px) {
+  [data-mwp-navbar][data-mwp-collapsed="true"][data-layout="full-width"] [data-mwp-panel] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  [data-mwp-navbar][data-mwp-collapsed="true"][data-layout="full-width"] [data-mwp-secondary] {
+    border-left: 0;
+    border-top: 1px solid var(--mwp-nav-panel-border, rgb(0 0 0 / 0.14));
+    padding-left: 0;
+    padding-top: 1rem;
+  }
 }
 
 [data-mwp-navbar][data-mwp-collapsed="true"]:where([data-layout="left"], [data-layout="right"], [data-layout="overlay"]) [data-mwp-menu][open] + [data-mwp-panel] {
@@ -406,12 +579,19 @@
 
 [data-mwp-navbar][data-mwp-collapsed="true"][data-motion="custom"] [data-mwp-panel],
 [data-mwp-menu][data-mwp-motion="mwp-motion-custom"] + [data-mwp-panel] {
-  opacity: 1;
-  pointer-events: auto;
+  opacity: 0;
+  pointer-events: none;
   transform: none;
   transition: none;
-  visibility: visible;
+  visibility: hidden;
   will-change: auto;
+}
+
+[data-mwp-navbar][data-mwp-collapsed="true"][data-motion="custom"]:is([data-state="opening"], [data-state="open"], [data-state="closing"]) [data-mwp-panel],
+[data-mwp-menu][data-mwp-motion="mwp-motion-custom"][open] + [data-mwp-panel] {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
 }
 
 /* Optional item stagger. The script assigns --mwp-item-index. */
@@ -742,7 +922,7 @@ class NavbarLight {
 
   motionDuration(direction) {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return 0;
-    if (['none', 'custom'].includes(this.root.dataset.motion)) return 0;
+    if (this.root.dataset.motion === 'none') return 0;
     const property = direction === 'open' ? '--mwp-nav-duration-open' : '--mwp-nav-duration-close';
     return milliseconds(getComputedStyle(this.root).getPropertyValue(property), 0);
   }

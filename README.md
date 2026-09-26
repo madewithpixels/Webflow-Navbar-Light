@@ -1,6 +1,6 @@
 # SmashBurger
 
-SmashBurger is a CSS-first, Webflow-native replacement for the native Navbar component. It keeps one shared set of links for expanded and collapsed layouts, exposes the useful choices as component properties, and uses JavaScript only for progressive enhancement. The current `v0.2.2` files and compatibility API retain their original `Navbar Light` implementation names until the planned repository and package migration is released.
+SmashBurger is a CSS-first, Webflow-native replacement for the native Navbar component. It keeps one shared set of links for expanded and collapsed layouts, exposes the useful choices as component properties, and uses JavaScript only for progressive enhancement. The `v0.2.3` files and compatibility API retain their original `Navbar Light` implementation names until the planned repository and package migration is released.
 
 The maintained implementation exists in synchronized forms:
 
@@ -10,7 +10,7 @@ The maintained implementation exists in synchronized forms:
 
 Published acceptance builds:
 
-- Source library: <https://mwp-component-library.webflow.io/navbar-light>
+- Source library: <https://mwp-component-library.webflow.io/smashburger-navbar>
 - Clean Library installation: <https://smashburger-4b8f18.webflow.io/>
 
 ## Design constraints
@@ -18,8 +18,8 @@ Published acceptance builds:
 - Visible structure is made from native Webflow elements.
 - Links, submenu, submenu arrow, CTA, social/contact navigation and replaceable icon Images, backdrop, icon bars, settings and embed remain visible in Designer.
 - There are no pseudo-elements.
-- Webflow classes remain responsible for visual design.
-- Custom CSS is limited to functional layout, state and motion behavior.
+- Webflow classes remain editable for project-specific visual design.
+- The shared CSS supplies neutral visual defaults for each collapsed layout, alongside functional state and motion behavior.
 - Native `<details>`/`<summary>` plus CSS provide the no-script baseline.
 - JavaScript adds state events, focus management, outside/link closing, inertness and scroll locking.
 
@@ -80,6 +80,8 @@ The source site has a deliberately separate demo theme for presenting components
 The native `/style-guide` page is both a visual reference and a class-retention page. It keeps the demo typography, semantic colours, layout primitives, buttons, pills and cards attached to real Canvas elements so Webflow's unused-class cleanup does not remove useful library-site styles. Project-specific presentation belongs on these host-page classes; portable component structure belongs on `mwp-css-nav_*`.
 
 ## Layout and motion presets
+
+Version 0.2.3 gives each collapsed layout a usable default presentation. See [layout presets](webflow/layout-presets.md) for the five shapes and styling tokens. A linked Webflow Library site receives these defaults when its Library update is accepted.
 
 Layouts:
 
@@ -184,16 +186,16 @@ Open [demo/index.html](demo/index.html) directly or through a local web server. 
 
 ## Optional CDN distribution
 
-The CDN route uses exact semantic-version GitHub tags through jsDelivr. The `v0.2.2` production files are:
+The CDN route uses exact semantic-version GitHub tags through jsDelivr. The `v0.2.3` production files are:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.2.2/dist/navbar-light.min.css">
-<script defer src="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.2.2/dist/navbar-light.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.2.3/dist/navbar-light.min.css">
+<script defer src="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.2.3/dist/navbar-light.min.js"></script>
 ```
 
 Never use `latest`, a branch name or a version range in a production Webflow project. Exact jsDelivr versions are permanently cached, so a correction must receive a new version and tag. The generated [webflow/navbar-light-cdn-loader.html](webflow/navbar-light-cdn-loader.html) includes the exact URLs, SHA-384 integrity values, a readable runtime version and load/error state on the native link/script elements. A failed asset dispatches `mwp-navbar-light:cdn-error` and logs a diagnostic without hiding the native navigation content.
 
-The `v0.2.2` build corrects the burger open-state alignment. Existing sites pinned to `v0.2.1` continue to use the previous files until their exact CDN URLs are updated.
+The `v0.2.3` build adds neutral layouts and supports timed custom motion. Existing sites pinned to `v0.2.2` continue to use the previous files until their exact CDN URLs are updated.
 
 Sites with a Content Security Policy must allow `https://cdn.jsdelivr.net` in `style-src` and `script-src`. The loader's inline diagnostic handlers also need the site's permitted inline-handler policy; blocking those handlers suppresses the custom diagnostic but does not itself block the external CSS or JavaScript. The CDN necessarily receives ordinary request metadata needed to serve the files. Use the self-contained Embed or self-hosted files when third-party requests or the required CSP allowances are unsuitable.
 

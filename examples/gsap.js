@@ -2,7 +2,9 @@
  * Navbar Light + GSAP example
  *
  * Set the component's Motion class property to `mwp-motion-custom`, load GSAP,
- * then run this after Navbar Light's enhancement script.
+ * then run this after Navbar Light's enhancement script. Keep these timeline
+ * lengths within the component's configured open (280ms) and close (220ms)
+ * durations so its visibility and accessibility states finish in order.
  */
 
 const root = document.querySelector('[data-mwp-navbar]');
@@ -14,12 +16,12 @@ if (root && panel && globalThis.gsap) {
   if (backdrop) gsap.set(backdrop, { autoAlpha: 0 });
 
   root.addEventListener('mwp-nav:open', () => {
-    gsap.to(panel, { autoAlpha: 1, duration: 0.35, ease: 'power3.out', xPercent: 0 });
+    gsap.to(panel, { autoAlpha: 1, duration: 0.28, ease: 'power3.out', xPercent: 0 });
     if (backdrop) gsap.to(backdrop, { autoAlpha: 1, duration: 0.25 });
   });
 
   root.addEventListener('mwp-nav:close', () => {
-    gsap.to(panel, { autoAlpha: 0, duration: 0.25, ease: 'power2.in', xPercent: 100 });
+    gsap.to(panel, { autoAlpha: 0, duration: 0.2, ease: 'power2.in', xPercent: 100 });
     if (backdrop) gsap.to(backdrop, { autoAlpha: 0, duration: 0.2 });
   });
 }

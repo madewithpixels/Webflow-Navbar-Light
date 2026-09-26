@@ -50,9 +50,9 @@ Navbar Light [header.mwp-css-nav, data-mwp-navbar]
 └── Backdrop [native Div, data-mwp-backdrop]
 ```
 
-The panel is the single source of navigation content for desktop and collapsed layouts. Its Base/Desktop native style is `display: flex` and `position: static`, keeping every link visible on Canvas. The embed and settings are root-level siblings below the navbar row: they remain visible in Designer without inflating the panel, and the settings block is hidden only after runtime initialization.
+The panel is the single source of navigation content for desktop and collapsed layouts. Its Base/Desktop native style is `display: flex`, keeping every link visible on Canvas. The v0.2.3 candidate removes the native `position: static` declaration so runtime layout placement can work on linked Library instances. The embed and settings are root-level siblings below the navbar row: they remain visible in Designer without inflating the panel, and the settings block is hidden only after runtime initialization.
 
-For collapsed variants, the native authoring styles wrap `Navbar inner` and give `Navigation panel` a 100% flex basis/width at the selected breakpoint. This keeps Brand and Menu in the first row and the editable link panel beneath them in Designer. Runtime CSS replaces that authoring layout with the configured dropdown, drawer or overlay in Preview and published output.
+For collapsed variants, the native authoring styles wrap `Navbar inner` and give `Navigation panel` a 100% flex basis at the selected breakpoint. The v0.2.3 candidate removes the native panel width declaration; its flex basis still keeps Brand and Menu in the first row and the editable link panel beneath them in Designer. Runtime CSS replaces that authoring layout with the configured dropdown, drawer or overlay in Preview and published output.
 
 Expanded variants must explicitly reverse inherited collapsed authoring styles when their threshold is narrower than the base Mobile landscape variant. At Mobile landscape, `Never` and `Mobile portrait` set `Navbar inner` back to `flex-wrap: nowrap` and restore `Navigation panel` to `display: flex`, `width: auto`, `flex-shrink: 1` and `flex-basis: auto`. Mobile portrait then applies its collapsed grid overrides at Mobile portrait. Do not target the removed legacy `mwp-css-nav_desktop` element.
 

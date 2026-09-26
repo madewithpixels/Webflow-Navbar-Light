@@ -275,7 +275,7 @@ class NavbarLight {
 
   motionDuration(direction) {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return 0;
-    if (['none', 'custom'].includes(this.root.dataset.motion)) return 0;
+    if (this.root.dataset.motion === 'none') return 0;
     const property = direction === 'open' ? '--mwp-nav-duration-open' : '--mwp-nav-duration-close';
     return milliseconds(getComputedStyle(this.root).getPropertyValue(property), 0);
   }
