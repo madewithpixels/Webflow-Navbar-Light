@@ -9,10 +9,10 @@ page typography and navigation between examples. All six are drafts while the
 new default layouts are being integrated. The published `/demo` URL returns
 404; the original Home page remains published.
 
-The source Library's self-contained component has the v0.2.3 candidate
-Embed and new structural data hooks. The CDN Library edition and its linked
-Smashburger instances still load v0.2.2. The Library style corrections have
-been saved but have not been shared with installed sites.
+Version 0.2.3 is tagged and published. Both source Library components have
+the new structural data hooks and layout corrections. The source CDN edition
+loads the exact pinned v0.2.3 files. Linked Smashburger instances still
+await the Library update.
 
 ## Source runtime checks
 
@@ -33,6 +33,11 @@ At 320px, the open left drawer and overlay were also reviewed visually. The
 source runtime's closed panel immediately computes to `visibility:hidden`,
 `opacity:0` and `transition-duration:0s`, avoiding an initial flash. Local
 tests: `npm test` (21 passed), `npm run check`, and `git diff --check` passed.
+The v0.2.3 tag passed `npm run check:dist`; both jsDelivr assets matched the
+committed files byte for byte. The published source CDN page loaded both
+assets with SRI, reached `data-mwp-ready="true"`, and had no page overflow at
+320, 479, 767, 991, 1280, 1440, or 1920px. Its closed header was 72px
+through 991px and its expanded header was 92px at wider widths.
 
 ## Webflow animation fixtures
 
@@ -45,11 +50,9 @@ visibility and lets configured open/close durations cover the GSAP timelines.
 
 ## Acceptance still required
 
-1. Release the exact v0.2.3 CDN assets, then update the Library CDN Embed to
-   that pinned version and SRI values.
-2. Share the two changed Library components, apply the update on Smashburger,
+1. Share the two changed Library components, apply the update on Smashburger,
    and verify that no unrelated Library resources are accepted.
-3. Publish the six demo pages on the Smashburger Webflow subdomain and check
+2. Publish the six demo pages on the Smashburger Webflow subdomain and check
    every layout, breakpoint, keyboard/focus/ARIA/inert behavior, and both
    native GSAP interactions on the linked consumer build.
 
