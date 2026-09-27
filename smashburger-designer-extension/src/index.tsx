@@ -22,6 +22,11 @@ const CORE_PROPERTIES: CreatePropOptions[] = [
   { type: "string", name: "Menu layout", group: "Layout", defaultValue: "dropdown", tooltip: "dropdown, full-width, left, right, or overlay" },
   { type: "string", name: "Menu motion", group: "Motion", defaultValue: "dropdown", tooltip: "dropdown, left, right, up, fade, none, or custom" },
   { type: "string", name: "Panel alignment", group: "Layout", defaultValue: "right", tooltip: "left, center, or right" },
+  { type: "string", name: "Panel width", group: "Layout", defaultValue: "24rem", tooltip: "CSS width for drawers and dropdowns, for example 24rem" },
+  { type: "string", name: "Focus first link", group: "Behavior", defaultValue: "false", tooltip: "true or false" },
+  { type: "string", name: "Close on outside click", group: "Behavior", defaultValue: "true", tooltip: "true or false" },
+  { type: "string", name: "Close on link click", group: "Behavior", defaultValue: "true", tooltip: "true or false" },
+  { type: "string", name: "Lock page scroll", group: "Behavior", defaultValue: "auto", tooltip: "auto, true, or false" },
   { type: "string", name: "Brand accessible label", group: "Accessibility", defaultValue: "SmashBurger home" },
   { type: "string", name: "Menu button label", group: "Accessibility", defaultValue: "Navigation menu" },
   { type: "string", name: "Navigation label", group: "Accessibility", defaultValue: "Primary navigation" },
@@ -301,7 +306,8 @@ async function configureNativeCore(report: (message: string) => void, knownCompo
   const savedEmbeds = savedInfrastructureChildren.filter((child) => child.type === "HtmlEmbed");
   const savedLabels = await Promise.all(savedInfrastructureChildren.map(async (child) =>
     child.attributes && await child.getResolvedAttributeValue("data-mwp-infrastructure-label") !== null));
-  if (savedEmbeds.length !== 1 || savedEmbeds[0].id !== embed.id || savedLabels.filter(Boolean).length !== 1) {
+  if (savedEmbeds.length !== 1 || savedEmbeds[0].id.component !== embed.id.component ||
+    savedEmbeds[0].id.element !== embed.id.element || savedLabels.filter(Boolean).length !== 1) {
     throw new Error("The compact runtime Details structure did not pass readback.");
   }
   const props = await component.getProps();
@@ -315,6 +321,11 @@ async function configureNativeCore(report: (message: string) => void, knownCompo
     [root, "data-layout", "Menu layout"],
     [root, "data-motion", "Menu motion"],
     [root, "data-align", "Panel alignment"],
+    [root, "data-panel-width", "Panel width"],
+    [root, "data-focus-first", "Focus first link"],
+    [root, "data-close-on-outside", "Close on outside click"],
+    [root, "data-close-on-link", "Close on link click"],
+    [root, "data-scroll-lock", "Lock page scroll"],
     [brand, "aria-label", "Brand accessible label"],
     [summary, "aria-label", "Menu button label"],
     [panel, "aria-label", "Navigation label"],
