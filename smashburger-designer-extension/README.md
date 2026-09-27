@@ -1,6 +1,6 @@
 # SmashBurger Designer Extension capability prototype
 
-This is a **private, disposable API test**, not a SmashBurger installer. It has three actions:
+This is a **private, disposable API test**, not a SmashBurger installer. It has these actions:
 
 - **Inspect selection** reads the site breakpoints, selected component origin, variants, property groups and instance overrides, root marker, recognizable runtime hooks in WHTML, and whether WHTML export is available.
 - **Create native proof** inserts a small editable header on a selected page container, gives it reusable `sb-proof-*` classes with styles at every configured breakpoint, converts it to a project component, creates the five planned collapse variant names, adds grouped properties, and attempts to bind those properties to native `aria-label` attributes.
@@ -30,7 +30,7 @@ The bundle is `bundle.zip`. For live Designer testing, register a private Design
 4. Reopen and run the action again. It must refuse duplicates. Test a partial failure separately on a clone.
 5. Determine whether the API can insert and configure a Canvas-visible Embed, and whether WHTML import can safely preserve an adapted SmashBurger tree.
 
-The production installer, Make local workflow, Embed insertion, rollback, and full functional/accessible menu remain separate work.
+The production installer, Make local workflow, production Embed setup, rollback, and full functional/accessibility checks remain separate work.
 
 ## Connected-site baseline, 27 September 2026
 
@@ -50,4 +50,6 @@ A separate Make local trial placed one new `SmashBurger CDN` instance in a marke
 
 The WHTML route also stopped before mutation: although the installed type definitions include `getWHTML` and `insertElementFromWHTML`, the live Designer session exposed neither method. The app no longer offers that action. The next trial generates a small native menu directly through the methods already proven to work. Its default styling and runtime loader are pinned for this private draft test; it does not yet reproduce the full menu content, component property schema or all layout variants.
 
-The native core trial now exists as one project component with one instance on the draft page. Webflow data readback confirms its header root, adjacent `details`/`summary` trigger and navigation panel, native link elements, three editable icon-line Divs, backdrop hook and nested Code Embed. The saved Embed code matches `webflow/navbar-light-cdn-loader.html` byte for byte (`v0.2.3`). It has only a Base variant and no properties, as expected for this small structure test. Webflow's element snapshot tool returned an error, so Canvas appearance and Preview behavior remain to be checked in Designer before this can be called a functioning drop-in menu.
+The native core trial now exists as one project component with one instance on the draft page. Webflow data readback confirms its header root, adjacent `details`/`summary` trigger and navigation panel, native link elements, three editable icon-line Divs, backdrop hook and nested Code Embed. The saved Embed code matches `webflow/navbar-light-cdn-loader.html` byte for byte (`v0.2.3`). It has only a Base variant and no properties, as expected for this small structure test.
+
+Designer screenshots on 27 September show the native core rendering its brand and links on Desktop, and its collapsed Menu opening to a white link panel at 820px in Preview with custom code enabled. A Tablet Canvas screenshot also exposed three oversized white icon placeholders and a tall backdrop block. The saved project-native classes now bound each icon line to 20 × 2px and its container to 20 × 16px, while the backdrop is fixed, transparent, hidden and non-interactive by default. Webflow style and component-element readback confirms those class values and the backdrop assignment. A screenshot after this correction was not available, so the corrected Canvas appearance has not been visually accepted. The screenshots also do not establish keyboard/focus behavior, ARIA state, overflow, all-breakpoint layout, or app-independent published behavior. Keep the lab page as a draft until those checks and the full component schema are implemented.

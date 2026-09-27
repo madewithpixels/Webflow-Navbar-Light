@@ -195,21 +195,22 @@ async function createNativeCore(report: (message: string) => void): Promise<void
   if (names.includes(CORE_NAME)) throw new Error("The native core component already exists; no duplicate was created.");
 
   report("Creating project-native layout classes…");
-  const [rootStyle, innerStyle, brandStyle, menuStyle, summaryStyle, iconStyle, lineStyle, panelStyle, linksStyle, linkStyle] = await Promise.all([
+  const [rootStyle, innerStyle, brandStyle, menuStyle, summaryStyle, iconStyle, lineStyle, panelStyle, linksStyle, linkStyle, backdropStyle] = await Promise.all([
     style("sb-app-nav"), style("sb-app-inner"), style("sb-app-brand"), style("sb-app-menu"),
     style("sb-app-summary"), style("sb-app-icon"), style("sb-app-icon-line"),
-    style("sb-app-panel"), style("sb-app-links"), style("sb-app-link"),
+    style("sb-app-panel"), style("sb-app-links"), style("sb-app-link"), style("sb-app-backdrop"),
   ]);
   await rootStyle.setProperties({ "background-color": "#17251e", color: "#ffffff", "padding-top": "16px", "padding-bottom": "16px", "padding-left": "24px", "padding-right": "24px" });
   await innerStyle.setProperties({ display: "flex", "align-items": "center", "justify-content": "space-between", gap: "20px" });
   await brandStyle.setProperties({ color: "#ffffff", "text-decoration": "none", "font-weight": "700" });
   await menuStyle.setProperties({ display: "none" });
   await summaryStyle.setProperties({ display: "flex", "align-items": "center", gap: "10px", cursor: "pointer" });
-  await iconStyle.setProperties({ display: "flex", "flex-direction": "column", gap: "5px" });
-  await lineStyle.setProperties({ display: "block", width: "20px", height: "2px", "background-color": "currentColor" });
+  await iconStyle.setProperties({ display: "flex", "flex-direction": "column", gap: "5px", width: "20px", height: "16px", overflow: "visible", "flex-shrink": "0" });
+  await lineStyle.setProperties({ display: "block", width: "20px", height: "2px", "min-width": "20px", "max-width": "20px", "min-height": "2px", "max-height": "2px", "flex-shrink": "0", "background-color": "currentColor" });
   await panelStyle.setProperties({ display: "flex", "align-items": "center" });
   await linksStyle.setProperties({ display: "flex", "align-items": "center", gap: "20px" });
   await linkStyle.setProperties({ color: "#ffffff", "text-decoration": "none" });
+  await backdropStyle.setProperties({ position: "fixed", top: "0", right: "0", bottom: "0", left: "0", opacity: "0", visibility: "hidden", "pointer-events": "none" });
   await rootStyle.setProperties({ "padding-left": "20px", "padding-right": "20px" }, { breakpoint: "medium" });
   await innerStyle.setProperties({ "flex-wrap": "wrap" }, { breakpoint: "medium" });
   await menuStyle.setProperties({ display: "block" }, { breakpoint: "medium" });
@@ -273,6 +274,7 @@ async function createNativeCore(report: (message: string) => void): Promise<void
     await link.setAttribute("data-mwp-item", "");
   }
   const backdrop = await root.append(webflow.elementPresets.DivBlock);
+  await backdrop.setStyles([backdropStyle]);
   await backdrop.setAttribute("data-mwp-backdrop", "");
   await backdrop.setAttribute("aria-hidden", "true");
   const embed = await root.append(webflow.elementPresets.HtmlEmbed);
