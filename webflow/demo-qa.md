@@ -1,18 +1,18 @@
-# SmashBurger demo acceptance — 26 September 2026
+# SmashBurger demo acceptance — 27 September 2026
 
 ## Current state
 
-Six pages exist in the Smashburger Webflow site: `/demo`, `/demo-dropdown`,
-`/demo-full-width`, `/demo-left-drawer`, `/demo-right-drawer`, and
-`/demo-overlay`. They contain one linked CDN component instance each, basic
-page typography and navigation between examples. All six are drafts while the
-new default layouts are being integrated. The published `/demo` URL returns
-404; the original Home page remains published.
+Six pages are published on the Smashburger Webflow subdomain: `/demo`,
+`/demo-dropdown`, `/demo-full-width`, `/demo-left-drawer`,
+`/demo-right-drawer`, and `/demo-overlay`. They contain one linked CDN
+component instance each, basic page typography and navigation between
+examples. The original Home page remains published.
 
 Version 0.2.3 is tagged and published. Both source Library components have
 the new structural data hooks and layout corrections. The source CDN edition
-loads the exact pinned v0.2.3 files. Linked Smashburger instances still
-await the Library update.
+loads the exact pinned v0.2.3 files. The two component changes were shared
+from the MWP Component Library, then the update was accepted only on the
+Smashburger test site. Other installed sites were not updated.
 
 ## Source runtime checks
 
@@ -44,18 +44,30 @@ through 991px and its expanded header was 92px at wider widths.
 The Dropdown page has page-scoped native GSAP open and close interactions and
 a footer bridge from `mwp-nav:open` / `mwp-nav:close` DOM events to IX3 custom
 triggers. The Overview page has a page-scoped scroll reveal interaction on
-its dark card. Interaction definitions were stored, but their published
-playback remains unverified. The v0.2.3 candidate fixes Custom mode's closed
-visibility and lets configured open/close durations cover the GSAP timelines.
+its dark card. On the published Dropdown page, the bridge reached `ready`,
+`open`, and `close`; the native GSAP timeline changed panel opacity and
+transform in both directions. The panel ended hidden with `aria-hidden=true`
+and `inert`, and Escape returned focus to the menu trigger. On the published
+Overview page, the dark card began at opacity 0 and 28px vertical offset,
+then animated into view on scroll. Custom mode keeps the closed panel hidden
+and uses the configured open/close durations for the GSAP timelines.
 
-## Acceptance still required
+## Linked consumer acceptance
 
-1. Share the two changed Library components, apply the update on Smashburger,
-   and verify that no unrelated Library resources are accepted.
-2. Publish the six demo pages on the Smashburger Webflow subdomain and check
-   every layout, breakpoint, keyboard/focus/ARIA/inert behavior, and both
-   native GSAP interactions on the linked consumer build.
+All six published pages loaded both CDN assets at v0.2.3, reached
+`data-mwp-ready="true"`, and showed the expected layout. Their copy now names
+v0.2.3; no old v0.2.2 text remains. Each layout page was tested closed and
+open at 320, 479, 767, 991, 1279, 1280, 1440, and 1920px. The header was
+72px closed, panel placement matched its layout, and there was no horizontal
+page overflow. Full width filled the viewport at each width; drawers were
+384px wide except when limited by a smaller viewport; the overlay covered
+the viewport. The dropdown, full width, both drawers, and overlay were also
+reviewed visually at representative mobile or tablet sizes.
 
-The user approved the v0.2.3 release, sharing both Library components, and
-applying the update only to the Smashburger test site. Installed-site
-acceptance and published consumer verification remain to be recorded here.
+At 320px on Overview, the first Escape closed the nested submenu and kept
+focus on its summary. The second Escape closed the main menu, set its panel
+to `aria-hidden=true` and `inert`, and returned focus to the trigger. An open
+drawer set `overflow:hidden` on the document element; it was released on
+close. The initial closed panel was hidden on the published pages. Automated
+tests remain 21/21 passing. A fresh assistive-technology check of the v0.2.3
+consumer and Windows NVDA verification have not yet been performed.

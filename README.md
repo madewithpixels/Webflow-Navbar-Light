@@ -12,6 +12,7 @@ Published acceptance builds:
 
 - Source library: <https://mwp-component-library.webflow.io/smashburger-navbar>
 - Clean Library installation: <https://smashburger-4b8f18.webflow.io/>
+- Five-layout demo area: <https://smashburger-4b8f18.webflow.io/demo>
 
 ## Design constraints
 
