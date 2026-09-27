@@ -99,9 +99,10 @@ async function style(name: string): Promise<Style> {
   return (await webflow.getStyleByName(name)) ?? webflow.createStyle(name);
 }
 
-function isBoundTo(value: string | BindingValue | null, propId: string): boolean {
+function isBoundTo(value: unknown, propId: string): boolean {
   return typeof value === "object" && value !== null &&
-    value.sourceType === "prop" && value.propId === propId;
+    "sourceType" in value && value.sourceType === "prop" &&
+    "propId" in value && value.propId === propId;
 }
 
 async function verifyProof(): Promise<string> {
@@ -327,6 +328,104 @@ async function configureNativeCore(report: (message: string) => void, knownCompo
     element.attributes && isBoundTo(await element.getAttributeValue(attribute), propId(name))));
   if (checks.some((passed) => !passed)) throw new Error("Native properties were added, but an attribute binding failed readback.");
   return `Native core configured: ${CORE_PROPERTIES.length} grouped properties, ${checks.length} attribute bindings and compact runtime Details saved.`;
+}
+
+async function configureNativeContent(report: (message: string) => void): Promise<string> {
+  const site = await webflow.getSiteInfo();
+  const page = await webflow.getCurrentPage();
+  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error("Open the SmashBurger App API Lab draft page before configuring native content.");
+  }
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((component) => component.getName()));
+  const component = components[names.indexOf(CORE_NAME)];
+  if (!component || component.readOnly || await component.getInstanceCount() !== 1) {
+    throw new Error("Expected one editable native core trial instance; no content was changed.");
+  }
+  const root = await component.getRootElement();
+  if (!root?.children || !root.attributes ||
+    await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native core trial marker has changed; no content was changed.");
+  }
+  const [inner] = await root.getChildren();
+  if (!inner?.children) throw new Error("The native core row is missing; no content was changed.");
+  const [brand, , panel] = await inner.getChildren();
+  if (brand?.type !== "Link" || !panel?.children || !panel.attributes ||
+    await panel.getResolvedAttributeValue("data-mwp-panel") === null) {
+    throw new Error("The native brand or panel has changed; no content was changed.");
+  }
+  const [linksContainer] = await panel.getChildren();
+  if (!linksContainer?.children || !linksContainer.attributes ||
+    await linksContainer.getResolvedAttributeValue("data-mwp-links") === null) {
+    throw new Error("The native link container has changed; no content was changed.");
+  }
+  const links = await linksContainer.getChildren();
+  if (links.length !== 3 || links.some((link) => link.type !== "Link")) {
+    throw new Error("Expected the trial's three native links; no content was changed.");
+  }
+  const targets = [brand, ...links] as LinkElement[];
+  const labels = ["Brand", "Link 1", "Link 2", "Link 3"];
+  for (const [index, target] of targets.entries()) {
+    if (!target.attributes || (target !== brand &&
+      await target.getResolvedAttributeValue("data-mwp-item") === null)) {
+      throw new Error("A native link marker has changed; no content was changed.");
+    }
+    const settings = await target.searchSettings();
+    if (settings.text?.valueType !== "textContent" || !settings.text.canBind ||
+      settings.link?.valueType !== "link" || !settings.link.canBind) {
+      throw new Error(`This Designer session reports ${labels[index]} text as ${settings.text?.valueType ?? "missing"}/${settings.text?.canBind ?? false} and destination as ${settings.link?.valueType ?? "missing"}/${settings.link?.canBind ?? false}; no content properties were created.`);
+    }
+  }
+  report("Native link text and destination settings are bindable; preserving their current values…");
+  const definitions: CreatePropOptions[] = [];
+  for (let index = 0; index < targets.length; index++) {
+    const settings = await targets[index].getResolvedSettings();
+    const text = settings.text;
+    const destination = settings.link;
+    const textValue = typeof text === "string" ? text :
+      text && typeof text === "object" && "innerText" in text ? text.innerText : null;
+    if (typeof textValue !== "string" || !destination ||
+      typeof destination !== "object" || !("mode" in destination)) {
+      throw new Error(`Could not preserve ${labels[index]} text and destination; no properties were created.`);
+    }
+    definitions.push(
+      { type: "textContent", name: `${labels[index]} text`, group: "Content", defaultValue: textValue },
+      { type: "link", name: `${labels[index]} destination`, group: "Links", defaultValue: destination },
+    );
+  }
+  const existing = await component.getProps();
+  for (const expected of definitions) {
+    const found = existing.find((prop) => prop.name === expected.name);
+    if (found && (found.type !== expected.type || found.group !== expected.group)) {
+      throw new Error(`Property ${expected.name} has a different type or group; no bindings were changed.`);
+    }
+  }
+  const missing = definitions.filter((expected) => !existing.some((prop) => prop.name === expected.name));
+  if (missing.length) {
+    report(`Creating ${missing.length} native content and destination properties…`);
+    await component.createProps(missing);
+  }
+  const props = await component.getProps();
+  const propId = (name: string): string => {
+    const prop = props.find((item) => item.name === name);
+    if (!prop) throw new Error(`Property ${name} was not saved.`);
+    return prop.id;
+  };
+  report("Binding editable text and destinations to the native links…");
+  for (let index = 0; index < targets.length; index++) {
+    await targets[index].setSettings({
+      text: { sourceType: "prop", propId: propId(`${labels[index]} text`) },
+      link: { sourceType: "prop", propId: propId(`${labels[index]} destination`) },
+    });
+  }
+  for (let index = 0; index < targets.length; index++) {
+    const settings = await targets[index].getSettings();
+    if (!isBoundTo(settings.text, propId(`${labels[index]} text`)) ||
+      !isBoundTo(settings.link, propId(`${labels[index]} destination`))) {
+      throw new Error(`${labels[index]} bindings did not pass readback.`);
+    }
+  }
+  return `Native content configured: ${definitions.length} text and destination properties saved and bound.`;
 }
 
 async function createNativeCore(report: (message: string) => void): Promise<void> {
@@ -598,6 +697,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native core configuration stopped: ${String(error)}`); }
     finally { setBusy(false); }
   };
+  const configureContent = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await configureNativeContent(setMessage)); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Native content configuration stopped: ${String(error)}`); }
+    finally { setBusy(false); }
+  };
   return <main>
     <div className="eyebrow">SmashBurger · private prototype</div>
     <h1>Designer capability check</h1>
@@ -610,6 +715,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.proofExists} onClick={() => { void checkLab(); }}>Check styles + Embed API</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.proofExists || snapshot.nativeCoreExists} onClick={() => { void tryNativeCore(); }}>Create native core trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureCore(); }}>Configure native core trial</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureContent(); }}>Configure native content trial</button>
     </div>
     <p className="status" role="status">{message}</p>
     {snapshot && <dl>
