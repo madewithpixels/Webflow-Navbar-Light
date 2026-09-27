@@ -233,8 +233,9 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [x] Prove end-to-end creation of native elements and site classes, with the saved proof styles verified by the Extension at all seven Smashburger breakpoints, including Tablet row wrapping.
 - [x] Prove project component creation, all five named variants, grouped string properties and native `aria-label` bindings on the Smashburger draft lab; verify the saved bindings through both the Extension and Webflow data readback.
 - [ ] Prove the Extension API can inspect a selected linked or unlinked instance, create a project-level component, create and group properties, and reconnect those properties to existing elements. Document any Designer-only steps immediately if the API cannot perform them safely.
-- [ ] Confirm the Extension-inserted Code Embed is visible and editable on the Canvas with the app closed. Insertion and code writing already pass live; Webflow data readback confirms the saved `code` setting and unique proof marker. Production CSS/JS insertion remains installer work.
-- [ ] Confirm generated output remains functional and editable without the extension running.
+- [ ] Resolve Make local for a linked Library instance: the live Designer Extension inserted a disposable linked copy but `unlinkComponent()` rejected it with `Library components cannot be modified`; the copy was removed. Test a native-template route or specify the precise Designer UI handoff.
+- [x] Confirm the Extension-inserted Code Embed remains visible on the draft Canvas and in the Navigator with the app closed. Insertion and code writing pass live; Webflow data readback confirms the saved `code` setting and unique proof marker. Direct editing of the Embed code and production CSS/JS insertion remain installer work.
+- [ ] Confirm generated output remains functional and editable without the extension running. The native proof header and Embed remain visible with the extension closed; direct editing and runtime behavior still need acceptance.
 - [ ] Confirm repeated installation is idempotent and does not duplicate components, classes or runtime code.
 
 ### Private installer MVP
