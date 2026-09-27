@@ -4,6 +4,7 @@ import ReactDOM from "react-dom/client";
 
 const PROOF_NAME = "SmashBurger API proof";
 const LAB_PAGE_SLUG = "smashburger-app-api-lab";
+const LOCAL_TRIAL_NAME = "SmashBurger local API trial";
 
 type Snapshot = {
   site: string;
@@ -171,6 +172,58 @@ async function probeEmbed(): Promise<string> {
   return `Embed ${created ? "inserted" : "reused"}; ${codeKey} content ${saved === code ? "saved" : `readback differs (${JSON.stringify(saved)})`}`;
 }
 
+async function makeLocalTrial(report: (message: string) => void): Promise<void> {
+  const site = await webflow.getSiteInfo();
+  const page = await webflow.getCurrentPage();
+  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error("Open the SmashBurger App API Lab draft page before testing Make local.");
+  }
+  const elements = await webflow.getAllElements();
+  for (const element of elements) {
+    if (element.attributes &&
+      await element.getResolvedAttributeValue("data-mwp-prototype") === "local-trial-v1") {
+      report("A marked local trial already exists on this draft page; no duplicate was created.");
+      return;
+    }
+  }
+  const body = elements.find((element) => element.type === "Body");
+  if (!body?.children) throw new Error("The draft lab page Body is not available.");
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((component) => component.getName()));
+  if (names.includes(LOCAL_TRIAL_NAME)) {
+    throw new Error("The local trial component already exists; no duplicate was created.");
+  }
+  const linked = components[names.indexOf("SmashBurger CDN")];
+  if (!linked?.library) throw new Error("The linked SmashBurger CDN component is not installed on this site.");
+  report("Adding one linked copy inside a marked draft-page wrapper…");
+  const wrapper = await body.append(webflow.elementPresets.DivBlock);
+  await wrapper.setAttribute("data-mwp-prototype", "local-trial-v1");
+  const instance = await wrapper.append(linked);
+  if (instance.type !== "ComponentInstance") {
+    throw new Error("The linked copy was inserted, but it is not a component instance.");
+  }
+  const instanceProps = await instance.getProps();
+  report("Unlinking only the new draft-page copy…");
+  const native = await instance.unlinkComponent();
+  const marker = native.attributes
+    ? await native.getResolvedAttributeValue("data-mwp-navbar") : null;
+  let hooks = "unavailable";
+  if (webflow.getWHTML) {
+    try {
+      const whtml = (await webflow.getWHTML(native))?.whtml;
+      if (whtml) hooks = ["navbar", "menu", "trigger", "panel", "config"]
+        .filter((name) => whtml.includes(`data-mwp-${name}`)).join(", ") || "none";
+    } catch { hooks = "unavailable"; }
+  }
+  report("Registering the unlinked tree as a disposable project component…");
+  const local = await webflow.registerComponent({
+    name: LOCAL_TRIAL_NAME, group: "SmashBurger experiments",
+    description: "Disposable Make local trial on the draft lab page.",
+  }, native);
+  const [localProps, localVariants] = await Promise.all([local.getProps(), local.getVariants()]);
+  report(`Local trial created: ${instanceProps.length} source instance properties; ${localProps.length} new component properties; ${localVariants.length} new variant; root marker ${marker ?? "absent"}; WHTML hooks ${hooks}.`);
+}
+
 async function createProof(report: (message: string) => void, anchor?: AnyElement): Promise<void> {
   const selected = anchor ?? await webflow.getSelectedElement();
   if (!selected?.children) throw new Error("Select a page container that can hold children.");
@@ -316,6 +369,12 @@ const App: React.FC = () => {
     } catch (error) { setMessage(`Lab check stopped: ${String(error)}`); }
     finally { setBusy(false); }
   };
+  const tryLocal = async (): Promise<void> => {
+    setBusy(true);
+    try { await makeLocalTrial(setMessage); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Make local stopped: ${String(error)}`); }
+    finally { setBusy(false); }
+  };
   return <main>
     <div className="eyebrow">SmashBurger · private prototype</div>
     <h1>Designer capability check</h1>
@@ -326,6 +385,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || snapshot.proofExists} onClick={() => { void makeLab(); }}>Create draft lab and proof</button>
       <button className="secondary" disabled={busy || !snapshot?.proofExists} onClick={() => { void checkProof(); }}>Verify existing proof</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.proofExists} onClick={() => { void checkLab(); }}>Check styles + Embed API</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.proofExists} onClick={() => { void tryLocal(); }}>Make local trial on draft</button>
     </div>
     <p className="status" role="status">{message}</p>
     {snapshot && <dl>
