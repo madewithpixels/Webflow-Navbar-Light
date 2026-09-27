@@ -80,6 +80,43 @@ function isBoundTo(value: string | BindingValue | null, propId: string): boolean
     value.sourceType === "prop" && value.propId === propId;
 }
 
+async function verifyProof(): Promise<string> {
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(PROOF_NAME)];
+  if (!component) throw new Error("The proof component is not present on this site.");
+  const [variants, props, root] = await Promise.all([
+    component.getVariants(), component.getProps(), component.getRootElement(),
+  ]);
+  const expectedVariants = ["Never", "Tablet", "Mobile landscape", "Mobile portrait", "Always"];
+  const missingVariants = expectedVariants.filter((name) => !variants.some((variant) => variant.name === name));
+  const brandProp = props.find((prop) => prop.name === "Brand accessible label" && prop.type === "string");
+  const navProp = props.find((prop) => prop.name === "Navigation label" && prop.type === "string");
+  if (!root?.children) throw new Error("The saved component root cannot be inspected.");
+  const [row] = await root.getChildren();
+  if (!row?.children) throw new Error("The saved component row cannot be inspected.");
+  const [brand, nav] = await row.getChildren();
+  if (!brand?.attributes || !nav?.attributes) {
+    throw new Error("The saved brand link or navigation element cannot be inspected.");
+  }
+  const [brandBinding, navBinding] = await Promise.all([
+    brand.getAttributeValue("aria-label"), nav.getAttributeValue("aria-label"),
+  ]);
+  const checks = [
+    missingVariants.length === 0 && variants.length === expectedVariants.length
+      ? "five variants saved" : `variant mismatch (${variants.map((variant) => variant.name).join(", ")})`,
+    brandProp && navProp ? "two authored string properties saved" : "authored property missing",
+    brandProp && isBoundTo(brandBinding, brandProp.id)
+      ? "brand label bound" : `brand label binding missing (${JSON.stringify(brandBinding)})`,
+    navProp && isBoundTo(navBinding, navProp.id)
+      ? "navigation label bound" : `navigation label binding missing (${JSON.stringify(navBinding)})`,
+  ];
+  const passed = missingVariants.length === 0 && variants.length === expectedVariants.length &&
+    Boolean(brandProp && navProp) && Boolean(brandProp && isBoundTo(brandBinding, brandProp.id)) &&
+    Boolean(navProp && isBoundTo(navBinding, navProp.id));
+  return `${passed ? "Proof verified" : "Proof needs attention"}: ${checks.join("; ")}. Webflow also has ${props.length - 2} generated component property.`;
+}
+
 async function createProof(report: (message: string) => void, anchor?: AnyElement): Promise<void> {
   const selected = anchor ?? await webflow.getSelectedElement();
   if (!selected?.children) throw new Error("Select a page container that can hold children.");
@@ -154,15 +191,7 @@ async function createProof(report: (message: string) => void, anchor?: AnyElemen
   }
   await brandLink.setAttribute("aria-label", { sourceType: "prop", propId: labelProp.id });
   await navElement.setAttribute("aria-label", { sourceType: "prop", propId: ariaProp.id });
-  const [brandBinding, navBinding, savedVariants, savedProps] = await Promise.all([
-    brandLink.getAttributeValue("aria-label"), navElement.getAttributeValue("aria-label"),
-    component.getVariants(), component.getProps(),
-  ]);
-  if (!isBoundTo(brandBinding, labelProp.id) || !isBoundTo(navBinding, ariaProp.id) ||
-    savedVariants.length !== 5 || savedProps.length !== 2) {
-    throw new Error("Component created, but its variants, properties or attribute bindings did not pass readback.");
-  }
-  report("Proof created. Inspect the project component in Designer.");
+  report(await verifyProof());
 }
 
 async function createLabAndProof(report: (message: string) => void): Promise<void> {
@@ -216,6 +245,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Lab stopped: ${String(error)}`); }
     finally { setBusy(false); }
   };
+  const checkProof = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await verifyProof()); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Verification stopped: ${String(error)}`); }
+    finally { setBusy(false); }
+  };
   return <main>
     <div className="eyebrow">SmashBurger · private prototype</div>
     <h1>Designer capability check</h1>
@@ -224,6 +259,7 @@ const App: React.FC = () => {
       <button disabled={busy} onClick={() => { void refresh(); }}>Inspect selection</button>
       <button className="secondary" disabled={busy || !snapshot?.canAppend || snapshot.proofExists} onClick={() => { void makeProof(); }}>Create native proof</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || snapshot.proofExists} onClick={() => { void makeLab(); }}>Create draft lab and proof</button>
+      <button className="secondary" disabled={busy || !snapshot?.proofExists} onClick={() => { void checkProof(); }}>Verify existing proof</button>
     </div>
     <p className="status" role="status">{message}</p>
     {snapshot && <dl>

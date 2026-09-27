@@ -229,7 +229,7 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 
 ### Capability prototype
 
-- [x] Scaffold and locally bundle a private Designer Extension with the Webflow CLI (`smashburger-designer-extension/`); live Designer installation and API execution remain pending.
+- [x] Scaffold and locally bundle a private Designer Extension with the Webflow CLI (`smashburger-designer-extension/`); install it on Smashburger and verify live linked-component inspection across all seven breakpoints.
 - [ ] Prove end-to-end creation of native elements, existing/new classes and responsive styles.
 - [ ] Prove component creation, all five collapse variants and component property bindings.
 - [ ] Prove the Extension API can inspect a selected linked or unlinked instance, create a project-level component, create and group properties, and reconnect those properties to existing elements. Document any Designer-only steps immediately if the API cannot perform them safely.
