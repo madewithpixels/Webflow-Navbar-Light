@@ -117,6 +117,60 @@ async function verifyProof(): Promise<string> {
   return `${passed ? "Proof verified" : "Proof needs attention"}: ${checks.join("; ")}. Webflow also has ${props.length - 2} generated component property.`;
 }
 
+async function verifyResponsiveStyles(): Promise<string> {
+  const navStyle = await webflow.getStyleByName("sb-proof-nav");
+  const rowStyle = await webflow.getStyleByName("sb-proof-row");
+  if (!navStyle || !rowStyle) return "Styles missing: proof classes were not found";
+  const expected: Array<[BreakpointId, string]> = [
+    ["main", "16px 24px"], ["large", "20px 32px"], ["xl", "22px 36px"],
+    ["xxl", "24px 40px"], ["medium", "16px 20px"],
+    ["small", "14px 18px"], ["tiny", "12px 16px"],
+  ];
+  const actual = await Promise.all(expected.map(([breakpoint]) =>
+    navStyle.getProperty("padding", breakpoint === "main" ? undefined : { breakpoint })));
+  const mismatches = expected.flatMap(([breakpoint, value], index) =>
+    actual[index] === value ? [] : [`${breakpoint}: ${JSON.stringify(actual[index])}`]);
+  const mediumWrap = await rowStyle.getProperty("flex-wrap", { breakpoint: "medium" });
+  if (mediumWrap !== "wrap") mismatches.push(`medium row wrap: ${JSON.stringify(mediumWrap)}`);
+  return mismatches.length === 0
+    ? "Styles verified at all seven breakpoints, including Tablet row wrapping"
+    : `Style readback differs at ${mismatches.join(", ")}`;
+}
+
+async function probeEmbed(): Promise<string> {
+  const site = await webflow.getSiteInfo();
+  const page = await webflow.getCurrentPage();
+  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error("Open the SmashBurger App API Lab draft page before testing Embed insertion.");
+  }
+  const elements = await webflow.getAllElements();
+  const body = elements.find((element) => element.type === "Body");
+  if (!body?.children) throw new Error("The draft lab page Body is not available.");
+  let embed: AnyElement | undefined;
+  for (const element of elements) {
+    if (element.type === "HtmlEmbed" && element.attributes &&
+      await element.getResolvedAttributeValue("data-mwp-prototype") === "embed-proof-v1") {
+      embed = element;
+      break;
+    }
+  }
+  const created = !embed;
+  if (!embed) {
+    embed = await body.append(webflow.elementPresets.HtmlEmbed);
+    if (embed.attributes) await embed.setAttribute("data-mwp-prototype", "embed-proof-v1");
+  }
+  if (!embed.elementSettings) return `Embed ${created ? "inserted" : "reused"}, but settings are unavailable`;
+  const settings = await embed.getSettings();
+  const searchable = await embed.searchSettings().catch(() => ({}));
+  const keys = [...new Set([...Object.keys(settings), ...Object.keys(searchable)])];
+  const codeKey = ["code", "html", "embedCode", "customCode"].find((key) => keys.includes(key));
+  if (!codeKey) return `Embed ${created ? "inserted" : "reused"}; no editable code setting exposed (keys: ${keys.join(", ") || "none"})`;
+  const code = "<!-- SmashBurger API lab Embed proof -->";
+  await embed.setSettings({ [codeKey]: code });
+  const saved: unknown = (await embed.getSettings())[codeKey];
+  return `Embed ${created ? "inserted" : "reused"}; ${codeKey} content ${saved === code ? "saved" : `readback differs (${JSON.stringify(saved)})`}`;
+}
+
 async function createProof(report: (message: string) => void, anchor?: AnyElement): Promise<void> {
   const selected = anchor ?? await webflow.getSelectedElement();
   if (!selected?.children) throw new Error("Select a page container that can hold children.");
@@ -251,6 +305,17 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Verification stopped: ${String(error)}`); }
     finally { setBusy(false); }
   };
+  const checkLab = async (): Promise<void> => {
+    setBusy(true);
+    try {
+      const styles = await verifyResponsiveStyles().catch((error) => `Style check stopped: ${String(error)}`);
+      setMessage(`${styles}. Checking Embed API…`);
+      const embed = await probeEmbed();
+      setMessage(`${styles}. ${embed}.`);
+      setSnapshot(await inspect());
+    } catch (error) { setMessage(`Lab check stopped: ${String(error)}`); }
+    finally { setBusy(false); }
+  };
   return <main>
     <div className="eyebrow">SmashBurger · private prototype</div>
     <h1>Designer capability check</h1>
@@ -260,6 +325,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || !snapshot?.canAppend || snapshot.proofExists} onClick={() => { void makeProof(); }}>Create native proof</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || snapshot.proofExists} onClick={() => { void makeLab(); }}>Create draft lab and proof</button>
       <button className="secondary" disabled={busy || !snapshot?.proofExists} onClick={() => { void checkProof(); }}>Verify existing proof</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.proofExists} onClick={() => { void checkLab(); }}>Check styles + Embed API</button>
     </div>
     <p className="status" role="status">{message}</p>
     {snapshot && <dl>
