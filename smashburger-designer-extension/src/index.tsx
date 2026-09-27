@@ -1,9 +1,11 @@
 import type {} from "@webflow/designer-extension-typings";
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
+import cdnLoader from "../../webflow/navbar-light-cdn-loader.html";
 
 const PROOF_NAME = "SmashBurger API proof";
 const LAB_PAGE_SLUG = "smashburger-app-api-lab";
+const CORE_NAME = "SmashBurger native core trial";
 
 type Snapshot = {
   site: string;
@@ -171,40 +173,114 @@ async function probeEmbed(): Promise<string> {
   return `Embed ${created ? "inserted" : "reused"}; ${codeKey} content ${saved === code ? "saved" : `readback differs (${JSON.stringify(saved)})`}`;
 }
 
-async function testWHTMLImport(report: (message: string) => void): Promise<void> {
+async function createNativeCore(report: (message: string) => void): Promise<void> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
   if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
-    throw new Error("Open the SmashBurger App API Lab draft page before testing WHTML import.");
-  }
-  if (!webflow.getWHTML || !webflow.insertElementFromWHTML) {
-    throw new Error("This Designer session does not expose WHTML export and import.");
+    throw new Error("Open the SmashBurger App API Lab draft page before creating the native core.");
   }
   const elements = await webflow.getAllElements();
   for (const element of elements) {
     if (element.attributes &&
-      await element.getResolvedAttributeValue("data-mwp-prototype") === "whtml-proof-v1") {
-      report("A marked WHTML import already exists on this draft page; no duplicate was created.");
-      return;
+      await element.getResolvedAttributeValue("data-mwp-prototype") === "native-core-v1") {
+      throw new Error("A native core trial already exists on this draft page; no duplicate was created.");
     }
   }
   const body = elements.find((element) => element.type === "Body");
   if (!body?.children) throw new Error("The draft lab page Body is not available.");
   const components = await webflow.getAllComponents();
   const names = await Promise.all(components.map((component) => component.getName()));
-  const proof = components[names.indexOf(PROOF_NAME)];
-  if (!proof || proof.library) throw new Error("The native project proof component is not available.");
-  const root = await proof.getRootElement();
-  if (!root) throw new Error("The native proof root is not available for WHTML export.");
-  report("Exporting the native proof component tree as WHTML…");
-  const exported = await webflow.getWHTML(root);
-  if (!exported?.whtml) throw new Error("WHTML export returned no markup for the native proof.");
-  report("Importing that markup as a native draft-page element…");
-  const imported = await webflow.insertElementFromWHTML(exported.whtml, body);
-  if (imported.attributes) await imported.setAttribute("data-mwp-prototype", "whtml-proof-v1");
-  const styles = imported.styles ? await imported.getStyles() : null;
-  const children = imported.children ? await imported.getChildren() : [];
-  report(`WHTML import created a ${imported.type} with ${children.length} direct child and styles ${styles?.filter(Boolean).map((style) => style?.name).join(", ") || "none"}.`);
+  if (names.includes(CORE_NAME)) throw new Error("The native core component already exists; no duplicate was created.");
+
+  report("Creating project-native layout classes…");
+  const [rootStyle, innerStyle, brandStyle, menuStyle, summaryStyle, iconStyle, lineStyle, panelStyle, linksStyle, linkStyle] = await Promise.all([
+    style("sb-app-nav"), style("sb-app-inner"), style("sb-app-brand"), style("sb-app-menu"),
+    style("sb-app-summary"), style("sb-app-icon"), style("sb-app-icon-line"),
+    style("sb-app-panel"), style("sb-app-links"), style("sb-app-link"),
+  ]);
+  await rootStyle.setProperties({ "background-color": "#17251e", color: "#ffffff", "padding-top": "16px", "padding-bottom": "16px", "padding-left": "24px", "padding-right": "24px" });
+  await innerStyle.setProperties({ display: "flex", "align-items": "center", "justify-content": "space-between", gap: "20px" });
+  await brandStyle.setProperties({ color: "#ffffff", "text-decoration": "none", "font-weight": "700" });
+  await menuStyle.setProperties({ display: "none" });
+  await summaryStyle.setProperties({ display: "flex", "align-items": "center", gap: "10px", cursor: "pointer" });
+  await iconStyle.setProperties({ display: "flex", "flex-direction": "column", gap: "5px" });
+  await lineStyle.setProperties({ display: "block", width: "20px", height: "2px", "background-color": "currentColor" });
+  await panelStyle.setProperties({ display: "flex", "align-items": "center" });
+  await linksStyle.setProperties({ display: "flex", "align-items": "center", gap: "20px" });
+  await linkStyle.setProperties({ color: "#ffffff", "text-decoration": "none" });
+  await rootStyle.setProperties({ "padding-left": "20px", "padding-right": "20px" }, { breakpoint: "medium" });
+  await innerStyle.setProperties({ "flex-wrap": "wrap" }, { breakpoint: "medium" });
+  await menuStyle.setProperties({ display: "block" }, { breakpoint: "medium" });
+  await panelStyle.setProperties({ "flex-basis": "100%" }, { breakpoint: "medium" });
+  await linksStyle.setProperties({ "flex-direction": "column", "align-items": "flex-start" }, { breakpoint: "medium" });
+  await rootStyle.setProperties({ "padding-left": "16px", "padding-right": "16px" }, { breakpoint: "small" });
+  await rootStyle.setProperties({ "padding-left": "12px", "padding-right": "12px" }, { breakpoint: "tiny" });
+
+  report("Building the native header, details trigger and shared links…");
+  const root = await body.append(webflow.elementPresets.DivBlock);
+  await root.setTag("header");
+  await root.setStyles([rootStyle]);
+  for (const [name, value] of Object.entries({
+    "data-mwp-prototype": "native-core-v1", "data-mwp-navbar": "", "data-collapse": "tablet",
+    "data-layout": "dropdown", "data-motion": "dropdown", "data-align": "right",
+    "data-close-on-link": "true", "data-close-on-outside": "true", "data-focus-first": "false",
+  })) await root.setAttribute(name, value);
+  const inner = await root.append(webflow.elementPresets.DivBlock);
+  await inner.setStyles([innerStyle]);
+  await inner.setAttribute("data-mwp-inner", "");
+  const brand = await inner.append(webflow.elementPresets.TextLink);
+  await brand.setStyles([brandStyle]);
+  await brand.setSettings("url", "#");
+  await brand.setTextContent("SmashBurger");
+  await brand.setAttribute("aria-label", "SmashBurger home");
+  const menu = await inner.append(webflow.elementPresets.DOM);
+  await menu.setTag("details");
+  await menu.setStyles([menuStyle]);
+  await menu.setAttribute("data-mwp-menu", "");
+  const summary = await menu.append(webflow.elementPresets.DOM);
+  await summary.setTag("summary");
+  await summary.setStyles([summaryStyle]);
+  await summary.setAttribute("data-mwp-trigger", "");
+  await summary.setAttribute("aria-label", "Navigation menu");
+  const label = await summary.append(webflow.elementPresets.DOM);
+  await label.setTag("span");
+  await label.setAttribute("data-mwp-label", "");
+  await label.setTextContent("Menu");
+  const icon = await summary.append(webflow.elementPresets.DivBlock);
+  await icon.setStyles([iconStyle]);
+  await icon.setAttribute("data-mwp-icon", "");
+  await icon.setAttribute("aria-hidden", "true");
+  for (let index = 0; index < 3; index++) {
+    const line = await icon.append(webflow.elementPresets.DivBlock);
+    await line.setStyles([lineStyle]);
+    await line.setAttribute("data-mwp-line", "");
+  }
+  const panel = await inner.append(webflow.elementPresets.DivBlock);
+  await panel.setTag("nav");
+  await panel.setStyles([panelStyle]);
+  await panel.setAttribute("data-mwp-panel", "");
+  await panel.setAttribute("aria-label", "Primary navigation");
+  const links = await panel.append(webflow.elementPresets.DivBlock);
+  await links.setStyles([linksStyle]);
+  await links.setAttribute("data-mwp-links", "");
+  for (const text of ["Home", "About", "Contact"]) {
+    const link = await links.append(webflow.elementPresets.TextLink);
+    await link.setStyles([linkStyle]);
+    await link.setSettings("url", "#");
+    await link.setTextContent(text);
+    await link.setAttribute("data-mwp-item", "");
+  }
+  const backdrop = await root.append(webflow.elementPresets.DivBlock);
+  await backdrop.setAttribute("data-mwp-backdrop", "");
+  await backdrop.setAttribute("aria-hidden", "true");
+  const embed = await root.append(webflow.elementPresets.HtmlEmbed);
+  await embed.setSettings({ code: cdnLoader });
+  report("Registering the native core as a project component…");
+  await webflow.registerComponent({
+    name: CORE_NAME, group: "SmashBurger experiments",
+    description: "Draft-only native generator trial, with a pinned runtime Embed.",
+  }, root);
+  report("Native core created with editable details, summary, links, classes and a pinned runtime Embed. Inspect on Canvas before any publication.");
 }
 
 async function createProof(report: (message: string) => void, anchor?: AnyElement): Promise<void> {
@@ -352,10 +428,10 @@ const App: React.FC = () => {
     } catch (error) { setMessage(`Lab check stopped: ${String(error)}`); }
     finally { setBusy(false); }
   };
-  const tryWHTML = async (): Promise<void> => {
+  const tryNativeCore = async (): Promise<void> => {
     setBusy(true);
-    try { await testWHTMLImport(setMessage); setSnapshot(await inspect()); }
-    catch (error) { setMessage(`WHTML test stopped: ${String(error)}`); }
+    try { await createNativeCore(setMessage); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Native core stopped: ${String(error)}`); }
     finally { setBusy(false); }
   };
   return <main>
@@ -368,7 +444,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || snapshot.proofExists} onClick={() => { void makeLab(); }}>Create draft lab and proof</button>
       <button className="secondary" disabled={busy || !snapshot?.proofExists} onClick={() => { void checkProof(); }}>Verify existing proof</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.proofExists} onClick={() => { void checkLab(); }}>Check styles + Embed API</button>
-      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.proofExists} onClick={() => { void tryWHTML(); }}>Test native WHTML import</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.proofExists} onClick={() => { void tryNativeCore(); }}>Create native core trial</button>
     </div>
     <p className="status" role="status">{message}</p>
     {snapshot && <dl>
