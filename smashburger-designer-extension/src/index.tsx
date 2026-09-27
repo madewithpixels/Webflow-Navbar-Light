@@ -22,6 +22,7 @@ type Snapshot = {
   adoption: string;
   canAppend: boolean;
   proofExists: boolean;
+  nativeCoreExists: boolean;
   whtml: boolean;
 };
 
@@ -69,6 +70,7 @@ async function inspect(): Promise<Snapshot> {
     adoption,
     canAppend: Boolean(selected?.children),
     proofExists: names.includes(PROOF_NAME),
+    nativeCoreExists: names.includes(CORE_NAME),
     whtml: Boolean(whtml),
   };
 }
@@ -444,7 +446,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || snapshot.proofExists} onClick={() => { void makeLab(); }}>Create draft lab and proof</button>
       <button className="secondary" disabled={busy || !snapshot?.proofExists} onClick={() => { void checkProof(); }}>Verify existing proof</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.proofExists} onClick={() => { void checkLab(); }}>Check styles + Embed API</button>
-      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.proofExists} onClick={() => { void tryNativeCore(); }}>Create native core trial</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.proofExists || snapshot.nativeCoreExists} onClick={() => { void tryNativeCore(); }}>Create native core trial</button>
     </div>
     <p className="status" role="status">{message}</p>
     {snapshot && <dl>
@@ -460,6 +462,7 @@ const App: React.FC = () => {
       <dt>Make local</dt><dd>{snapshot.adoption}</dd>
       <dt>WHTML export</dt><dd>{snapshot.whtml ? "Available" : "Unavailable for this selection"}</dd>
       <dt>Proof on site</dt><dd>{snapshot.proofExists ? "Present" : "Absent"}</dd>
+      <dt>Native core on site</dt><dd>{snapshot.nativeCoreExists ? "Present" : "Absent"}</dd>
     </dl>}
   </main>;
 };
