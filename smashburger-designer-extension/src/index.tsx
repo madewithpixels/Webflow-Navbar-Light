@@ -11,8 +11,12 @@ type Snapshot = {
   component: string;
   origin: string;
   variants: string[];
-  props: string[];
+  propertyCount: number;
+  propertyGroups: string[];
+  overrides: string[];
   marker: string;
+  hooks: string[];
+  adoption: string;
   canAppend: boolean;
   proofExists: boolean;
   whtml: boolean;
@@ -28,8 +32,24 @@ async function inspect(): Promise<Snapshot> {
   const [variants, props] = component
     ? await Promise.all([component.getVariants(), component.getProps()])
     : [[], []];
+  const instanceProps = selected?.type === "ComponentInstance" ? await selected.getProps() : [];
   const marker = selected?.attributes
     ? await selected.getResolvedAttributeValue("data-mwp-navbar") : null;
+  let whtml: string | null = null;
+  if (selected && webflow.getWHTML) {
+    try { whtml = (await webflow.getWHTML(selected))?.whtml ?? null; }
+    catch { whtml = null; }
+  }
+  const hooks = ["navbar", "menu", "trigger", "panel", "backdrop", "config"]
+    .filter((hook) => whtml?.includes(`data-mwp-${hook}`));
+  const propNames = new Map(props.map((prop) => [prop.id, prop.name]));
+  const adoption = component?.library
+    ? "Linked Library instance: preserve overrides before making a project-native copy. No conversion is performed here."
+    : marker !== null
+      ? "Native navbar root: inspect its structure and content before converting it to a project component."
+      : component
+        ? "Project component: inspect its editable root and bindings before changing it."
+        : "Select a SmashBurger instance or native navbar root for an adoption assessment.";
   return {
     site: site.siteName,
     selected: selected ? selected.type : "Nothing selected",
@@ -37,11 +57,16 @@ async function inspect(): Promise<Snapshot> {
     component: component ? await component.getName() : "Native or none",
     origin: component ? component.library ? "Linked Library" : component.readOnly ? "Read-only" : "Project-native" : "—",
     variants: variants.map((variant) => variant.name),
-    props: props.map((prop) => `${prop.group || "Ungrouped"} / ${prop.name}`),
+    propertyCount: props.length,
+    propertyGroups: [...new Set(props.map((prop) => prop.group || "Ungrouped"))],
+    overrides: instanceProps.filter((prop) => prop.hasOverride)
+      .map((prop) => propNames.get(prop.propId) || prop.propId),
     marker: marker ?? "Not on selected element",
+    hooks,
+    adoption,
     canAppend: Boolean(selected?.children),
     proofExists: names.includes(PROOF_NAME),
-    whtml: Boolean(selected && webflow.getWHTML && await webflow.getWHTML(selected)),
+    whtml: Boolean(whtml),
   };
 }
 
@@ -69,9 +94,17 @@ async function createProof(report: (message: string) => void): Promise<void> {
   await navStyle.setProperties({ "background-color": "#17251e", color: "#ffffff", padding: "16px 24px" });
   await rowStyle.setProperties({ display: "flex", "align-items": "center", "justify-content": "space-between", gap: "16px" });
   await linkStyle.setProperties({ color: "#ffffff", "text-decoration": "none" });
-  if (queries.some((query) => query.id === "medium")) await rowStyle.setProperties({ "flex-wrap": "wrap" }, { breakpoint: "medium" });
-  if (queries.some((query) => query.id === "tiny")) await navStyle.setProperties({ padding: "12px 16px" }, { breakpoint: "tiny" });
-  if (queries.some((query) => query.id === "large")) await navStyle.setProperties({ padding: "20px 32px" }, { breakpoint: "large" });
+  const responsivePadding: Partial<Record<BreakpointId, string>> = {
+    large: "20px 32px", xl: "22px 36px", xxl: "24px 40px",
+    medium: "16px 20px", small: "14px 18px", tiny: "12px 16px",
+  };
+  for (const query of queries) {
+    const padding = responsivePadding[query.id];
+    if (padding) await navStyle.setProperties({ padding }, { breakpoint: query.id });
+  }
+  if (queries.some((query) => query.id === "medium")) {
+    await rowStyle.setProperties({ "flex-wrap": "wrap" }, { breakpoint: "medium" });
+  }
 
   report("Inserting the editable proof structure…");
   const root = webflow.elementBuilder(webflow.elementPresets.DivBlock);
@@ -103,7 +136,7 @@ async function createProof(report: (message: string) => void): Promise<void> {
   await component.setVariant("base", { name: "Mobile landscape" });
   for (const name of ["Never", "Tablet", "Mobile portrait", "Always"]) await component.createVariant(name);
   const [labelProp, ariaProp] = await component.createProps([
-    { type: "string", name: "Brand label", group: "Content", defaultValue: "SmashBurger proof" },
+    { type: "string", name: "Brand accessible label", group: "Accessibility", defaultValue: "SmashBurger proof" },
     { type: "string", name: "Navigation label", group: "Accessibility", defaultValue: "Proof navigation" },
   ]);
   const componentRoot = await component.getRootElement();
@@ -149,7 +182,10 @@ const App: React.FC = () => {
       <dt>Navbar marker</dt><dd>{snapshot.marker}</dd>
       <dt>Breakpoints</dt><dd>{snapshot.breakpoints.join(", ")}</dd>
       <dt>Variants</dt><dd>{snapshot.variants.join(", ") || "—"}</dd>
-      <dt>Properties</dt><dd>{snapshot.props.join(", ") || "—"}</dd>
+      <dt>Properties</dt><dd>{snapshot.propertyCount} · {snapshot.propertyGroups.join(", ") || "No groups"}</dd>
+      <dt>Instance overrides</dt><dd>{snapshot.overrides.join(", ") || "None"}</dd>
+      <dt>WHTML hooks</dt><dd>{snapshot.hooks.join(", ") || "None found"}</dd>
+      <dt>Make local</dt><dd>{snapshot.adoption}</dd>
       <dt>WHTML export</dt><dd>{snapshot.whtml ? "Available" : "Unavailable for this selection"}</dd>
       <dt>Proof on site</dt><dd>{snapshot.proofExists ? "Present" : "Absent"}</dd>
     </dl>}
