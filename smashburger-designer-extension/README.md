@@ -13,6 +13,12 @@ This is a **private, disposable API test**, not a SmashBurger installer. It has 
 
 The proof deliberately has no SmashBurger runtime and its variant names do not yet alter collapse behavior. It must never be used as a production navigation menu. Run it only on a spare page or clone of the Smashburger site. It refuses a second run when the named component exists, and also checks for a partial native proof in the selected container. It reuses its styles if an earlier attempt stopped before component creation.
 
+## Current status and handoff
+
+The `SmashBurger App API Lab` page is a draft on the Smashburger test site. Its native core trial has one project-native component instance, one Base variant, three sample links, 20 grouped/bound properties and a compact, Canvas-visible runtime Details containing the exact pinned `v0.2.3` loader after the trial's scoped display rules. Webflow settings readback confirms the saved element bindings. The extension was closed for the final Preview checks, and tested instance overrides were reset to defaults.
+
+This proves the direct native generator route and several configuration primitives. It does not yet reproduce the released Library component's five functional variants or 57-property content surface. The next implementation step is a complete generator schema and structure on a disposable clean-site fixture, followed by idempotent installation and published runtime checks. The draft lab has not been published, and the Library `Make local` API route remains unavailable in this Designer session.
+
 ## Build and local run
 
 ```sh
@@ -38,7 +44,7 @@ The production installer, Make local workflow, production Embed setup, rollback,
 
 The Webflow site tools can read the Smashburger consumer without altering it. The site has all seven breakpoints: Desktop, 1280, 1440, 1920, Tablet, Mobile landscape and Mobile portrait. Its Overview page contains one `SmashBurger CDN` component instance. The component has 57 property definitions, five variants (`Never`, `Tablet`, `Mobile landscape`, `Mobile portrait`, `Always`), and seven site instances.
 
-The private development app is registered and running inside Smashburger Designer. Live **Inspect selection** on the linked CDN instance returned all seven breakpoints, the five variant names, all 57 property definitions in eight groups, and two instance overrides (`Variant`, `Show primary navigation`). The selected instance itself has no visible `data-mwp-navbar` marker; WHTML export returned unavailable, so its internal runtime hooks could not be inspected through that route. These are live Designer Extension reads.
+The private development app is registered on Smashburger and was launched for the trial, then closed at handoff. Live **Inspect selection** on the linked CDN instance returned all seven breakpoints, the five variant names, all 57 property definitions in eight groups, and two instance overrides (`Variant`, `Show primary navigation`). The selected instance itself has no visible `data-mwp-navbar` marker; WHTML export returned unavailable, so its internal runtime hooks could not be inspected through that route. These are live Designer Extension reads.
 
 The first lab action did create the draft page, then stopped before inserting any element: the live `elementBuilder` rejected `DivBlock` with “Only `webflow.elementPresets.DOM` is currently supported.” The installed TypeScript declarations allowed that call, so runtime capability differs from its type surface. The proof has been changed to use direct native `append(DivBlock)` and `append(TextLink)` operations. The retry reuses the same draft page; its first failure left no proof marker or component.
 

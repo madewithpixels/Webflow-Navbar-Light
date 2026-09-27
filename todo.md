@@ -14,7 +14,17 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Do not refresh the Webflow `Navbar Light` test page without explicit approval and a confirmed backup.
 - [x] Keep this roadmap and `README.md` aligned with implementation.
 
-## Current handoff — 21 August 2026
+## Current handoff — 27 September 2026
+
+- [x] Ship and verify the pinned `v0.2.3` layout defaults and the six-page Smashburger demo area. The five layout pages passed closed/open checks at the recorded widths; Dropdown native GSAP and Overview Webflow scroll interactions passed on the published site. Evidence: `webflow/demo-qa.md`, `682257b`, `98b6de6`.
+- [x] Prove the private Designer Extension can create and configure a project-native draft component. The API Lab now has one Base variant, three sample links, a compact native Details around the pinned Embed, and 20 grouped/bound properties. Tablet Preview with the app closed covered all five layouts without horizontal overflow; selected content, destination, panel-width and focus overrides were checked and reset. Evidence: `smashburger-designer-extension/README.md`, `3205093`, `0e02a63`, `8be9e8b`.
+- [x] Keep the `SmashBurger App API Lab` page unpublished. The existing linked Library source and other consumer sites were not changed by the extension trial.
+- [ ] Build the complete native generator: production content and property schema, five functional collapse variants, all layout/motion combinations, and safe repeat-install behavior on a clean site.
+- [ ] Prove published behavior of the generated component, including its pinned Embed, keyboard/focus/ARIA state and an app-independent editing path. Resolve the Library `Make local` limitation or provide a precise Designer handoff.
+
+The current released installation path remains the MWP Component Library. The private extension is a capability trial, not a released installer. Implementation snapshot reviewed at `8be9e8b`; local checks passed 21 runtime tests, `check:dist`, extension type checking, linting and bundling. Next useful action: design and test the generator's complete native tree and property schema on a disposable clean-site fixture before offering installation to other sites. No publication is needed for the draft API Lab at this stage.
+
+## Earlier handoff — 21 August 2026
 
 - [x] Complete a real replacement trial on the in-progress madewithpixels Home page using an installed `SmashBurger CDN` instance, configured to Always collapse and then unlinked for local editing.
 - [x] Confirm the unlinked trigger opens and closes, Escape restores focus, utility Link Blocks can be recreated with native Div wrappers, and existing project button classes can style the native SmashBurger summary.
