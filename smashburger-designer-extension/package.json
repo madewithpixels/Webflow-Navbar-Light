@@ -1,0 +1,42 @@
+{
+  "name": "smashburger-designer-extension",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "npm install && concurrently \"webflow extension serve\" \"npm run watch-webpack\"",
+    "build": "npm run build-webpack && webflow extension bundle --skip-update-check",
+    "watch-webpack": "webpack --config webpack.config.mjs --mode development --watch",
+    "build-webpack": "webpack --config webpack.config.mjs --mode production",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.23.2",
+    "@babel/preset-react": "^7.22.15",
+    "@eslint/js": "^9.21.0",
+    "@types/react": "^18.2.79",
+    "@types/react-dom": "^18.2.25",
+    "@webflow/designer-extension-typings": "^2.0.2",
+    "@webflow/webflow-cli": "2.9.0",
+    "babel-loader": "^9.1.3",
+    "concurrently": "^8.2.2",
+    "css-loader": "^7.1.2",
+    "eslint": "^9.21.0",
+    "eslint-plugin-promise": "^7.2.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "style-loader": "^4.0.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.24.0",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
+  },
+  "dependencies": {
+    "react-dom": "^18.2.0"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-react"
+    ]
+  }
+}
