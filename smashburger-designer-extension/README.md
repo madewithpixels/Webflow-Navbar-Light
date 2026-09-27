@@ -1,9 +1,10 @@
 # SmashBurger Designer Extension capability prototype
 
-This is a **private, disposable API test**, not a SmashBurger installer. It has two actions:
+This is a **private, disposable API test**, not a SmashBurger installer. It has three actions:
 
 - **Inspect selection** reads the site breakpoints, selected component origin, variants, property groups and instance overrides, root marker, recognizable runtime hooks in WHTML, and whether WHTML export is available.
 - **Create native proof** inserts a small editable header on a selected page container, gives it reusable `sb-proof-*` classes with styles at every configured breakpoint, converts it to a project component, creates the five planned collapse variant names, adds grouped properties, and attempts to bind those properties to native `aria-label` attributes.
+- **Create draft lab and proof** finds or creates the unpublished `smashburger-app-api-lab` page on the Smashburger test site and runs the native proof on its Body. It refuses a duplicate proof component and checks the saved variants, properties and bindings.
 
 The proof deliberately has no SmashBurger runtime and its variant names do not yet alter collapse behavior. It must never be used as a production navigation menu. Run it only on a spare page or clone of the Smashburger site. It refuses a second run when the named component exists, and also checks for a partial native proof in the selected container. It reuses its styles if an earlier attempt stopped before component creation.
 
@@ -26,8 +27,12 @@ The bundle is `bundle.zip`. For live Designer testing, register a private Design
 4. Reopen and run the action again. It must refuse duplicates. Test a partial failure separately on a clone.
 5. Determine whether the API can insert and configure a Canvas-visible Embed, and whether WHTML import can safely preserve an adapted SmashBurger tree.
 
-No live Designer execution is claimed by the local build. The production installer, Make local workflow, Embed insertion, rollback, and full functional/accessible menu remain separate work.
+The production installer, Make local workflow, Embed insertion, rollback, and full functional/accessible menu remain separate work.
 
 ## Connected-site baseline, 27 September 2026
 
-The Webflow site tools can read the Smashburger consumer without altering it. The site has all seven breakpoints: Desktop, 1280, 1440, 1920, Tablet, Mobile landscape and Mobile portrait. Its Overview page contains one `SmashBurger CDN` component instance. The component has 57 property definitions, five variants (`Never`, `Tablet`, `Mobile landscape`, `Mobile portrait`, `Always`), and seven site instances. This confirms the shape the inspector must handle; it is **not** a live run of this Extension. Browser control did not reach an authenticated app-setup page, so private installation and runtime API verification remain pending.
+The Webflow site tools can read the Smashburger consumer without altering it. The site has all seven breakpoints: Desktop, 1280, 1440, 1920, Tablet, Mobile landscape and Mobile portrait. Its Overview page contains one `SmashBurger CDN` component instance. The component has 57 property definitions, five variants (`Never`, `Tablet`, `Mobile landscape`, `Mobile portrait`, `Always`), and seven site instances.
+
+The private development app is registered and running inside Smashburger Designer. Live **Inspect selection** on the linked CDN instance returned all seven breakpoints, the five variant names, all 57 property definitions in eight groups, and two instance overrides (`Variant`, `Show primary navigation`). The selected instance itself has no visible `data-mwp-navbar` marker; WHTML export returned unavailable, so its internal runtime hooks could not be inspected through that route. These are live Designer Extension reads. Native creation, binding readback, and persistence with the app closed remain pending.
+
+The first lab action did create the draft page, then stopped before inserting any element: the live `elementBuilder` rejected `DivBlock` with “Only `webflow.elementPresets.DOM` is currently supported.” The installed TypeScript declarations allowed that call, so runtime capability differs from its type surface. The proof has been changed to use direct native `append(DivBlock)` and `append(TextLink)` operations. The retry reuses the same draft page; its first failure left no proof marker or component.

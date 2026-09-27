@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 
 const PROOF_NAME = "SmashBurger API proof";
+const LAB_PAGE_SLUG = "smashburger-app-api-lab";
 
 type Snapshot = {
   site: string;
@@ -74,8 +75,13 @@ async function style(name: string): Promise<Style> {
   return (await webflow.getStyleByName(name)) ?? webflow.createStyle(name);
 }
 
-async function createProof(report: (message: string) => void): Promise<void> {
-  const selected = await webflow.getSelectedElement();
+function isBoundTo(value: string | BindingValue | null, propId: string): boolean {
+  return typeof value === "object" && value !== null &&
+    value.sourceType === "prop" && value.propId === propId;
+}
+
+async function createProof(report: (message: string) => void, anchor?: AnyElement): Promise<void> {
+  const selected = anchor ?? await webflow.getSelectedElement();
   if (!selected?.children) throw new Error("Select a page container that can hold children.");
   const components = await webflow.getAllComponents();
   if ((await Promise.all(components.map((item) => item.getName()))).includes(PROOF_NAME)) {
@@ -107,27 +113,26 @@ async function createProof(report: (message: string) => void): Promise<void> {
   }
 
   report("Inserting the editable proof structure…");
-  const root = webflow.elementBuilder(webflow.elementPresets.DivBlock);
-  root.setTag("header");
-  root.setStyles([navStyle]);
-  root.setAttribute("data-mwp-prototype", "api-proof-v1");
-  const row = root.append(webflow.elementPresets.DivBlock);
-  row.setStyles([rowStyle]);
-  const brand = row.append(webflow.elementPresets.TextLink);
-  brand.setStyles([linkStyle]);
-  brand.setAttribute("href", "#");
-  brand.setTextContent("SmashBurger proof");
-  const nav = row.append(webflow.elementPresets.DivBlock);
-  nav.setTag("nav");
-  nav.setAttribute("aria-label", "Proof navigation");
-  nav.setStyles([rowStyle]);
+  const inserted = await selected.append(webflow.elementPresets.DivBlock);
+  await inserted.setAttribute("data-mwp-prototype", "api-proof-v1");
+  await inserted.setTag("header");
+  await inserted.setStyles([navStyle]);
+  const row = await inserted.append(webflow.elementPresets.DivBlock);
+  await row.setStyles([rowStyle]);
+  const brand = await row.append(webflow.elementPresets.TextLink);
+  await brand.setStyles([linkStyle]);
+  await brand.setSettings("url", "#");
+  await brand.setTextContent("SmashBurger proof");
+  const nav = await row.append(webflow.elementPresets.DivBlock);
+  await nav.setTag("nav");
+  await nav.setAttribute("aria-label", "Proof navigation");
+  await nav.setStyles([rowStyle]);
   for (const label of ["Home", "About", "Contact"]) {
-    const link = nav.append(webflow.elementPresets.TextLink);
-    link.setStyles([linkStyle]);
-    link.setAttribute("href", "#");
-    link.setTextContent(label);
+    const link = await nav.append(webflow.elementPresets.TextLink);
+    await link.setStyles([linkStyle]);
+    await link.setSettings("url", "#");
+    await link.setTextContent(label);
   }
-  const inserted = await selected.append(root);
   report("Making a project component with variants and grouped properties…");
   const component = await webflow.registerComponent({
     name: PROOF_NAME, group: "SmashBurger experiments",
@@ -144,9 +149,45 @@ async function createProof(report: (message: string) => void): Promise<void> {
   const [innerRow] = await componentRoot.getChildren();
   if (!innerRow?.children) throw new Error("Component created, but its row cannot be inspected.");
   const [brandLink, navElement] = await innerRow.getChildren();
-  if (brandLink?.attributes) await brandLink.setAttribute("aria-label", { sourceType: "prop", propId: labelProp.id });
-  if (navElement?.attributes) await navElement.setAttribute("aria-label", { sourceType: "prop", propId: ariaProp.id });
+  if (!brandLink?.attributes || !navElement?.attributes) {
+    throw new Error("Component created, but its native links do not support attribute bindings.");
+  }
+  await brandLink.setAttribute("aria-label", { sourceType: "prop", propId: labelProp.id });
+  await navElement.setAttribute("aria-label", { sourceType: "prop", propId: ariaProp.id });
+  const [brandBinding, navBinding, savedVariants, savedProps] = await Promise.all([
+    brandLink.getAttributeValue("aria-label"), navElement.getAttributeValue("aria-label"),
+    component.getVariants(), component.getProps(),
+  ]);
+  if (!isBoundTo(brandBinding, labelProp.id) || !isBoundTo(navBinding, ariaProp.id) ||
+    savedVariants.length !== 5 || savedProps.length !== 2) {
+    throw new Error("Component created, but its variants, properties or attribute bindings did not pass readback.");
+  }
   report("Proof created. Inspect the project component in Designer.");
+}
+
+async function createLabAndProof(report: (message: string) => void): Promise<void> {
+  const site = await webflow.getSiteInfo();
+  if (site.siteName !== "Smashburger") {
+    throw new Error("This private lab action is limited to the Smashburger test site.");
+  }
+  const components = await webflow.getAllComponents();
+  if ((await Promise.all(components.map((item) => item.getName()))).includes(PROOF_NAME)) {
+    throw new Error("The proof component already exists. No page or component was duplicated.");
+  }
+  report("Finding or creating the draft lab page…");
+  const pages = (await webflow.getAllPagesAndFolders()).filter((item): item is Page => item.type === "Page");
+  const slugs = await Promise.all(pages.map((page) => page.getSlug()));
+  let page = pages.find((_, index) => slugs[index] === LAB_PAGE_SLUG);
+  if (!page) {
+    page = await webflow.createPage();
+    await page.setName("SmashBurger App API Lab");
+    await page.setSlug(LAB_PAGE_SLUG);
+  }
+  await page.setDraft(true);
+  await webflow.switchPage(page);
+  const body = (await webflow.getAllElements()).find((element) => element.type === "Body");
+  if (!body) throw new Error("The draft page opened, but its Body element was not available.");
+  await createProof(report, body);
 }
 
 const App: React.FC = () => {
@@ -159,11 +200,20 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Inspection failed: ${String(error)}`); }
     finally { setBusy(false); }
   };
-  useEffect(() => { void refresh(); }, []);
+  useEffect(() => {
+    void webflow.setExtensionSize("comfortable").catch(() => undefined);
+    void refresh();
+  }, []);
   const makeProof = async (): Promise<void> => {
     setBusy(true);
     try { await createProof(setMessage); setSnapshot(await inspect()); }
     catch (error) { setMessage(`Proof stopped: ${String(error)}`); }
+    finally { setBusy(false); }
+  };
+  const makeLab = async (): Promise<void> => {
+    setBusy(true);
+    try { await createLabAndProof(setMessage); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Lab stopped: ${String(error)}`); }
     finally { setBusy(false); }
   };
   return <main>
@@ -173,6 +223,7 @@ const App: React.FC = () => {
     <div className="actions">
       <button disabled={busy} onClick={() => { void refresh(); }}>Inspect selection</button>
       <button className="secondary" disabled={busy || !snapshot?.canAppend || snapshot.proofExists} onClick={() => { void makeProof(); }}>Create native proof</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || snapshot.proofExists} onClick={() => { void makeLab(); }}>Create draft lab and proof</button>
     </div>
     <p className="status" role="status">{message}</p>
     {snapshot && <dl>
