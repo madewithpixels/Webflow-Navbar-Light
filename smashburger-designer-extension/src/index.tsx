@@ -6,6 +6,17 @@ import cdnLoader from "../../webflow/navbar-light-cdn-loader.html";
 const PROOF_NAME = "SmashBurger API proof";
 const LAB_PAGE_SLUG = "smashburger-app-api-lab";
 const CORE_NAME = "SmashBurger native core trial";
+const CORE_DISPLAY_BRIDGE_V1 = `<style>
+.sb-app-nav[data-collapse="always"] .sb-app-menu,
+.sb-app-nav[data-mwp-collapsed="true"] .sb-app-menu { display: block; }
+</style>`;
+const CORE_EMBED_CODE_V1 = `${CORE_DISPLAY_BRIDGE_V1}\n${cdnLoader}`;
+const CORE_DISPLAY_BRIDGE = `<style>
+.sb-app-nav[data-collapse="always"] .sb-app-menu,
+.sb-app-nav[data-mwp-collapsed="true"] .sb-app-menu { display: block; }
+.sb-app-nav .sb-app-infrastructure { display: none; }
+</style>`;
+const CORE_EMBED_CODE = `${CORE_DISPLAY_BRIDGE}\n${cdnLoader}`;
 const CORE_PROPERTIES: CreatePropOptions[] = [
   { type: "string", name: "Collapse breakpoint", group: "Behavior", defaultValue: "tablet", tooltip: "never, tablet, mobile-landscape, mobile-portrait, or always" },
   { type: "string", name: "Menu layout", group: "Layout", defaultValue: "dropdown", tooltip: "dropdown, full-width, left, right, or overlay" },
@@ -201,8 +212,28 @@ async function configureNativeCore(report: (message: string) => void, knownCompo
     await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
     throw new Error("The native core trial root marker or structure has changed; no properties were added.");
   }
-  const [inner] = await root.getChildren();
+  const children = await root.getChildren();
+  const [inner] = children;
   if (!inner?.children) throw new Error("The native core inner row is missing; no properties were added.");
+  let infrastructure: AnyElement | undefined;
+  for (const child of children) {
+    if (child.attributes && await child.getResolvedAttributeValue("data-mwp-infrastructure") !== null) {
+      infrastructure = child;
+      break;
+    }
+  }
+  const directEmbed = children.find((child) => child.type === "HtmlEmbed");
+  const infrastructureChildren = infrastructure?.children ? await infrastructure.getChildren() : [];
+  const nestedEmbed = infrastructureChildren.find((child) => child.type === "HtmlEmbed");
+  if (directEmbed && nestedEmbed) throw new Error("Two runtime Embeds were found; no code was changed.");
+  const embed = directEmbed ?? nestedEmbed;
+  if (!embed?.elementSettings) {
+    throw new Error("The native core runtime Embed is missing; no properties were added.");
+  }
+  const existingCode = (await embed.getSettings()).code;
+  if (existingCode !== cdnLoader && existingCode !== CORE_EMBED_CODE_V1 && existingCode !== CORE_EMBED_CODE) {
+    throw new Error("The native core Embed differs from the known trial versions; no code was replaced.");
+  }
   const [brand, menu, panel] = await inner.getChildren();
   if (!brand?.attributes || !menu?.children || !panel?.attributes ||
     await menu.getResolvedAttributeValue("data-mwp-menu") === null ||
@@ -225,6 +256,52 @@ async function configureNativeCore(report: (message: string) => void, knownCompo
   if (missing.length) {
     report(`Creating ${missing.length} native component properties…`);
     await component.createProps(missing);
+  }
+  report("Keeping the runtime Embed in a compact native Details section…");
+  const [infrastructureStyle, infrastructureSummaryStyle] = await Promise.all([
+    style("sb-app-infrastructure"), style("sb-app-infrastructure-summary"),
+  ]);
+  await infrastructureStyle.setProperties({ "font-size": "11px", "line-height": "1.3", color: "#b7c8bd", "padding-top": "6px" });
+  await infrastructureSummaryStyle.setProperties({ cursor: "pointer" });
+  if (!infrastructure) {
+    infrastructure = await root.append(webflow.elementPresets.DOM);
+    await infrastructure.setTag("details");
+    await infrastructure.setAttribute("data-mwp-infrastructure", "");
+  }
+  if (!infrastructure.children || !infrastructure.styles) {
+    throw new Error("The native infrastructure Details cannot contain or style its Embed.");
+  }
+  await infrastructure.setStyles([infrastructureStyle]);
+  const currentChildren = await infrastructure.getChildren();
+  let infrastructureSummary: AnyElement | undefined;
+  for (const child of currentChildren) {
+    if (child.attributes && await child.getResolvedAttributeValue("data-mwp-infrastructure-label") !== null) {
+      infrastructureSummary = child;
+      break;
+    }
+  }
+  if (!infrastructureSummary) {
+    infrastructureSummary = await infrastructure.prepend(webflow.elementPresets.DOM);
+    await infrastructureSummary.setTag("summary");
+    await infrastructureSummary.setAttribute("data-mwp-infrastructure-label", "");
+    await infrastructureSummary.setTextContent("SmashBurger infrastructure");
+  }
+  if (!infrastructureSummary.styles) throw new Error("The infrastructure summary cannot be styled.");
+  await infrastructureSummary.setStyles([infrastructureSummaryStyle]);
+  if (directEmbed) await infrastructure.append(directEmbed);
+  if (existingCode !== CORE_EMBED_CODE) {
+    report("Updating the scoped runtime display rules…");
+    await embed.setSettings({ code: CORE_EMBED_CODE });
+    if ((await embed.getSettings()).code !== CORE_EMBED_CODE) {
+      throw new Error("The native core Embed update did not pass readback.");
+    }
+  }
+  const savedInfrastructureChildren = await infrastructure.getChildren();
+  const savedEmbeds = savedInfrastructureChildren.filter((child) => child.type === "HtmlEmbed");
+  const savedLabels = await Promise.all(savedInfrastructureChildren.map(async (child) =>
+    child.attributes && await child.getResolvedAttributeValue("data-mwp-infrastructure-label") !== null));
+  if (savedEmbeds.length !== 1 || savedEmbeds[0].id !== embed.id || savedLabels.filter(Boolean).length !== 1) {
+    throw new Error("The compact runtime Details structure did not pass readback.");
   }
   const props = await component.getProps();
   const propId = (name: string): string => {
@@ -249,7 +326,7 @@ async function configureNativeCore(report: (message: string) => void, knownCompo
   const checks = await Promise.all(bindings.map(async ([element, attribute, name]) =>
     element.attributes && isBoundTo(await element.getAttributeValue(attribute), propId(name))));
   if (checks.some((passed) => !passed)) throw new Error("Native properties were added, but an attribute binding failed readback.");
-  return `Native core configured: ${CORE_PROPERTIES.length} grouped properties and ${checks.length} attribute bindings saved.`;
+  return `Native core configured: ${CORE_PROPERTIES.length} grouped properties, ${checks.length} attribute bindings and compact runtime Details saved.`;
 }
 
 async function createNativeCore(report: (message: string) => void): Promise<void> {
@@ -280,7 +357,7 @@ async function createNativeCore(report: (message: string) => void): Promise<void
   await rootStyle.setProperties({ "background-color": "#17251e", color: "#ffffff", "padding-top": "16px", "padding-bottom": "16px", "padding-left": "24px", "padding-right": "24px" });
   await innerStyle.setProperties({ display: "flex", "align-items": "center", "justify-content": "space-between", gap: "20px" });
   await brandStyle.setProperties({ color: "#ffffff", "text-decoration": "none", "font-weight": "700" });
-  await menuStyle.setProperties({ display: "block" });
+  await menuStyle.setProperties({ display: "none" });
   await summaryStyle.setProperties({ display: "flex", "align-items": "center", gap: "10px", cursor: "pointer" });
   await iconStyle.setProperties({ display: "flex", "flex-direction": "column", gap: "5px", width: "20px", height: "16px", overflow: "visible", "flex-shrink": "0" });
   await lineStyle.setProperties({ display: "block", width: "20px", height: "2px", "min-width": "20px", "max-width": "20px", "min-height": "2px", "max-height": "2px", "flex-shrink": "0", "background-color": "currentColor" });
@@ -355,7 +432,7 @@ async function createNativeCore(report: (message: string) => void): Promise<void
   await backdrop.setAttribute("data-mwp-backdrop", "");
   await backdrop.setAttribute("aria-hidden", "true");
   const embed = await root.append(webflow.elementPresets.HtmlEmbed);
-  await embed.setSettings({ code: cdnLoader });
+  await embed.setSettings({ code: CORE_EMBED_CODE });
   report("Registering the native core as a project component…");
   const component = await webflow.registerComponent({
     name: CORE_NAME, group: "SmashBurger experiments",
