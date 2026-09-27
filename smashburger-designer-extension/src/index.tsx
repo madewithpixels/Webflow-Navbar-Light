@@ -6,6 +6,15 @@ import cdnLoader from "../../webflow/navbar-light-cdn-loader.html";
 const PROOF_NAME = "SmashBurger API proof";
 const LAB_PAGE_SLUG = "smashburger-app-api-lab";
 const CORE_NAME = "SmashBurger native core trial";
+const CORE_PROPERTIES: CreatePropOptions[] = [
+  { type: "string", name: "Collapse breakpoint", group: "Behavior", defaultValue: "tablet", tooltip: "never, tablet, mobile-landscape, mobile-portrait, or always" },
+  { type: "string", name: "Menu layout", group: "Layout", defaultValue: "dropdown", tooltip: "dropdown, full-width, left, right, or overlay" },
+  { type: "string", name: "Menu motion", group: "Motion", defaultValue: "dropdown", tooltip: "dropdown, left, right, up, fade, none, or custom" },
+  { type: "string", name: "Panel alignment", group: "Layout", defaultValue: "right", tooltip: "left, center, or right" },
+  { type: "string", name: "Brand accessible label", group: "Accessibility", defaultValue: "SmashBurger home" },
+  { type: "string", name: "Menu button label", group: "Accessibility", defaultValue: "Navigation menu" },
+  { type: "string", name: "Navigation label", group: "Accessibility", defaultValue: "Primary navigation" },
+];
 
 type Snapshot = {
   site: string;
@@ -175,6 +184,74 @@ async function probeEmbed(): Promise<string> {
   return `Embed ${created ? "inserted" : "reused"}; ${codeKey} content ${saved === code ? "saved" : `readback differs (${JSON.stringify(saved)})`}`;
 }
 
+async function configureNativeCore(report: (message: string) => void, knownComponent?: Component): Promise<string> {
+  const site = await webflow.getSiteInfo();
+  const page = await webflow.getCurrentPage();
+  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error("Open the SmashBurger App API Lab draft page before configuring its native core.");
+  }
+  const components = knownComponent ? [knownComponent] : await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(CORE_NAME)];
+  if (!component || component.readOnly || await component.getInstanceCount() !== 1) {
+    throw new Error("Expected one editable native core trial instance; no component was changed.");
+  }
+  const root = await component.getRootElement();
+  if (!root?.children || !root.attributes ||
+    await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native core trial root marker or structure has changed; no properties were added.");
+  }
+  const [inner] = await root.getChildren();
+  if (!inner?.children) throw new Error("The native core inner row is missing; no properties were added.");
+  const [brand, menu, panel] = await inner.getChildren();
+  if (!brand?.attributes || !menu?.children || !panel?.attributes ||
+    await menu.getResolvedAttributeValue("data-mwp-menu") === null ||
+    await panel.getResolvedAttributeValue("data-mwp-panel") === null) {
+    throw new Error("The native core brand, menu or panel has changed; no properties were added.");
+  }
+  const [summary] = await menu.getChildren();
+  if (!summary?.attributes || await summary.getResolvedAttributeValue("data-mwp-trigger") === null) {
+    throw new Error("The native core menu trigger has changed; no properties were added.");
+  }
+
+  const existing = await component.getProps();
+  for (const expected of CORE_PROPERTIES) {
+    const found = existing.find((prop) => prop.name === expected.name);
+    if (found && (found.type !== "string" || found.group !== expected.group)) {
+      throw new Error(`Property ${expected.name} already exists with a different type or group; no bindings were changed.`);
+    }
+  }
+  const missing = CORE_PROPERTIES.filter((expected) => !existing.some((prop) => prop.name === expected.name));
+  if (missing.length) {
+    report(`Creating ${missing.length} native component properties…`);
+    await component.createProps(missing);
+  }
+  const props = await component.getProps();
+  const propId = (name: string): string => {
+    const prop = props.find((item) => item.name === name && item.type === "string");
+    if (!prop) throw new Error(`Property ${name} was not saved.`);
+    return prop.id;
+  };
+  const bindings: Array<[AnyElement, string, string]> = [
+    [root, "data-collapse", "Collapse breakpoint"],
+    [root, "data-layout", "Menu layout"],
+    [root, "data-motion", "Menu motion"],
+    [root, "data-align", "Panel alignment"],
+    [brand, "aria-label", "Brand accessible label"],
+    [summary, "aria-label", "Menu button label"],
+    [panel, "aria-label", "Navigation label"],
+  ];
+  report("Binding behavior and accessibility settings to native elements…");
+  for (const [element, attribute, name] of bindings) {
+    if (!element.attributes) throw new Error(`The target for ${name} cannot bind attributes.`);
+    await element.setAttribute(attribute, { sourceType: "prop", propId: propId(name) });
+  }
+  const checks = await Promise.all(bindings.map(async ([element, attribute, name]) =>
+    element.attributes && isBoundTo(await element.getAttributeValue(attribute), propId(name))));
+  if (checks.some((passed) => !passed)) throw new Error("Native properties were added, but an attribute binding failed readback.");
+  return `Native core configured: ${CORE_PROPERTIES.length} grouped properties and ${checks.length} attribute bindings saved.`;
+}
+
 async function createNativeCore(report: (message: string) => void): Promise<void> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
@@ -203,7 +280,7 @@ async function createNativeCore(report: (message: string) => void): Promise<void
   await rootStyle.setProperties({ "background-color": "#17251e", color: "#ffffff", "padding-top": "16px", "padding-bottom": "16px", "padding-left": "24px", "padding-right": "24px" });
   await innerStyle.setProperties({ display: "flex", "align-items": "center", "justify-content": "space-between", gap: "20px" });
   await brandStyle.setProperties({ color: "#ffffff", "text-decoration": "none", "font-weight": "700" });
-  await menuStyle.setProperties({ display: "none" });
+  await menuStyle.setProperties({ display: "block" });
   await summaryStyle.setProperties({ display: "flex", "align-items": "center", gap: "10px", cursor: "pointer" });
   await iconStyle.setProperties({ display: "flex", "flex-direction": "column", gap: "5px", width: "20px", height: "16px", overflow: "visible", "flex-shrink": "0" });
   await lineStyle.setProperties({ display: "block", width: "20px", height: "2px", "min-width": "20px", "max-width": "20px", "min-height": "2px", "max-height": "2px", "flex-shrink": "0", "background-color": "currentColor" });
@@ -280,11 +357,11 @@ async function createNativeCore(report: (message: string) => void): Promise<void
   const embed = await root.append(webflow.elementPresets.HtmlEmbed);
   await embed.setSettings({ code: cdnLoader });
   report("Registering the native core as a project component…");
-  await webflow.registerComponent({
+  const component = await webflow.registerComponent({
     name: CORE_NAME, group: "SmashBurger experiments",
     description: "Draft-only native generator trial, with a pinned runtime Embed.",
   }, root);
-  report("Native core created with editable details, summary, links, classes and a pinned runtime Embed. Inspect on Canvas before any publication.");
+  report(await configureNativeCore(report, component));
 }
 
 async function createProof(report: (message: string) => void, anchor?: AnyElement): Promise<void> {
@@ -438,6 +515,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native core stopped: ${String(error)}`); }
     finally { setBusy(false); }
   };
+  const configureCore = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await configureNativeCore(setMessage)); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Native core configuration stopped: ${String(error)}`); }
+    finally { setBusy(false); }
+  };
   return <main>
     <div className="eyebrow">SmashBurger · private prototype</div>
     <h1>Designer capability check</h1>
@@ -449,6 +532,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || !snapshot?.proofExists} onClick={() => { void checkProof(); }}>Verify existing proof</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.proofExists} onClick={() => { void checkLab(); }}>Check styles + Embed API</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.proofExists || snapshot.nativeCoreExists} onClick={() => { void tryNativeCore(); }}>Create native core trial</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureCore(); }}>Configure native core trial</button>
     </div>
     <p className="status" role="status">{message}</p>
     {snapshot && <dl>
