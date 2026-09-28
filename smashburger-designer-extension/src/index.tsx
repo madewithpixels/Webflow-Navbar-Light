@@ -336,16 +336,18 @@ async function styleCoreVariants(): Promise<string> {
   if (!root?.attributes || await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
     throw new Error("The native core root marker has changed.");
   }
-  const [inner, menu, panel, links] = await Promise.all([
+  const [inner, menu, panel, links, primary] = await Promise.all([
     webflow.getStyleByName("sb-app-inner"), webflow.getStyleByName("sb-app-menu"),
     webflow.getStyleByName("sb-app-panel"), webflow.getStyleByName("sb-app-links"),
+    webflow.getStyleByName("sb-app-primary"),
   ]);
   if (!inner || !menu || !panel || !links) throw new Error("A native core layout class is missing.");
   const apply = async (collapsed: boolean, options: StyleOptions): Promise<void> => {
     await inner.setProperties({ "flex-wrap": collapsed ? "wrap" : "nowrap" }, options);
     await menu.setProperties({ display: collapsed ? "block" : "none" }, options);
     await panel.setProperties({ "flex-basis": collapsed ? "100%" : "auto" }, options);
-    await links.setProperties({ "flex-direction": collapsed ? "column" : "row", "align-items": collapsed ? "flex-start" : "center" }, options);
+    await links.setProperties({ "flex-direction": collapsed ? "column" : "row", "align-items": collapsed ? "flex-start" : "center", "flex-wrap": collapsed ? "nowrap" : "wrap" }, options);
+    if (primary) await primary.setProperties({ "flex-direction": collapsed ? "column" : "row", "align-items": collapsed ? "flex-start" : "center", "flex-wrap": collapsed ? "nowrap" : "wrap" }, options);
   };
   await apply(false, { breakpoint: "medium" });
   await apply(true, { breakpoint: "small" });
@@ -365,6 +367,19 @@ async function styleCoreVariants(): Promise<string> {
   ]);
   if (checks.join(",") !== "none,block,block,none,block,block") {
     throw new Error(`Native core variant styles did not pass readback: ${checks.join(", ")}`);
+  }
+  if (primary) {
+    const primaryChecks = await Promise.all([
+      primary.getProperty("flex-direction", { breakpoint: "medium" }),
+      primary.getProperty("flex-direction", { breakpoint: "small" }),
+      primary.getProperty("flex-direction", { variantId: variantId("Tablet"), breakpoint: "medium" }),
+      primary.getProperty("flex-direction", { variantId: variantId("Never"), breakpoint: "small" }),
+      primary.getProperty("flex-direction", { variantId: variantId("Mobile portrait"), breakpoint: "tiny" }),
+      primary.getProperty("flex-direction", { variantId: variantId("Always") }),
+    ]);
+    if (primaryChecks.join(",") !== "row,column,column,row,column,column") {
+      throw new Error(`Native primary variant styles did not pass readback: ${primaryChecks.join(", ")}`);
+    }
   }
   return "Native core Canvas styles saved for all five collapse variants at their breakpoint thresholds.";
 }
@@ -587,7 +602,11 @@ async function configureNativeContent(report: (message: string) => void): Promis
     await panel.getResolvedAttributeValue("data-mwp-panel") === null) {
     throw new Error("The native brand or panel has changed; no content was changed.");
   }
-  const [linksContainer] = await panel.getChildren();
+  const [firstPanelChild] = await panel.getChildren();
+  const primary = firstPanelChild?.attributes &&
+    await firstPanelChild.getResolvedAttributeValue("data-mwp-primary") !== null
+    ? firstPanelChild : null;
+  const [linksContainer] = primary?.children ? await primary.getChildren() : [firstPanelChild];
   if (!linksContainer?.children || !linksContainer.attributes ||
     await linksContainer.getResolvedAttributeValue("data-mwp-links") === null) {
     throw new Error("The native link container has changed; no content was changed.");
@@ -659,6 +678,137 @@ async function configureNativeContent(report: (message: string) => void): Promis
     }
   }
   return `Native content configured: ${definitions.length} text and destination properties saved and bound.`;
+}
+
+async function configureNativePrimary(report: (message: string) => void): Promise<string> {
+  const site = await webflow.getSiteInfo();
+  const page = await webflow.getCurrentPage();
+  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error("Open the SmashBurger App API Lab draft page before expanding its native navigation.");
+  }
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(CORE_NAME)];
+  if (!component || component.library || component.readOnly || await component.getInstanceCount() !== 1) {
+    throw new Error("Expected one editable native core trial instance; no navigation was changed.");
+  }
+  const root = await component.getRootElement();
+  if (!root?.children || !root.attributes ||
+    await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native core trial marker has changed; no navigation was changed.");
+  }
+  const rootChildren = await root.getChildren();
+  const inner = rootChildren[0];
+  let backdrop: AnyElement | undefined;
+  for (const child of rootChildren) {
+    if (child.attributes && await child.getResolvedAttributeValue("data-mwp-backdrop") !== null) backdrop = child;
+  }
+  if (!inner?.children) throw new Error("The native core inner row is missing.");
+  const [, menu, panel] = await inner.getChildren();
+  if (!menu?.children || !panel?.children || !panel.attributes ||
+    await panel.getResolvedAttributeValue("data-mwp-panel") === null) {
+    throw new Error("The native menu or panel has changed; no navigation was changed.");
+  }
+  const [summary] = await menu.getChildren();
+  const [label] = summary?.children ? await summary.getChildren() : [];
+  if (!label?.attributes || !label.visibility || !backdrop?.attributes || !backdrop.visibility ||
+    await label.getResolvedAttributeValue("data-mwp-label") === null ||
+    await backdrop.getResolvedAttributeValue("data-mwp-backdrop") === null) {
+    throw new Error("The native menu label or backdrop has changed; no navigation was changed.");
+  }
+  const panelChildren = await panel.getChildren();
+  let primary: AnyElement | undefined;
+  for (const child of panelChildren) {
+    if (child.attributes && await child.getResolvedAttributeValue("data-mwp-primary") !== null) primary = child;
+  }
+  if (panelChildren.length !== 1 || !panelChildren[0].children ||
+    (primary && panelChildren[0].id.element !== primary.id.element)) {
+    throw new Error("The panel has an unexpected child; inspect it before expanding navigation.");
+  }
+  const links = primary?.children ? (await primary.getChildren())[0] : panelChildren[0];
+  if (!links?.attributes || await links.getResolvedAttributeValue("data-mwp-links") === null) {
+    throw new Error("The original native links were not found; no navigation was changed.");
+  }
+  const definitions: CreatePropOptions[] = [
+    { type: "boolean", name: "Show menu label", group: "Trigger", defaultValue: true },
+    { type: "boolean", name: "Show backdrop", group: "Content", defaultValue: true },
+    { type: "boolean", name: "Show primary navigation", group: "Content", defaultValue: true },
+    { type: "boolean", name: "Show CTA", group: "Content", defaultValue: true },
+  ];
+  const existing = await component.getProps();
+  for (const expected of definitions) {
+    const found = existing.find((prop) => prop.name === expected.name);
+    if (found && (found.type !== expected.type || found.group !== expected.group)) {
+      throw new Error(`Property ${expected.name} has a different type or group; no navigation was changed.`);
+    }
+  }
+  const [primaryStyle, ctaStyle] = await Promise.all([style("sb-app-primary"), style("sb-app-cta")]);
+  await primaryStyle.setProperties({ display: "flex", "align-items": "center", gap: "20px" });
+  await ctaStyle.setProperties({ color: "inherit", "text-decoration": "none", "border-style": "solid", "border-width": "1px", "border-color": "currentColor", "border-radius": "999px", "padding-top": "8px", "padding-bottom": "8px", "padding-left": "14px", "padding-right": "14px" });
+  await primaryStyle.setProperties({ "flex-direction": "row", "align-items": "center", "align-self": "stretch", "flex-wrap": "wrap" }, { breakpoint: "medium" });
+  if (!primary) {
+    report("Grouping the existing links in a native primary navigation wrapper…");
+    primary = await panel.append(webflow.elementPresets.DivBlock);
+    await primary.setStyles([primaryStyle]);
+    await primary.setAttribute("data-mwp-primary", "");
+    if (!primary.children) throw new Error("The new primary wrapper cannot contain the existing links.");
+    await primary.append(links);
+  }
+  if (!primary.children || !primary.visibility) throw new Error("The primary wrapper cannot hold or bind native content.");
+  const primaryChildren = await primary.getChildren();
+  if (primaryChildren.length > 2 || primaryChildren[0]?.id.element !== links.id.element) {
+    throw new Error("The primary wrapper has an unexpected structure; no CTA was added.");
+  }
+  let cta = primaryChildren[1];
+  if (cta && (cta.type !== "Link" || !cta.attributes ||
+    await cta.getResolvedAttributeValue("data-mwp-cta") === null)) {
+    throw new Error("The existing primary child is not the trial CTA.");
+  }
+  if (!cta) {
+    report("Adding an editable native call-to-action link…");
+    cta = await primary.append(webflow.elementPresets.TextLink);
+    await cta.setStyles([ctaStyle]);
+    await cta.setSettings("url", "#");
+    await cta.setTextContent("Explore SmashBurger");
+    await cta.setAttribute("data-mwp-cta", "");
+  }
+  if (!cta.attributes) throw new Error("The CTA cannot expose its runtime item marker.");
+  if (await cta.getResolvedAttributeValue("data-mwp-item") === null) {
+    await cta.setAttribute("data-mwp-item", "");
+  }
+  if (!cta.visibility) throw new Error("The CTA cannot bind a visibility property.");
+  const missing = definitions.filter((expected) => !existing.some((prop) => prop.name === expected.name));
+  if (missing.length) {
+    report(`Creating ${missing.length} native visibility properties…`);
+    await component.createProps(missing);
+  }
+  const props = await component.getProps();
+  const propId = (name: string): string => {
+    const id = props.find((prop) => prop.name === name && prop.type === "boolean")?.id;
+    if (!id) throw new Error(`Property ${name} was not saved.`);
+    return id;
+  };
+  const bindings: Array<[AnyElement, string]> = [
+    [label, "Show menu label"], [backdrop, "Show backdrop"],
+    [primary, "Show primary navigation"], [cta, "Show CTA"],
+  ];
+  for (const [element, name] of bindings) {
+    if (!element.visibility) throw new Error(`${name} target cannot bind visibility.`);
+    await element.setVisibility({ sourceType: "prop", propId: propId(name) });
+  }
+  for (const [element, name] of bindings) {
+    if (!element.visibility || !isBoundTo(await element.getVisibility({ bindings: true }), propId(name))) {
+      throw new Error(`${name} visibility binding did not pass readback.`);
+    }
+  }
+  const savedPanel = await panel.getChildren();
+  const savedPrimary = await primary.getChildren();
+  if (savedPanel.length !== 1 || savedPanel[0].id.element !== primary.id.element ||
+    savedPrimary.length !== 2 || savedPrimary[0].id.element !== links.id.element ||
+    savedPrimary[1].id.element !== cta.id.element) {
+    throw new Error("The primary navigation structure did not pass readback.");
+  }
+  return "Native primary navigation saved: original links preserved, editable CTA added, four visibility controls bound.";
 }
 
 async function createNativeCore(report: (message: string) => void): Promise<void> {
@@ -942,6 +1092,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native content configuration stopped: ${String(error)}`); }
     finally { setBusy(false); }
   };
+  const configurePrimary = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await configureNativePrimary(setMessage)); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Native primary navigation stopped: ${String(error)}`); }
+    finally { setBusy(false); }
+  };
   const configureVariants = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await configureCoreVariants()); setSnapshot(await inspect()); }
@@ -974,6 +1130,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.proofExists || snapshot.nativeCoreExists} onClick={() => { void tryNativeCore(); }}>Create native core trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureCore(); }}>Configure native core trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureContent(); }}>Configure native content trial</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configurePrimary(); }}>Build native primary navigation</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureVariants(); }}>Create core variant names</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void activateVariants(); }}>Activate core variant bridge</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void styleVariants(); }}>Style core variants</button>
