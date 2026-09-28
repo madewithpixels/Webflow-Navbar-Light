@@ -11,14 +11,36 @@ const CORE_DISPLAY_BRIDGE_V1 = `<style>
 .sb-app-nav[data-mwp-collapsed="true"] .sb-app-menu { display: block; }
 </style>`;
 const CORE_EMBED_CODE_V1 = `${CORE_DISPLAY_BRIDGE_V1}\n${cdnLoader}`;
-const CORE_DISPLAY_BRIDGE = `<style>
+const CORE_DISPLAY_BRIDGE_V2 = `<style>
 .sb-app-nav[data-collapse="always"] .sb-app-menu,
 .sb-app-nav[data-mwp-collapsed="true"] .sb-app-menu { display: block; }
 .sb-app-nav .sb-app-infrastructure { display: none; }
 </style>`;
-const CORE_EMBED_CODE = `${CORE_DISPLAY_BRIDGE}\n${cdnLoader}`;
+const CORE_EMBED_CODE_V2 = `${CORE_DISPLAY_BRIDGE_V2}\n${cdnLoader}`;
+const CORE_VARIANT_BRIDGE = `<script>
+(() => {
+  const root = document.currentScript?.closest('[data-mwp-navbar]');
+  if (!root || root.getAttribute('data-collapse')?.trim()) return;
+  const marker = root.getAttributeNames().find((name) => /^data-wf--.+--variant$/.test(name));
+  const value = marker && root.getAttribute(marker);
+  if (['never', 'tablet', 'mobile-landscape', 'mobile-portrait', 'always'].includes(value)) {
+    root.setAttribute('data-collapse', value);
+  }
+})();
+</script>`;
+const CORE_EMBED_CODE_V3 = `${CORE_DISPLAY_BRIDGE_V2}\n${CORE_VARIANT_BRIDGE}\n${cdnLoader}`;
+const CORE_DISPLAY_BRIDGE = `<style>
+.sb-app-nav[data-collapse="always"] .sb-app-menu,
+.sb-app-nav[data-mwp-collapsed="true"] .sb-app-menu { display: block; }
+.sb-app-nav[data-mwp-collapsed="false"] .sb-app-inner { flex-wrap: nowrap; }
+.sb-app-nav[data-mwp-collapsed="false"] .sb-app-menu { display: none; }
+.sb-app-nav[data-mwp-collapsed="false"] .sb-app-panel { flex-basis: auto; }
+.sb-app-nav[data-mwp-collapsed="false"] .sb-app-links { flex-direction: row; align-items: center; }
+.sb-app-nav .sb-app-infrastructure { display: none; }
+</style>`;
+const CORE_EMBED_CODE = `${CORE_DISPLAY_BRIDGE}\n${CORE_VARIANT_BRIDGE}\n${cdnLoader}`;
 const CORE_PROPERTIES: CreatePropOptions[] = [
-  { type: "string", name: "Collapse breakpoint", group: "Behavior", defaultValue: "tablet", tooltip: "never, tablet, mobile-landscape, mobile-portrait, or always" },
+  { type: "string", name: "Collapse breakpoint", group: "Behavior", defaultValue: "", tooltip: "Leave blank to follow the selected variant; enter never, tablet, mobile-landscape, mobile-portrait, or always to override it" },
   { type: "string", name: "Menu layout", group: "Layout", defaultValue: "dropdown", tooltip: "dropdown, full-width, left, right, or overlay" },
   { type: "string", name: "Menu motion", group: "Motion", defaultValue: "dropdown", tooltip: "dropdown, left, right, up, fade, none, or custom" },
   { type: "string", name: "Panel alignment", group: "Layout", defaultValue: "right", tooltip: "left, center, or right" },
@@ -132,6 +154,8 @@ async function verifyProof(): Promise<string> {
   const [brandBinding, navBinding] = await Promise.all([
     brand.getAttributeValue("aria-label"), nav.getAttributeValue("aria-label"),
   ]);
+  const probeMarker = root.attributes
+    ? await root.getResolvedAttributeValue("data-mwp-variant-probe") : null;
   const checks = [
     missingVariants.length === 0 && variants.length === expectedVariants.length
       ? "five variants saved" : `variant mismatch (${variants.map((variant) => variant.name).join(", ")})`,
@@ -140,11 +164,209 @@ async function verifyProof(): Promise<string> {
       ? "brand label bound" : `brand label binding missing (${JSON.stringify(brandBinding)})`,
     navProp && isBoundTo(navBinding, navProp.id)
       ? "navigation label bound" : `navigation label binding missing (${JSON.stringify(navBinding)})`,
+    probeMarker === null ? "variant probe marker absent" : "variant probe marker remains",
   ];
   const passed = missingVariants.length === 0 && variants.length === expectedVariants.length &&
     Boolean(brandProp && navProp) && Boolean(brandProp && isBoundTo(brandBinding, brandProp.id)) &&
-    Boolean(navProp && isBoundTo(navBinding, navProp.id));
+    Boolean(navProp && isBoundTo(navBinding, navProp.id)) && probeMarker === null;
   return `${passed ? "Proof verified" : "Proof needs attention"}: ${checks.join("; ")}. Webflow also has ${props.length - 2} generated component property.`;
+}
+
+async function probeVariantAttributes(): Promise<string> {
+  const site = await webflow.getSiteInfo();
+  const page = await webflow.getCurrentPage();
+  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error("Open the SmashBurger App API Lab draft page before testing variant attributes.");
+  }
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(PROOF_NAME)];
+  if (!component || component.library || component.readOnly) {
+    throw new Error("The editable, disposable proof component is not present.");
+  }
+  const marker = "data-mwp-variant-probe";
+  const value = "always-only";
+  const original = await component.getSelectedVariant().catch(() => {
+    throw new Error("Open the SmashBurger API proof with Edit component, then run this check.");
+  });
+  let alwaysValue: string | null = null;
+  let baseValue: string | null = null;
+  let wroteMarker = false;
+  try {
+    for (const variant of [{ name: "Always" }, { id: "base" }]) {
+      await component.setSelectedVariant(variant);
+      const root = await component.getRootElement();
+      if (!root?.attributes) throw new Error("The proof component root does not support attributes.");
+      if (await root.getResolvedAttributeValue(marker) !== null) {
+        throw new Error("A variant probe marker already exists; no attribute was changed.");
+      }
+    }
+    await component.setSelectedVariant({ name: "Always" });
+    const alwaysRoot = await component.getRootElement();
+    if (!alwaysRoot?.attributes) throw new Error("The Always variant root is unavailable.");
+    await alwaysRoot.setAttribute(marker, value);
+    wroteMarker = true;
+    alwaysValue = await alwaysRoot.getResolvedAttributeValue(marker);
+    await component.setSelectedVariant({ id: "base" });
+    const baseRoot = await component.getRootElement();
+    if (!baseRoot?.attributes) throw new Error("The Base variant root is unavailable.");
+    baseValue = await baseRoot.getResolvedAttributeValue(marker);
+  } finally {
+    if (wroteMarker) {
+      for (const variant of [{ name: "Always" }, { id: "base" }]) {
+        await component.setSelectedVariant(variant);
+        const root = await component.getRootElement();
+        if (root?.attributes && await root.getResolvedAttributeValue(marker) === value) {
+          await root.removeAttribute(marker);
+        }
+      }
+    }
+    await component.setSelectedVariant({ id: original.id });
+  }
+  return alwaysValue === value && baseValue === null
+    ? "Variant attribute probe passed: Always has its own root attribute; Base remains unchanged. Temporary marker removed."
+    : `Variant attribute probe found shared settings: Always=${JSON.stringify(alwaysValue)}, Base=${JSON.stringify(baseValue)}. Temporary marker removed.`;
+}
+
+async function configureCoreVariants(): Promise<string> {
+  const site = await webflow.getSiteInfo();
+  const page = await webflow.getCurrentPage();
+  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error("Open the SmashBurger App API Lab draft page before configuring core variants.");
+  }
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(CORE_NAME)];
+  if (!component || component.library || component.readOnly) {
+    throw new Error("The editable native core trial is not present.");
+  }
+  const expected = ["Never", "Tablet", "Mobile landscape", "Mobile portrait", "Always"];
+  let variants = await component.getVariants();
+  if (variants.some((variant) => ![...expected, "Base"].includes(variant.name))) {
+    throw new Error("The native core has an unexpected variant; inspect it before changing variants.");
+  }
+  if (variants[0]?.id !== "base") throw new Error("The native core Base variant is unavailable.");
+  if (variants[0].name === "Base") await component.setVariant("base", { name: "Mobile landscape" });
+  for (const name of expected) {
+    variants = await component.getVariants();
+    if (!variants.some((variant) => variant.name === name)) await component.createVariant(name);
+  }
+  variants = await component.getVariants();
+  if (variants.length !== expected.length || expected.some((name) => !variants.some((variant) => variant.name === name))) {
+    throw new Error(`Native core variants did not pass readback: ${variants.map((variant) => variant.name).join(", ")}`);
+  }
+  return "Five native core variant names saved. Runtime collapse behavior still requires a generated-marker check.";
+}
+
+async function activateCoreVariants(): Promise<string> {
+  const site = await webflow.getSiteInfo();
+  const page = await webflow.getCurrentPage();
+  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error("Open the SmashBurger App API Lab draft page before activating core variants.");
+  }
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(CORE_NAME)];
+  if (!component || component.library || component.readOnly || await component.getInstanceCount() !== 1) {
+    throw new Error("Expected one editable native core trial instance.");
+  }
+  const variants = await component.getVariants();
+  const expected = ["Never", "Tablet", "Mobile landscape", "Mobile portrait", "Always"];
+  if (variants.length !== expected.length || expected.some((name) => !variants.some((variant) => variant.name === name))) {
+    throw new Error("Create and verify the five native core variants first.");
+  }
+  const props = await component.getProps();
+  const collapse = props.find((prop) => prop.name === "Collapse breakpoint" && prop.type === "string");
+  if (!collapse) throw new Error("The native core Collapse breakpoint property is missing.");
+  const root = await component.getRootElement();
+  if (!root?.children || await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native core root marker or structure has changed.");
+  }
+  if (!root.attributes || !isBoundTo(await root.getAttributeValue("data-collapse"), collapse.id)) {
+    throw new Error("The native core collapse binding has changed.");
+  }
+  const children = await root.getChildren();
+  const infrastructure = await Promise.all(children.map(async (child) =>
+    child.attributes && await child.getResolvedAttributeValue("data-mwp-infrastructure") !== null));
+  const details = children[infrastructure.indexOf(true)];
+  const embed = details?.children
+    ? (await details.getChildren()).find((child) => child.type === "HtmlEmbed") : undefined;
+  if (!embed?.elementSettings) throw new Error("The native core runtime Embed is missing.");
+  const code = (await embed.getSettings()).code;
+  if (code !== CORE_EMBED_CODE_V2 && code !== CORE_EMBED_CODE_V3 && code !== CORE_EMBED_CODE) {
+    throw new Error("The runtime Embed differs from the known trial version; no code was replaced.");
+  }
+  if (collapse.defaultValue !== "") {
+    await component.setProp(collapse.id, {
+      defaultValue: "",
+      tooltip: "Leave blank to follow the selected variant; enter never, tablet, mobile-landscape, mobile-portrait, or always to override it",
+    });
+  }
+  if (code !== CORE_EMBED_CODE) await embed.setSettings({ code: CORE_EMBED_CODE });
+  const [savedProps, savedCode] = await Promise.all([component.getProps(), embed.getSettings()]);
+  if (savedProps.find((prop) => prop.id === collapse.id)?.defaultValue !== "" || savedCode.code !== CORE_EMBED_CODE) {
+    throw new Error("Variant bridge settings did not pass readback.");
+  }
+  return "Native core variant bridge saved: blank Collapse breakpoint follows Webflow’s variant marker; a nonblank value overrides it. Preview behavior still needs checking.";
+}
+
+async function styleCoreVariants(): Promise<string> {
+  const site = await webflow.getSiteInfo();
+  const page = await webflow.getCurrentPage();
+  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error("Open the SmashBurger App API Lab draft page before styling core variants.");
+  }
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(CORE_NAME)];
+  if (!component || component.library || component.readOnly || await component.getInstanceCount() !== 1) {
+    throw new Error("Expected one editable native core trial instance.");
+  }
+  const variants = await component.getVariants();
+  if (["Never", "Tablet", "Mobile landscape", "Mobile portrait", "Always"]
+    .some((name) => !variants.some((variant) => variant.name === name))) {
+    throw new Error("Create the five native core variants before styling them.");
+  }
+  const variantId = (name: string): string => {
+    const id = variants.find((variant) => variant.name === name)?.id;
+    if (!id) throw new Error(`Native core variant ${name} is missing.`);
+    return id;
+  };
+  const root = await component.getRootElement();
+  if (!root?.attributes || await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native core root marker has changed.");
+  }
+  const [inner, menu, panel, links] = await Promise.all([
+    webflow.getStyleByName("sb-app-inner"), webflow.getStyleByName("sb-app-menu"),
+    webflow.getStyleByName("sb-app-panel"), webflow.getStyleByName("sb-app-links"),
+  ]);
+  if (!inner || !menu || !panel || !links) throw new Error("A native core layout class is missing.");
+  const apply = async (collapsed: boolean, options: StyleOptions): Promise<void> => {
+    await inner.setProperties({ "flex-wrap": collapsed ? "wrap" : "nowrap" }, options);
+    await menu.setProperties({ display: collapsed ? "block" : "none" }, options);
+    await panel.setProperties({ "flex-basis": collapsed ? "100%" : "auto" }, options);
+    await links.setProperties({ "flex-direction": collapsed ? "column" : "row", "align-items": collapsed ? "flex-start" : "center" }, options);
+  };
+  await apply(false, { breakpoint: "medium" });
+  await apply(true, { breakpoint: "small" });
+  await apply(true, { variantId: variantId("Tablet"), breakpoint: "medium" });
+  await apply(false, { variantId: variantId("Never"), breakpoint: "small" });
+  await apply(false, { variantId: variantId("Mobile portrait"), breakpoint: "small" });
+  await apply(true, { variantId: variantId("Mobile portrait"), breakpoint: "tiny" });
+  await apply(true, { variantId: variantId("Always") });
+  await apply(true, { variantId: variantId("Always"), breakpoint: "medium" });
+  const checks = await Promise.all([
+    menu.getProperty("display", { breakpoint: "medium" }),
+    menu.getProperty("display", { breakpoint: "small" }),
+    menu.getProperty("display", { variantId: variantId("Tablet"), breakpoint: "medium" }),
+    menu.getProperty("display", { variantId: variantId("Never"), breakpoint: "small" }),
+    menu.getProperty("display", { variantId: variantId("Mobile portrait"), breakpoint: "tiny" }),
+    menu.getProperty("display", { variantId: variantId("Always") }),
+  ]);
+  if (checks.join(",") !== "none,block,block,none,block,block") {
+    throw new Error(`Native core variant styles did not pass readback: ${checks.join(", ")}`);
+  }
+  return "Native core Canvas styles saved for all five collapse variants at their breakpoint thresholds.";
 }
 
 async function verifyResponsiveStyles(): Promise<string> {
@@ -237,7 +459,7 @@ async function configureNativeCore(report: (message: string) => void, knownCompo
     throw new Error("The native core runtime Embed is missing; no properties were added.");
   }
   const existingCode = (await embed.getSettings()).code;
-  if (existingCode !== cdnLoader && existingCode !== CORE_EMBED_CODE_V1 && existingCode !== CORE_EMBED_CODE) {
+  if (existingCode !== cdnLoader && existingCode !== CORE_EMBED_CODE_V1 && existingCode !== CORE_EMBED_CODE_V2 && existingCode !== CORE_EMBED_CODE_V3 && existingCode !== CORE_EMBED_CODE) {
     throw new Error("The native core Embed differs from the known trial versions; no code was replaced.");
   }
   const [brand, menu, panel] = await inner.getChildren();
@@ -685,6 +907,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Verification stopped: ${String(error)}`); }
     finally { setBusy(false); }
   };
+  const checkVariantAttributes = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await probeVariantAttributes()); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Variant attribute probe stopped: ${String(error)}`); }
+    finally { setBusy(false); }
+  };
   const checkLab = async (): Promise<void> => {
     setBusy(true);
     try {
@@ -714,6 +942,24 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native content configuration stopped: ${String(error)}`); }
     finally { setBusy(false); }
   };
+  const configureVariants = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await configureCoreVariants()); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Native core variants stopped: ${String(error)}`); }
+    finally { setBusy(false); }
+  };
+  const activateVariants = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await activateCoreVariants()); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Variant bridge stopped: ${String(error)}`); }
+    finally { setBusy(false); }
+  };
+  const styleVariants = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await styleCoreVariants()); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Variant styling stopped: ${String(error)}`); }
+    finally { setBusy(false); }
+  };
   return <main>
     <div className="eyebrow">SmashBurger · private prototype</div>
     <h1>Designer capability check</h1>
@@ -723,10 +969,14 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || !snapshot?.canAppend || snapshot.proofExists} onClick={() => { void makeProof(); }}>Create native proof</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || snapshot.proofExists} onClick={() => { void makeLab(); }}>Create draft lab and proof</button>
       <button className="secondary" disabled={busy || !snapshot?.proofExists} onClick={() => { void checkProof(); }}>Verify existing proof</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.proofExists} onClick={() => { void checkVariantAttributes(); }}>Probe proof variant attributes</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.proofExists} onClick={() => { void checkLab(); }}>Check styles + Embed API</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.proofExists || snapshot.nativeCoreExists} onClick={() => { void tryNativeCore(); }}>Create native core trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureCore(); }}>Configure native core trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureContent(); }}>Configure native content trial</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureVariants(); }}>Create core variant names</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void activateVariants(); }}>Activate core variant bridge</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void styleVariants(); }}>Style core variants</button>
     </div>
     <p className="status" role="status">{message}</p>
     {snapshot && <dl>
