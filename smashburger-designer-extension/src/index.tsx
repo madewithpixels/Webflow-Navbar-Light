@@ -37,6 +37,7 @@ const CORE_DISPLAY_BRIDGE = `<style>
 .sb-app-nav[data-mwp-collapsed="false"] .sb-app-menu { display: none; }
 .sb-app-nav[data-mwp-collapsed="false"] .sb-app-panel { flex-basis: auto; }
 .sb-app-nav[data-mwp-collapsed="false"] .sb-app-links { flex-direction: row; align-items: center; }
+.sb-app-nav[data-mwp-collapsed="false"] .sb-app-secondary-icon { filter: brightness(0) invert(1); }
 .sb-app-nav .sb-app-infrastructure { display: none; }
 </style>`;
 const CORE_EMBED_CODE = `${CORE_DISPLAY_BRIDGE}\n${CORE_VARIANT_BRIDGE}\n${cdnLoader}`;
@@ -838,6 +839,206 @@ async function configureNativePrimary(report: (message: string) => void): Promis
   return "Native primary navigation saved: original links preserved, editable CTA added, four visibility controls bound.";
 }
 
+async function configureNativeSecondary(report: (message: string) => void): Promise<string> {
+  const site = await webflow.getSiteInfo();
+  const page = await webflow.getCurrentPage();
+  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error("Open the SmashBurger App API Lab draft page before building secondary navigation.");
+  }
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(CORE_NAME)];
+  if (!component || component.codeComponent !== false) {
+    throw new Error("Expected an editable project-native core trial component.");
+  }
+  if (component.library || component.readOnly || await component.getInstanceCount() !== 1) {
+    throw new Error("Expected one editable native core trial instance; no secondary navigation was changed.");
+  }
+  const root = await component.getRootElement();
+  if (!root?.children || !root.attributes ||
+    await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native core trial marker has changed; no secondary navigation was changed.");
+  }
+  const [inner] = await root.getChildren();
+  const [, , panel] = inner?.children ? await inner.getChildren() : [];
+  if (!panel?.children || !panel.attributes ||
+    await panel.getResolvedAttributeValue("data-mwp-panel") === null) {
+    throw new Error("The native panel has changed; no secondary navigation was changed.");
+  }
+  const panelChildren = await panel.getChildren();
+  const primary = panelChildren[0];
+  if (!primary?.attributes || await primary.getResolvedAttributeValue("data-mwp-primary") === null ||
+    panelChildren.length > 2) {
+    throw new Error("Build primary navigation first, then inspect any unexpected panel children.");
+  }
+  const entries = [
+    { label: "Facebook", group: "Social links" },
+    { label: "Instagram", group: "Social links" },
+    { label: "LinkedIn", group: "Social links" },
+    { label: "TikTok", group: "Social links" },
+    { label: "Threads", group: "Social links" },
+    { label: "X", group: "Social links" },
+    { label: "WhatsApp", group: "Social links" },
+    { label: "Telephone", group: "Contact links" },
+    { label: "Email", group: "Contact links" },
+  ] as const;
+  const definitions: CreatePropOptions[] = [
+    { type: "boolean", name: "Show socials", group: "Social links", defaultValue: true },
+    { type: "boolean", name: "Show social labels", group: "Social links", defaultValue: true },
+    { type: "boolean", name: "Show contact links", group: "Contact links", defaultValue: true },
+    { type: "boolean", name: "Show contact labels", group: "Contact links", defaultValue: true },
+    ...entries.map(({ label, group }): CreatePropOptions => ({
+      type: "link", name: `${label} destination`, group, defaultValue: { mode: "url", to: "#" },
+    })),
+  ];
+  const existing = await component.getProps();
+  for (const expected of definitions) {
+    const found = existing.find((prop) => prop.name === expected.name);
+    if (found && (found.type !== expected.type || found.group !== expected.group)) {
+      throw new Error(`Property ${expected.name} has a different type or group; no secondary navigation was changed.`);
+    }
+  }
+  const [panelStyle, secondaryStyle, groupStyle, itemStyle, labelStyle, iconStyle] = await Promise.all([
+    style("sb-app-panel"), style("sb-app-secondary"), style("sb-app-secondary-group"),
+    style("sb-app-secondary-item"), style("sb-app-secondary-label"), style("sb-app-secondary-icon"),
+  ]);
+  await panelStyle.setProperties({ "flex-direction": "column", "align-items": "flex-end", gap: "12px" });
+  await secondaryStyle.setProperties({ display: "flex", "flex-wrap": "wrap", "justify-content": "flex-end", "align-items": "center", gap: "12px", "max-width": "100%" });
+  await groupStyle.setProperties({ display: "flex", "flex-wrap": "wrap", "align-items": "center", gap: "12px" });
+  await itemStyle.setProperties({ color: "inherit", "text-decoration": "none", display: "inline-flex", "align-items": "center", "min-height": "24px" });
+  await labelStyle.setProperties({ display: "inline-block" });
+  await iconStyle.setProperties({ display: "block", width: "18px", height: "18px", "min-width": "18px", "max-width": "18px", "min-height": "18px", "max-height": "18px", "object-fit": "contain", "margin-right": "6px" });
+  await panelStyle.setProperties({ "align-items": "stretch" }, { breakpoint: "medium" });
+  await secondaryStyle.setProperties({ "justify-content": "flex-start", "border-top-style": "solid", "border-top-width": "1px", "border-top-color": "#ffffff33", "padding-top": "12px" }, { breakpoint: "medium" });
+  let secondary = panelChildren[1];
+  if (secondary && (!secondary.attributes ||
+    await secondary.getResolvedAttributeValue("data-mwp-secondary") === null)) {
+    throw new Error("The existing secondary panel child is not the trial secondary navigation.");
+  }
+  if (!secondary) {
+    report("Building native social and contact link groups without icon assets…");
+    secondary = await panel.append(webflow.elementPresets.DivBlock);
+    await secondary.setStyles([secondaryStyle]);
+    await secondary.setAttribute("data-mwp-secondary", "");
+  }
+  if (!secondary.children) throw new Error("The secondary wrapper cannot contain native links.");
+  const groups = await secondary.getChildren();
+  if (groups.length > 2) throw new Error("Unexpected secondary group structure.");
+  const targets: Array<{ group: AnyElement; labels: AnyElement[]; links: LinkElement[] }> = [];
+  for (const [index, spec] of [
+    { marker: "data-mwp-socials", labels: entries.slice(0, 7) },
+    { marker: "data-mwp-contacts", labels: entries.slice(7) },
+  ].entries()) {
+    let group = groups[index];
+    if (group && (!group.attributes ||
+      await group.getResolvedAttributeValue(spec.marker) === null)) {
+      throw new Error(`Existing secondary group ${index + 1} has an unexpected marker.`);
+    }
+    if (!group) {
+      group = await secondary.append(webflow.elementPresets.DivBlock);
+      await group.setStyles([groupStyle]);
+      await group.setAttribute(spec.marker, "");
+    }
+    if (!group.children || !group.visibility) throw new Error(`${spec.marker} cannot hold or bind native links.`);
+    const savedLinks = await group.getChildren();
+    if (savedLinks.length > spec.labels.length) throw new Error(`${spec.marker} has unexpected extra links.`);
+    const labels: AnyElement[] = [];
+    const links: LinkElement[] = [];
+    for (const [linkIndex, entry] of spec.labels.entries()) {
+      let link = savedLinks[linkIndex];
+      if (link && (link.type !== "Link" || !link.attributes ||
+        await link.getResolvedAttributeValue("data-mwp-secondary-item") !== entry.label.toLowerCase())) {
+        throw new Error(`The ${entry.label} link has an unexpected structure.`);
+      }
+      if (!link) {
+        link = await group.append(webflow.elementPresets.LinkBlock);
+        await link.setStyles([itemStyle]);
+        await link.setSettings("url", "#");
+        await link.setAttribute("data-mwp-item", "");
+        await link.setAttribute("data-mwp-secondary-item", entry.label.toLowerCase());
+      }
+      if (!link.children) throw new Error(`${entry.label} link cannot hold an editable label.`);
+      const children = await link.getChildren();
+      const icon = children[0]?.type === "Image" ? children[0] : null;
+      let label = children[icon ? 1 : 0];
+      if (children.length > (icon ? 2 : 1) || (label && (!label.attributes ||
+        await label.getResolvedAttributeValue("data-mwp-secondary-label") === null))) {
+        throw new Error(`${entry.label} has unexpected label children.`);
+      }
+      if (icon) {
+        await icon.setStyles([iconStyle]);
+        await icon.setAltText("");
+        if (icon.attributes && await icon.getResolvedAttributeValue("data-mwp-secondary-icon") === null) {
+          await icon.setAttribute("data-mwp-secondary-icon", "");
+        }
+      }
+      if (!label) {
+        label = await link.append(webflow.elementPresets.DOM);
+        await label.setTag("span");
+        await label.setStyles([labelStyle]);
+        await label.setTextContent(entry.label);
+        await label.setAttribute("data-mwp-secondary-label", "");
+      }
+      if (!label.visibility || link.type !== "Link") throw new Error(`${entry.label} cannot bind label or destination.`);
+      labels.push(label);
+      links.push(link);
+    }
+    targets.push({ group, labels, links });
+  }
+  const missing = definitions.filter((expected) => !existing.some((prop) => prop.name === expected.name));
+  if (missing.length) {
+    report(`Creating ${missing.length} secondary navigation properties…`);
+    await component.createProps(missing);
+  }
+  const props = await component.getProps();
+  const propId = (name: string): string => {
+    const id = props.find((prop) => prop.name === name)?.id;
+    if (!id) throw new Error(`Property ${name} was not saved.`);
+    return id;
+  };
+  for (const [index, target] of targets.entries()) {
+    const groupName = index === 0 ? "Show socials" : "Show contact links";
+    const labelName = index === 0 ? "Show social labels" : "Show contact labels";
+    if (!target.group.visibility) throw new Error(`${groupName} target cannot bind visibility.`);
+    await target.group.setVisibility({ sourceType: "prop", propId: propId(groupName) });
+    for (const label of target.labels) {
+      if (!label.visibility) throw new Error(`${labelName} target cannot bind visibility.`);
+      await label.setVisibility({ sourceType: "prop", propId: propId(labelName) });
+    }
+    for (const [linkIndex, link] of target.links.entries()) {
+      const entry = index === 0 ? entries[linkIndex] : entries[linkIndex + 7];
+      await link.setSettings({ link: { sourceType: "prop", propId: propId(`${entry.label} destination`) } });
+    }
+  }
+  const savedGroups = await secondary.getChildren();
+  if (savedGroups.length !== 2 || !savedGroups[0].children || !savedGroups[1].children ||
+    (await savedGroups[0].getChildren()).length !== 7 ||
+    (await savedGroups[1].getChildren()).length !== 2) {
+    throw new Error("Secondary navigation structure did not pass readback.");
+  }
+  for (const [index, target] of targets.entries()) {
+    const groupName = index === 0 ? "Show socials" : "Show contact links";
+    const labelName = index === 0 ? "Show social labels" : "Show contact labels";
+    if (!target.group.visibility ||
+      !isBoundTo(await target.group.getVisibility({ bindings: true }), propId(groupName))) {
+      throw new Error(`${groupName} visibility binding did not pass readback.`);
+    }
+    for (const label of target.labels) {
+      if (!label.visibility || !isBoundTo(await label.getVisibility({ bindings: true }), propId(labelName))) {
+        throw new Error(`${labelName} visibility binding did not pass readback.`);
+      }
+    }
+    for (const [linkIndex, link] of target.links.entries()) {
+      const entry = index === 0 ? entries[linkIndex] : entries[linkIndex + 7];
+      if (!isBoundTo((await link.getSettings()).link, propId(`${entry.label} destination`))) {
+        throw new Error(`${entry.label} destination binding did not pass readback.`);
+      }
+    }
+  }
+  await configureNativeCore(report, component);
+  return "Native secondary navigation verified: seven social and two contact links, four visibility controls, nine editable destinations; any existing icon images styled and the scoped runtime Embed updated.";
+}
+
 async function createNativeCore(report: (message: string) => void): Promise<void> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
@@ -1125,6 +1326,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native primary navigation stopped: ${String(error)}`); }
     finally { setBusy(false); }
   };
+  const configureSecondary = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await configureNativeSecondary(setMessage)); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Native secondary navigation stopped: ${String(error)}`); }
+    finally { setBusy(false); }
+  };
   const checkAssets = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await checkAssetAccess()); }
@@ -1164,6 +1371,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureCore(); }}>Configure native core trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureContent(); }}>Configure native content trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configurePrimary(); }}>Build native primary navigation</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSecondary(); }}>Build native secondary links</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger"} onClick={() => { void checkAssets(); }}>Check asset access</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureVariants(); }}>Create core variant names</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void activateVariants(); }}>Activate core variant bridge</button>
