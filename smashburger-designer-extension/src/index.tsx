@@ -1153,6 +1153,94 @@ async function bindNativeIcons(report: (message: string) => void): Promise<strin
   return "Nine replaceable icon properties saved and bound to native Images; each retained its site SVG as the default.";
 }
 
+async function bindSecondaryVisibility(report: (message: string) => void): Promise<string> {
+  const site = await webflow.getSiteInfo();
+  const page = await webflow.getCurrentPage();
+  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error("Open the SmashBurger App API Lab draft page before binding secondary visibility.");
+  }
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(CORE_NAME)];
+  if (!component || component.codeComponent !== false || component.library || component.readOnly ||
+    await component.getInstanceCount() !== 1) {
+    throw new Error("Expected one editable native core trial instance; no visibility properties were added.");
+  }
+  const root = await component.getRootElement();
+  if (!root?.children || !root.attributes ||
+    await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native core marker changed; no visibility properties were added.");
+  }
+  const [inner] = await root.getChildren();
+  const [, , panel] = inner?.children ? await inner.getChildren() : [];
+  const [, secondary] = panel?.children ? await panel.getChildren() : [];
+  if (!secondary?.children || !secondary.visibility || !secondary.attributes ||
+    await secondary.getResolvedAttributeValue("data-mwp-secondary") === null) {
+    throw new Error("The native secondary wrapper is missing or cannot bind visibility.");
+  }
+  const groups = await secondary.getChildren();
+  if (groups.length !== 2 || !groups[0].children || !groups[1].children ||
+    !groups[0].attributes || !groups[1].attributes ||
+    await groups[0].getResolvedAttributeValue("data-mwp-socials") === null ||
+    await groups[1].getResolvedAttributeValue("data-mwp-contacts") === null) {
+    throw new Error("The social/contact groups have changed; no visibility properties were added.");
+  }
+  const specs = [
+    { name: "Facebook", group: "Social links" },
+    { name: "Instagram", group: "Social links" },
+    { name: "LinkedIn", group: "Social links" },
+    { name: "TikTok", group: "Social links" },
+    { name: "Threads", group: "Social links" },
+    { name: "X", group: "Social links" },
+    { name: "WhatsApp", group: "Social links" },
+    { name: "Telephone", group: "Contact links" },
+    { name: "Email", group: "Contact links" },
+  ] as const;
+  const links = [...await groups[0].getChildren(), ...await groups[1].getChildren()];
+  if (links.length !== specs.length) throw new Error("Expected nine secondary links; no visibility properties were added.");
+  for (const [index, spec] of specs.entries()) {
+    const link = links[index];
+    if (!link.attributes || !link.visibility ||
+      await link.getResolvedAttributeValue("data-mwp-secondary-item") !== spec.name.toLowerCase()) {
+      throw new Error(`${spec.name} link changed or cannot bind visibility.`);
+    }
+  }
+  const definitions: CreatePropOptions[] = [
+    { type: "boolean", name: "Show secondary navigation", group: "Content", defaultValue: true },
+    ...specs.map((spec): CreatePropOptions => ({
+      type: "boolean", name: `Show ${spec.name}`, group: spec.group, defaultValue: true,
+    })),
+  ];
+  const existing = await component.getProps();
+  for (const expected of definitions) {
+    const found = existing.find((prop) => prop.name === expected.name);
+    if (found && (found.type !== expected.type || found.group !== expected.group)) {
+      throw new Error(`Property ${expected.name} has a different type or group; no visibility binding was changed.`);
+    }
+  }
+  const missing = definitions.filter((expected) => !existing.some((prop) => prop.name === expected.name));
+  if (missing.length) {
+    report(`Creating ${missing.length} secondary visibility properties…`);
+    await component.createProps(missing).catch((error: unknown) => {
+      throw new Error(`Secondary visibility property creation failed: ${describeError(error)}`);
+    });
+  }
+  const props = await component.getProps();
+  const targets: Array<[AnyElement, string]> = [
+    [secondary, "Show secondary navigation"],
+    ...specs.map((spec, index): [AnyElement, string] => [links[index], `Show ${spec.name}`]),
+  ];
+  for (const [element, name] of targets) {
+    const prop = props.find((item) => item.name === name && item.type === "boolean");
+    if (!prop || !element.visibility) throw new Error(`${name} property or visibility target is missing.`);
+    await element.setVisibility({ sourceType: "prop", propId: prop.id });
+    if (!isBoundTo(await element.getVisibility({ bindings: true }), prop.id)) {
+      throw new Error(`${name} visibility binding did not pass readback.`);
+    }
+  }
+  return "Ten secondary visibility controls saved and bound: one master switch plus nine individual links.";
+}
+
 async function createNativeCore(report: (message: string) => void): Promise<void> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
@@ -1452,6 +1540,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native icon binding stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
+  const configureSecondaryVisibility = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await bindSecondaryVisibility(setMessage)); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Secondary visibility stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const checkAssets = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await checkAssetAccess()); }
@@ -1493,6 +1587,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configurePrimary(); }}>Build native primary navigation</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSecondary(); }}>Build native secondary links</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureIcons(); }}>Bind native icon properties</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSecondaryVisibility(); }}>Bind secondary visibility</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger"} onClick={() => { void checkAssets(); }}>Check asset access</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureVariants(); }}>Create core variant names</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void activateVariants(); }}>Activate core variant bridge</button>
