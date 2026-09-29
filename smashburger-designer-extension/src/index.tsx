@@ -929,7 +929,12 @@ async function configureNativeSubmenu(report: (message: string) => void): Promis
   ]);
   await submenuStyle.setProperties({ position: "relative" });
   await triggerStyle.setProperties({ display: "flex", "align-items": "center", gap: "8px", cursor: "pointer", "min-height": "32px" });
-  await iconStyle.setProperties({ display: "flex", "align-items": "center", gap: "2px", "transform-origin": "center", "transition-property": "transform", "transition-duration": "220ms", "transition-timing-function": "ease" });
+  await iconStyle.setProperties({ display: "flex", "align-items": "center", gap: "2px", "transform-origin": "center" });
+  await iconStyle.removeProperties(["transition-property", "transition-duration", "transition-timing-function"]);
+  const iconProperties = await iconStyle.getProperties();
+  if (["transition-property", "transition-duration", "transition-timing-function"].some((name) => name in iconProperties)) {
+    throw new Error("The submenu icon class still overrides the runtime motion settings.");
+  }
   await lineStyle.setProperties({ width: "7px", height: "2px", "min-width": "7px", "min-height": "2px", "background-color": "currentColor" });
   await listStyle.setProperties({ display: "grid", gap: "4px", position: "absolute", top: "100%", right: "0", "min-width": "180px", "background-color": "#ffffff", color: "#17251e", "border-radius": "8px", "padding-top": "8px", "padding-bottom": "8px", "padding-left": "8px", "padding-right": "8px", "box-shadow": "0 12px 32px rgba(0,0,0,.16)", "z-index": "3" });
   await linkStyle.setProperties({ display: "block", color: "inherit", "text-decoration": "none", "padding-top": "8px", "padding-bottom": "8px", "padding-left": "10px", "padding-right": "10px" });
