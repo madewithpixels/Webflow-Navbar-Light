@@ -989,6 +989,120 @@ async function configureNativeSubmenu(report: (message: string) => void): Promis
   return "Native submenu saved: editable details and summary, two native links, scoped open-state styling and runtime Embed verified. Check its layout in Preview.";
 }
 
+async function configureNativeSubmenuProperties(report: (message: string) => void): Promise<string> {
+  const site = await webflow.getSiteInfo();
+  const page = await webflow.getCurrentPage();
+  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error("Open the SmashBurger App API Lab draft page before binding submenu properties.");
+  }
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(CORE_NAME)];
+  if (!component || component.codeComponent !== false || component.library || component.readOnly ||
+    await component.getInstanceCount() !== 1) {
+    throw new Error("Expected one editable project-native core trial instance.");
+  }
+  const root = await component.getRootElement();
+  if (!root?.children || !root.attributes ||
+    await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native core marker has changed; no properties were added.");
+  }
+  const [inner] = await root.getChildren();
+  const [, , panel] = inner?.children ? await inner.getChildren() : [];
+  const [primary] = panel?.children ? await panel.getChildren() : [];
+  const [links] = primary?.children ? await primary.getChildren() : [];
+  const children = links?.children ? await links.getChildren() : [];
+  const submenu = children[3];
+  if (children.length !== 4 || !submenu?.attributes || !submenu.children ||
+    await submenu.getResolvedAttributeValue("data-mwp-submenu") === null) {
+    throw new Error("Build the one native submenu before binding its properties.");
+  }
+  const [summary, list] = await submenu.getChildren();
+  const [, icon] = summary?.children ? await summary.getChildren() : [];
+  const nativeLinks = list?.children ? await list.getChildren() : [];
+  if (!icon?.attributes || !icon.visibility ||
+    await icon.getResolvedAttributeValue("data-mwp-submenu-icon") === null ||
+    nativeLinks.length !== 2 || nativeLinks.some((link) => link.type !== "Link")) {
+    throw new Error("The native submenu icon or two links have changed; no properties were added.");
+  }
+  const linksToBind = nativeLinks as LinkElement[];
+  const definitions: CreatePropOptions[] = [
+    { type: "boolean", name: "Show submenu arrows", group: "Trigger", defaultValue: true },
+    { type: "string", name: "Submenu icon duration", group: "Motion", defaultValue: "220ms" },
+    { type: "string", name: "Submenu icon easing", group: "Motion", defaultValue: "cubic-bezier(0.22, 1, 0.36, 1)" },
+    { type: "string", name: "Submenu icon rotation", group: "Motion", defaultValue: "180deg" },
+  ];
+  for (const [index, link] of linksToBind.entries()) {
+    const settings = await link.searchSettings();
+    if (settings.text?.valueType !== "textContent" || !settings.text.canBind ||
+      settings.link?.valueType !== "link" || !settings.link.canBind) {
+      throw new Error(`Submenu link ${index + 1} does not expose bindable text and destination settings.`);
+    }
+    const resolved = await link.getResolvedSettings();
+    const text = resolved.text;
+    const destination = resolved.link;
+    const textValue = typeof text === "string" ? text :
+      text && typeof text === "object" && "innerText" in text ? text.innerText : null;
+    if (typeof textValue !== "string" || !destination ||
+      typeof destination !== "object" || !("mode" in destination)) {
+      throw new Error(`Could not preserve submenu link ${index + 1} content and destination.`);
+    }
+    definitions.push(
+      { type: "textContent", name: `Submenu link ${index + 1} text`, group: "Content", defaultValue: textValue },
+      { type: "link", name: `Submenu link ${index + 1} destination`, group: "Links", defaultValue: destination },
+    );
+  }
+  const existing = await component.getProps();
+  for (const expected of definitions) {
+    const found = existing.find((prop) => prop.name === expected.name);
+    if (found && (found.type !== expected.type || found.group !== expected.group)) {
+      throw new Error(`${expected.name} has a different type or group; no bindings were changed.`);
+    }
+  }
+  const missing = definitions.filter((expected) => !existing.some((prop) => prop.name === expected.name));
+  if (missing.length) {
+    report(`Creating ${missing.length} submenu properties…`);
+    await component.createProps(missing);
+  }
+  const props = await component.getProps();
+  const propId = (name: string): string => {
+    const id = props.find((prop) => prop.name === name)?.id;
+    if (!id) throw new Error(`${name} was not saved.`);
+    return id;
+  };
+  await icon.setVisibility({ sourceType: "prop", propId: propId("Show submenu arrows") });
+  const attributes = [
+    ["data-submenu-icon-duration", "Submenu icon duration"],
+    ["data-submenu-icon-easing", "Submenu icon easing"],
+    ["data-submenu-icon-rotation", "Submenu icon rotation"],
+  ] as const;
+  for (const [attribute, name] of attributes) {
+    await root.setAttribute(attribute, { sourceType: "prop", propId: propId(name) });
+  }
+  for (const [index, link] of linksToBind.entries()) {
+    await link.setSettings({
+      text: { sourceType: "prop", propId: propId(`Submenu link ${index + 1} text`) },
+      link: { sourceType: "prop", propId: propId(`Submenu link ${index + 1} destination`) },
+    });
+  }
+  if (!isBoundTo(await icon.getVisibility({ bindings: true }), propId("Show submenu arrows"))) {
+    throw new Error("Submenu arrow visibility did not pass readback.");
+  }
+  for (const [attribute, name] of attributes) {
+    if (!isBoundTo(await root.getAttributeValue(attribute), propId(name))) {
+      throw new Error(`${name} binding did not pass readback.`);
+    }
+  }
+  for (const [index, link] of linksToBind.entries()) {
+    const settings = await link.getSettings();
+    if (!isBoundTo(settings.text, propId(`Submenu link ${index + 1} text`)) ||
+      !isBoundTo(settings.link, propId(`Submenu link ${index + 1} destination`))) {
+      throw new Error(`Submenu link ${index + 1} bindings did not pass readback.`);
+    }
+  }
+  return `Native submenu properties saved: ${definitions.length} grouped controls and ${definitions.length} bindings verified.`;
+}
+
 async function configureNativeSecondary(report: (message: string) => void): Promise<string> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
@@ -1767,6 +1881,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native submenu stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
+  const configureSubmenuProperties = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await configureNativeSubmenuProperties(setMessage)); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Native submenu properties stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const configureSecondary = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await configureNativeSecondary(setMessage)); setSnapshot(await inspect()); }
@@ -1837,6 +1957,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureContent(); }}>Configure native content trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configurePrimary(); }}>Build native primary navigation</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSubmenu(); }}>Build native submenu</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSubmenuProperties(); }}>Bind native submenu properties</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSecondary(); }}>Build native secondary links</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureIcons(); }}>Bind native icon properties</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSecondaryVisibility(); }}>Bind secondary visibility</button>
