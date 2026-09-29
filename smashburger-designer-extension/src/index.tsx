@@ -164,6 +164,12 @@ function isBoundTo(value: unknown, propId: string): boolean {
     "propId" in value && value.propId === propId;
 }
 
+function describeError(error: unknown): string {
+  if (error instanceof Error) return `${error.name}: ${error.message}`;
+  try { return JSON.stringify(error); }
+  catch { return "Unknown nonserializable error"; }
+}
+
 async function verifyProof(): Promise<string> {
   const components = await webflow.getAllComponents();
   const names = await Promise.all(components.map((item) => item.getName()));
@@ -1043,6 +1049,110 @@ async function configureNativeSecondary(report: (message: string) => void): Prom
   return "Native secondary navigation verified: seven social and two contact links, four visibility controls, nine editable destinations; any existing icon images styled and the scoped runtime Embed updated.";
 }
 
+async function bindNativeIcons(report: (message: string) => void): Promise<string> {
+  const site = await webflow.getSiteInfo();
+  const page = await webflow.getCurrentPage();
+  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error("Open the SmashBurger App API Lab draft page before binding native icons.");
+  }
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(CORE_NAME)];
+  if (!component || component.codeComponent !== false || component.library || component.readOnly ||
+    await component.getInstanceCount() !== 1) {
+    throw new Error("Expected one editable native core trial instance; no icon properties were added.");
+  }
+  const root = await component.getRootElement();
+  if (!root?.children || !root.attributes ||
+    await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native core trial marker has changed; no icon properties were added.");
+  }
+  const [inner] = await root.getChildren();
+  const [, , panel] = inner?.children ? await inner.getChildren() : [];
+  const [, secondary] = panel?.children ? await panel.getChildren() : [];
+  if (!secondary?.children || !secondary.attributes ||
+    await secondary.getResolvedAttributeValue("data-mwp-secondary") === null) {
+    throw new Error("Build the native secondary links before binding icons.");
+  }
+  const specs = [
+    { name: "Facebook", id: "6a7e4cb1eafcdf0550a61dc6", group: "Social links" },
+    { name: "Instagram", id: "6a7e4cb1eafcdf0550a61dc7", group: "Social links" },
+    { name: "LinkedIn", id: "6a7e4cb1eafcdf0550a61dc8", group: "Social links" },
+    { name: "TikTok", id: "6a7e4cb1eafcdf0550a61dc9", group: "Social links" },
+    { name: "Threads", id: "6a7e4cb1eafcdf0550a61dca", group: "Social links" },
+    { name: "X", id: "6a7e4cb1eafcdf0550a61dcb", group: "Social links" },
+    { name: "WhatsApp", id: "6a7e4cb1eafcdf0550a61dcc", group: "Social links" },
+    { name: "Telephone", id: "6a7e4cb1eafcdf0550a61dcd", group: "Contact links" },
+    { name: "Email", id: "6a7e4cb1eafcdf0550a61dce", group: "Contact links" },
+  ] as const;
+  const groups = await secondary.getChildren();
+  if (groups.length !== 2 || !groups[0].children || !groups[1].children) {
+    throw new Error("The secondary groups have changed; no icon properties were added.");
+  }
+  const links = [...await groups[0].getChildren(), ...await groups[1].getChildren()];
+  if (links.length !== specs.length) throw new Error("Expected nine secondary links; no icon properties were added.");
+  const icons: ImageElement[] = [];
+  for (const [index, spec] of specs.entries()) {
+    report(`Checking ${spec.name} native icon…`);
+    const link = links[index];
+    if (!link.children || !link.attributes ||
+      await link.getResolvedAttributeValue("data-mwp-secondary-item") !== spec.name.toLowerCase()) {
+      throw new Error(`${spec.name} link changed; no icon properties were added.`);
+    }
+    const [icon, label] = await link.getChildren();
+    if (icon?.type !== "Image" || !icon.attributes ||
+      await icon.getResolvedAttributeValue("data-mwp-secondary-icon") === null ||
+      !label?.attributes || await label.getResolvedAttributeValue("data-mwp-secondary-label") === null) {
+      throw new Error(`${spec.name} icon or label is missing; no icon properties were added.`);
+    }
+    const settings = await icon.searchSettings().catch((error: unknown) => {
+      throw new Error(`${spec.name} Image setting search failed: ${describeError(error)}`);
+    });
+    if (!settings.assetId?.canBind) {
+      throw new Error(`${spec.name} Image asset setting is not bindable in this Designer session.`);
+    }
+    const resolved = await icon.getResolvedSettings().catch((error: unknown) => {
+      throw new Error(`${spec.name} Image setting read failed: ${describeError(error)}`);
+    });
+    if (resolved.assetId !== spec.id) {
+      throw new Error(`${spec.name} Image asset ID differs from the site asset; no icon properties were added.`);
+    }
+    icons.push(icon);
+  }
+  const existing = await component.getProps();
+  const definitions: CreatePropOptions[] = specs.map((spec) => ({
+    type: "image", name: `${spec.name} icon`, group: spec.group, defaultValue: spec.id,
+  }));
+  for (const expected of definitions) {
+    const found = existing.find((prop) => prop.name === expected.name);
+    if (found && (found.type !== expected.type || found.group !== expected.group)) {
+      throw new Error(`Property ${expected.name} has a different type or group; no icon binding was changed.`);
+    }
+  }
+  const missing = definitions.filter((expected) => !existing.some((prop) => prop.name === expected.name));
+  if (missing.length) {
+    report(`Creating ${missing.length} replaceable native icon properties…`);
+    await component.createProps(missing).catch((error: unknown) => {
+      throw new Error(`Icon property creation failed: ${describeError(error)}`);
+    });
+  }
+  const props = await component.getProps();
+  for (const [index, spec] of specs.entries()) {
+    const prop = props.find((item) => item.name === `${spec.name} icon` && item.type === "image");
+    if (!prop || prop.defaultValue !== spec.id) {
+      throw new Error(`${spec.name} image property default did not pass readback; no image bindings were changed.`);
+    }
+    report(`Binding ${spec.name} Image property…`);
+    await icons[index].setSettings({ assetId: { sourceType: "prop", propId: prop.id } }).catch((error: unknown) => {
+      throw new Error(`${spec.name} Image binding failed: ${describeError(error)}`);
+    });
+    if (!isBoundTo((await icons[index].getSettings()).assetId, prop.id)) {
+      throw new Error(`${spec.name} image binding did not pass readback.`);
+    }
+  }
+  return "Nine replaceable icon properties saved and bound to native Images; each retained its site SVG as the default.";
+}
+
 async function createNativeCore(report: (message: string) => void): Promise<void> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
@@ -1336,6 +1446,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native secondary navigation stopped: ${String(error)}`); }
     finally { setBusy(false); }
   };
+  const configureIcons = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await bindNativeIcons(setMessage)); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Native icon binding stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const checkAssets = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await checkAssetAccess()); }
@@ -1376,6 +1492,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureContent(); }}>Configure native content trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configurePrimary(); }}>Build native primary navigation</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSecondary(); }}>Build native secondary links</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureIcons(); }}>Bind native icon properties</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger"} onClick={() => { void checkAssets(); }}>Check asset access</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureVariants(); }}>Create core variant names</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void activateVariants(); }}>Activate core variant bridge</button>
