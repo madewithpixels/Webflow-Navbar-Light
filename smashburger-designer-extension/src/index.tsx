@@ -217,7 +217,7 @@ async function inspectInstallReadiness(): Promise<InstallReadiness> {
 async function checkInstallReadiness(): Promise<string> {
   const result = await inspectInstallReadiness();
   const status = result.blockers.length ? `Preflight needs attention: ${result.blockers.join("; ")}` : "Preflight checks passed";
-  return `${status}. Site=${result.siteName}; page=${result.pageSlug}; app-visible bundled icons=${result.visibleIcons}/9. Read-only; no installer has run.`;
+  return `${status}. Site=${result.siteName}; page=${result.pageSlug}; app-visible bundled icons=${result.visibleIcons}/9. This check is read-only.`;
 }
 
 async function installNativeAlpha(report: (message: string) => void): Promise<string> {
@@ -267,6 +267,60 @@ async function expandNativeAlpha(report: (message: string) => void): Promise<str
   const missing = required.filter((name) => !saved.some((prop) => prop.name === name));
   if (missing.length) throw new Error(`Native alpha expansion is missing ${missing.join(", ")}; inspect before retrying.`);
   return `Native alpha expanded: primary links and CTA, nine text-only secondary links, submenu and grouped controls saved. Icons, full variants and published checks remain pending. Properties=${saved.length}.`;
+}
+
+async function repairAlphaCollapseDefault(): Promise<string> {
+  const page = await webflow.getCurrentPage();
+  if (!await page.isDraft()) throw new Error("Open the draft page containing the native alpha component.");
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(ALPHA_NAME)];
+  if (!component || component.library || component.readOnly || await component.getInstanceCount() !== 1) {
+    throw new Error("Expected one editable native alpha instance; no default was changed.");
+  }
+  const root = await component.getRootElement();
+  if (!root?.attributes || await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native alpha root marker changed; no default was changed.");
+  }
+  const variants = await component.getVariants();
+  if (variants.length !== 1) throw new Error("Collapse variants already exist; inspect the selected variant before changing its default.");
+  const props = await component.getProps();
+  const collapse = props.find((prop) => prop.name === "Collapse breakpoint" && prop.type === "string");
+  if (!collapse || !root.attributes || !isBoundTo(await root.getAttributeValue("data-collapse"), collapse.id)) {
+    throw new Error("Collapse breakpoint binding changed; no default was changed.");
+  }
+  if (collapse.defaultValue !== "" && collapse.defaultValue !== "tablet") {
+    throw new Error(`Collapse breakpoint is ${JSON.stringify(collapse.defaultValue)}; no default was replaced.`);
+  }
+  if (collapse.defaultValue === "") await component.setProp(collapse.id, { defaultValue: "tablet" });
+  const saved = await component.getProps();
+  if (saved.find((prop) => prop.id === collapse.id)?.defaultValue !== "tablet") {
+    throw new Error("Tablet collapse default did not pass readback.");
+  }
+  return "Native alpha default repaired: Collapse breakpoint=tablet. Refresh Preview and check the 820px trigger, then return to desktop to confirm horizontal links.";
+}
+
+async function inspectAlphaVariantState(): Promise<string> {
+  const page = await webflow.getCurrentPage();
+  if (!await page.isDraft()) throw new Error("Open the draft page containing the native alpha component.");
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(ALPHA_NAME)];
+  if (!component || component.library || component.readOnly) throw new Error("The editable native alpha component is unavailable.");
+  const [variants, props, root] = await Promise.all([component.getVariants(), component.getProps(), component.getRootElement()]);
+  const collapse = props.find((prop) => prop.name === "Collapse breakpoint" && prop.type === "string");
+  const marker = root?.attributes ? await root.getResolvedAttributeValue("data-mwp-prototype") : null;
+  return `Alpha variant state: ${variants.map((variant) => `${variant.name}=${variant.id}`).join(", ")}; collapse default=${JSON.stringify(collapse?.defaultValue)}; root marker=${marker ?? "missing"}; instances=${await component.getInstanceCount()}. Read-only.`;
+}
+
+async function configureAlphaVariants(report: (message: string) => void): Promise<string> {
+  report("Creating the five native alpha collapse variants…");
+  await configureCoreVariants(true);
+  report("Binding the alpha variant marker to the pinned runtime…");
+  await activateCoreVariants(true);
+  report("Styling the alpha variants at their responsive thresholds…");
+  await styleCoreVariants(true);
+  return "Native alpha variants saved: Never, Tablet, Mobile landscape, Mobile portrait and Always, with variant-aware collapse and responsive Canvas styles. Check all five in Preview before publishing.";
 }
 
 async function probeAssetUpload(): Promise<string> {
@@ -405,15 +459,15 @@ async function probeVariantAttributes(): Promise<string> {
     : `Variant attribute probe found shared settings: Always=${JSON.stringify(alwaysValue)}, Base=${JSON.stringify(baseValue)}. Temporary marker removed.`;
 }
 
-async function configureCoreVariants(): Promise<string> {
+async function configureCoreVariants(alpha = false): Promise<string> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
-  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+  if (alpha ? !await page.isDraft() : site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
     throw new Error("Open the SmashBurger App API Lab draft page before configuring core variants.");
   }
   const components = await webflow.getAllComponents();
   const names = await Promise.all(components.map((item) => item.getName()));
-  const component = components[names.indexOf(CORE_NAME)];
+  const component = components[names.indexOf(alpha ? ALPHA_NAME : CORE_NAME)];
   if (!component || component.library || component.readOnly) {
     throw new Error("The editable native core trial is not present.");
   }
@@ -423,7 +477,7 @@ async function configureCoreVariants(): Promise<string> {
     throw new Error("The native core has an unexpected variant; inspect it before changing variants.");
   }
   if (variants[0]?.id !== "base") throw new Error("The native core Base variant is unavailable.");
-  if (variants[0].name === "Base") await component.setVariant("base", { name: "Mobile landscape" });
+  if (variants[0].name === "Base") await component.setVariant("base", { name: alpha ? "Tablet" : "Mobile landscape" });
   for (const name of expected) {
     variants = await component.getVariants();
     if (!variants.some((variant) => variant.name === name)) await component.createVariant(name);
@@ -435,15 +489,15 @@ async function configureCoreVariants(): Promise<string> {
   return "Five native core variant names saved. Runtime collapse behavior still requires a generated-marker check.";
 }
 
-async function activateCoreVariants(): Promise<string> {
+async function activateCoreVariants(alpha = false): Promise<string> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
-  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+  if (alpha ? !await page.isDraft() : site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
     throw new Error("Open the SmashBurger App API Lab draft page before activating core variants.");
   }
   const components = await webflow.getAllComponents();
   const names = await Promise.all(components.map((item) => item.getName()));
-  const component = components[names.indexOf(CORE_NAME)];
+  const component = components[names.indexOf(alpha ? ALPHA_NAME : CORE_NAME)];
   if (!component || component.library || component.readOnly || await component.getInstanceCount() !== 1) {
     throw new Error("Expected one editable native core trial instance.");
   }
@@ -487,15 +541,15 @@ async function activateCoreVariants(): Promise<string> {
   return "Native core variant bridge saved: blank Collapse breakpoint follows Webflow’s variant marker; a nonblank value overrides it. Preview behavior still needs checking.";
 }
 
-async function styleCoreVariants(): Promise<string> {
+async function styleCoreVariants(alpha = false): Promise<string> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
-  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+  if (alpha ? !await page.isDraft() : site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
     throw new Error("Open the SmashBurger App API Lab draft page before styling core variants.");
   }
   const components = await webflow.getAllComponents();
   const names = await Promise.all(components.map((item) => item.getName()));
-  const component = components[names.indexOf(CORE_NAME)];
+  const component = components[names.indexOf(alpha ? ALPHA_NAME : CORE_NAME)];
   if (!component || component.library || component.readOnly || await component.getInstanceCount() !== 1) {
     throw new Error("Expected one editable native core trial instance.");
   }
@@ -526,9 +580,15 @@ async function styleCoreVariants(): Promise<string> {
     await links.setProperties({ "flex-direction": collapsed ? "column" : "row", "align-items": collapsed ? "flex-start" : "center", "flex-wrap": collapsed ? "nowrap" : "wrap" }, options);
     if (primary) await primary.setProperties({ "flex-direction": collapsed ? "column" : "row", "align-items": collapsed ? "flex-start" : "center", "flex-wrap": collapsed ? "nowrap" : "wrap" }, options);
   };
-  await apply(false, { breakpoint: "medium" });
+  await apply(alpha, { breakpoint: "medium" });
   await apply(true, { breakpoint: "small" });
-  await apply(true, { variantId: variantId("Tablet"), breakpoint: "medium" });
+  if (alpha) {
+    await apply(false, { variantId: variantId("Never"), breakpoint: "medium" });
+    await apply(false, { variantId: variantId("Mobile landscape"), breakpoint: "medium" });
+    await apply(false, { variantId: variantId("Mobile portrait"), breakpoint: "medium" });
+  } else {
+    await apply(true, { variantId: variantId("Tablet"), breakpoint: "medium" });
+  }
   await apply(false, { variantId: variantId("Never"), breakpoint: "small" });
   await apply(false, { variantId: variantId("Mobile portrait"), breakpoint: "small" });
   await apply(true, { variantId: variantId("Mobile portrait"), breakpoint: "tiny" });
@@ -537,24 +597,24 @@ async function styleCoreVariants(): Promise<string> {
   const checks = await Promise.all([
     menu.getProperty("display", { breakpoint: "medium" }),
     menu.getProperty("display", { breakpoint: "small" }),
-    menu.getProperty("display", { variantId: variantId("Tablet"), breakpoint: "medium" }),
+    menu.getProperty("display", alpha ? { breakpoint: "medium" } : { variantId: variantId("Tablet"), breakpoint: "medium" }),
     menu.getProperty("display", { variantId: variantId("Never"), breakpoint: "small" }),
     menu.getProperty("display", { variantId: variantId("Mobile portrait"), breakpoint: "tiny" }),
     menu.getProperty("display", { variantId: variantId("Always") }),
   ]);
-  if (checks.join(",") !== "none,block,block,none,block,block") {
+  if (checks.join(",") !== (alpha ? "block,block,block,none,block,block" : "none,block,block,none,block,block")) {
     throw new Error(`Native core variant styles did not pass readback: ${checks.join(", ")}`);
   }
   if (primary) {
     const primaryChecks = await Promise.all([
       primary.getProperty("flex-direction", { breakpoint: "medium" }),
       primary.getProperty("flex-direction", { breakpoint: "small" }),
-      primary.getProperty("flex-direction", { variantId: variantId("Tablet"), breakpoint: "medium" }),
+      primary.getProperty("flex-direction", alpha ? { breakpoint: "medium" } : { variantId: variantId("Tablet"), breakpoint: "medium" }),
       primary.getProperty("flex-direction", { variantId: variantId("Never"), breakpoint: "small" }),
       primary.getProperty("flex-direction", { variantId: variantId("Mobile portrait"), breakpoint: "tiny" }),
       primary.getProperty("flex-direction", { variantId: variantId("Always") }),
     ]);
-    if (primaryChecks.join(",") !== "row,column,column,row,column,column") {
+    if (primaryChecks.join(",") !== (alpha ? "column,column,column,row,column,column" : "row,column,column,row,column,column")) {
       throw new Error(`Native primary variant styles did not pass readback: ${primaryChecks.join(", ")}`);
     }
   }
@@ -666,14 +726,16 @@ async function configureNativeCore(report: (message: string) => void, knownCompo
     throw new Error("The native core menu trigger has changed; no properties were added.");
   }
 
+  const coreProperties: CreatePropOptions[] = alpha ? CORE_PROPERTIES.map((prop) => prop.name === "Collapse breakpoint" && prop.type === "string"
+    ? { ...prop, defaultValue: "tablet" } : prop) : CORE_PROPERTIES;
   const existing = await component.getProps();
-  for (const expected of CORE_PROPERTIES) {
+  for (const expected of coreProperties) {
     const found = existing.find((prop) => prop.name === expected.name);
     if (found && (found.type !== "string" || found.group !== expected.group)) {
       throw new Error(`Property ${expected.name} already exists with a different type or group; no bindings were changed.`);
     }
   }
-  const missing = CORE_PROPERTIES.filter((expected) => !existing.some((prop) => prop.name === expected.name));
+  const missing = coreProperties.filter((expected) => !existing.some((prop) => prop.name === expected.name));
   if (missing.length) {
     report(`Creating ${missing.length} native component properties…`);
     await component.createProps(missing);
@@ -2209,6 +2271,24 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native alpha icons stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
+  const repairAlphaCollapse = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await repairAlphaCollapseDefault()); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Native alpha collapse repair stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
+  const configureAlphaCollapse = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await configureAlphaVariants(setMessage)); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Native alpha variants stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
+  const inspectAlphaCollapse = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await inspectAlphaVariantState()); }
+    catch (error) { setMessage(`Alpha variant inspection stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const checkUpload = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await probeAssetUpload()); }
@@ -2260,6 +2340,9 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy} onClick={() => { void installAlpha(); }}>Install native alpha on draft page</button>
       <button className="secondary" disabled={busy} onClick={() => { void expandAlpha(); }}>Expand native alpha on draft page</button>
       <button className="secondary" disabled={busy} onClick={() => { void installAlphaImages(); }}>Install native alpha icons</button>
+      <button className="secondary" disabled={busy} onClick={() => { void repairAlphaCollapse(); }}>Repair alpha Tablet default</button>
+      <button className="secondary" disabled={busy} onClick={() => { void inspectAlphaCollapse(); }}>Inspect alpha variants (read only)</button>
+      <button className="secondary" disabled={busy} onClick={() => { void configureAlphaCollapse(); }}>Configure native alpha variants</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger"} onClick={() => { void checkUpload(); }}>Test one asset upload</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureVariants(); }}>Create core variant names</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void activateVariants(); }}>Activate core variant bridge</button>
