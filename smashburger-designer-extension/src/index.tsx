@@ -15,6 +15,7 @@ import emailSvg from "./icons/email.svg";
 const PROOF_NAME = "SmashBurger API proof";
 const LAB_PAGE_SLUG = "smashburger-app-api-lab";
 const CORE_NAME = "SmashBurger native core trial";
+const ALPHA_NAME = "SmashBurger native alpha";
 const FACEBOOK_ASSET_ID = "6a7e4cb1eafcdf0550a61dc6";
 const ICON_SOURCES = {
   facebook: facebookSvg, instagram: instagramSvg, linkedin: linkedinSvg,
@@ -173,7 +174,9 @@ async function checkAssetAccess(): Promise<string> {
   return `Asset access: canAccessAssets=${permissions.canAccessAssets}; canManageAssets=${permissions.canManageAssets}; getAllAssets=${listed}; known Facebook asset=${known}. Read-only check.`;
 }
 
-async function checkInstallReadiness(): Promise<string> {
+type InstallReadiness = { siteName: string; pageSlug: string; blockers: string[]; visibleIcons: number; body: AnyElement | undefined };
+
+async function inspectInstallReadiness(): Promise<InstallReadiness> {
   const [site, page, queries, components, elements, assets, permissions] = await Promise.all([
     webflow.getSiteInfo(), webflow.getCurrentPage(), webflow.getAllMediaQueries(),
     webflow.getAllComponents(), webflow.getAllElements(), webflow.getAllAssets(),
@@ -185,7 +188,8 @@ async function checkInstallReadiness(): Promise<string> {
   ]);
   const blockers: string[] = [];
   if (!draft) blockers.push("current page is not a draft");
-  if (!elements.some((item) => item.type === "Body" && item.children)) blockers.push("editable Body not found");
+  const body = elements.find((item) => item.type === "Body" && item.children);
+  if (!body) blockers.push("editable Body not found");
   const existingComponents = componentNames.filter((name) => /^SmashBurger(?:\b|\s)/i.test(name));
   if (existingComponents.length) blockers.push(`existing SmashBurger components: ${existingComponents.join(", ")}`);
   let existingRoot = false;
@@ -204,8 +208,31 @@ async function checkInstallReadiness(): Promise<string> {
   const duplicates = bundledNames.filter((name) => assetNames.filter((candidate) => candidate === name).length > 1);
   if (duplicates.length) blockers.push(`duplicate bundled asset names: ${duplicates.join(", ")}`);
   const existingIcons = bundledNames.filter((name) => assetNames.includes(name)).length;
-  const result = blockers.length ? `Preflight needs attention: ${blockers.join("; ")}` : "Preflight checks passed";
-  return `${result}. Site=${site.siteName}; page=${slug}; app-visible bundled icons=${existingIcons}/9. Read-only; no installer has run.`;
+  return { siteName: site.siteName, pageSlug: slug, blockers, visibleIcons: existingIcons, body };
+}
+
+async function checkInstallReadiness(): Promise<string> {
+  const result = await inspectInstallReadiness();
+  const status = result.blockers.length ? `Preflight needs attention: ${result.blockers.join("; ")}` : "Preflight checks passed";
+  return `${status}. Site=${result.siteName}; page=${result.pageSlug}; app-visible bundled icons=${result.visibleIcons}/9. Read-only; no installer has run.`;
+}
+
+async function installNativeAlpha(report: (message: string) => void): Promise<string> {
+  const readiness = await inspectInstallReadiness();
+  if (readiness.blockers.length) {
+    throw new Error(`Install preflight needs attention: ${readiness.blockers.join("; ")}. No element or component was created.`);
+  }
+  report(`Building one native alpha component on draft page ${readiness.pageSlug}…`);
+  await createNativeCore(report, true);
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(ALPHA_NAME)];
+  const root = await component?.getRootElement();
+  if (!component || component.library || component.readOnly || !root?.attributes ||
+    await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native alpha was created but its project component did not pass readback.");
+  }
+  return `Native alpha core created on draft page ${readiness.pageSlug}: one editable project component with a pinned runtime. This is an incomplete installation fixture; inspect Canvas before adding more content.`;
 }
 
 async function probeAssetUpload(): Promise<string> {
@@ -554,15 +581,16 @@ async function probeEmbed(): Promise<string> {
   return `Embed ${created ? "inserted" : "reused"}; ${codeKey} content ${saved === code ? "saved" : `readback differs (${JSON.stringify(saved)})`}`;
 }
 
-async function configureNativeCore(report: (message: string) => void, knownComponent?: Component): Promise<string> {
+async function configureNativeCore(report: (message: string) => void, knownComponent?: Component, alpha = false): Promise<string> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
-  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
-    throw new Error("Open the SmashBurger App API Lab draft page before configuring its native core.");
+  if (alpha ? !await page.isDraft() : site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error(alpha ? "The native alpha can only be configured on a draft page." :
+      "Open the SmashBurger App API Lab draft page before configuring its native core.");
   }
   const components = knownComponent ? [knownComponent] : await webflow.getAllComponents();
   const names = await Promise.all(components.map((item) => item.getName()));
-  const component = components[names.indexOf(CORE_NAME)];
+  const component = components[names.indexOf(alpha ? ALPHA_NAME : CORE_NAME)];
   if (!component || component.readOnly || await component.getInstanceCount() !== 1) {
     throw new Error("Expected one editable native core trial instance; no component was changed.");
   }
@@ -1680,11 +1708,12 @@ async function installBundledIconsOnTrial(report: (message: string) => void): Pr
   return `Bundled trial icons installed: ${uploaded} uploaded, ${9 - uploaded} reused; nine native Image property defaults now reference app-visible site assets.`;
 }
 
-async function createNativeCore(report: (message: string) => void): Promise<void> {
+async function createNativeCore(report: (message: string) => void, alpha = false): Promise<void> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
-  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
-    throw new Error("Open the SmashBurger App API Lab draft page before creating the native core.");
+  if (alpha ? !await page.isDraft() : site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error(alpha ? "The native alpha can only be created on a draft page." :
+      "Open the SmashBurger App API Lab draft page before creating the native core.");
   }
   const elements = await webflow.getAllElements();
   for (const element of elements) {
@@ -1697,7 +1726,7 @@ async function createNativeCore(report: (message: string) => void): Promise<void
   if (!body?.children) throw new Error("The draft lab page Body is not available.");
   const components = await webflow.getAllComponents();
   const names = await Promise.all(components.map((component) => component.getName()));
-  if (names.includes(CORE_NAME)) throw new Error("The native core component already exists; no duplicate was created.");
+  if (names.includes(alpha ? ALPHA_NAME : CORE_NAME)) throw new Error("The native core component already exists; no duplicate was created.");
 
   report("Creating project-native layout classes…");
   const [rootStyle, innerStyle, brandStyle, menuStyle, summaryStyle, iconStyle, lineStyle, panelStyle, linksStyle, linkStyle, backdropStyle] = await Promise.all([
@@ -1726,10 +1755,12 @@ async function createNativeCore(report: (message: string) => void): Promise<void
 
   report("Building the native header, details trigger and shared links…");
   const root = await body.append(webflow.elementPresets.DivBlock);
+  await root.setAttribute("data-mwp-prototype", "native-core-v1");
+  await root.setAttribute("data-mwp-navbar", "");
   await root.setTag("header");
   await root.setStyles([rootStyle]);
   for (const [name, value] of Object.entries({
-    "data-mwp-prototype": "native-core-v1", "data-mwp-navbar": "", "data-collapse": "tablet",
+    "data-collapse": "tablet",
     "data-layout": "dropdown", "data-motion": "dropdown", "data-align": "right",
     "data-close-on-link": "true", "data-close-on-outside": "true", "data-focus-first": "false",
   })) await root.setAttribute(name, value);
@@ -1786,10 +1817,10 @@ async function createNativeCore(report: (message: string) => void): Promise<void
   await embed.setSettings({ code: CORE_EMBED_CODE });
   report("Registering the native core as a project component…");
   const component = await webflow.registerComponent({
-    name: CORE_NAME, group: "SmashBurger experiments",
-    description: "Draft-only native generator trial, with a pinned runtime Embed.",
+    name: alpha ? ALPHA_NAME : CORE_NAME, group: "SmashBurger experiments",
+    description: "Draft-only native generator experiment, with a pinned runtime Embed.",
   }, root);
-  report(await configureNativeCore(report, component));
+  report(await configureNativeCore(report, component, alpha));
 }
 
 async function createProof(report: (message: string) => void, anchor?: AnyElement): Promise<void> {
@@ -2021,6 +2052,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Install preflight stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
+  const installAlpha = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await installNativeAlpha(setMessage)); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Native alpha install stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const checkUpload = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await probeAssetUpload()); }
@@ -2069,6 +2106,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void installTrialIcons(); }}>Install bundled icons on trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger"} onClick={() => { void checkAssets(); }}>Check asset access</button>
       <button className="secondary" disabled={busy} onClick={() => { void checkInstallTarget(); }}>Check install target (read only)</button>
+      <button className="secondary" disabled={busy} onClick={() => { void installAlpha(); }}>Install native alpha on draft page</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger"} onClick={() => { void checkUpload(); }}>Test one asset upload</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureVariants(); }}>Create core variant names</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void activateVariants(); }}>Activate core variant bridge</button>
