@@ -173,6 +173,41 @@ async function checkAssetAccess(): Promise<string> {
   return `Asset access: canAccessAssets=${permissions.canAccessAssets}; canManageAssets=${permissions.canManageAssets}; getAllAssets=${listed}; known Facebook asset=${known}. Read-only check.`;
 }
 
+async function checkInstallReadiness(): Promise<string> {
+  const [site, page, queries, components, elements, assets, permissions] = await Promise.all([
+    webflow.getSiteInfo(), webflow.getCurrentPage(), webflow.getAllMediaQueries(),
+    webflow.getAllComponents(), webflow.getAllElements(), webflow.getAllAssets(),
+    webflow.canForAppMode([webflow.appModes.canAccessAssets, webflow.appModes.canManageAssets]),
+  ]);
+  const [slug, draft, componentNames, assetNames] = await Promise.all([
+    page.getSlug(), page.isDraft(), Promise.all(components.map((item) => item.getName())),
+    Promise.all(assets.map((item) => item.getName())),
+  ]);
+  const blockers: string[] = [];
+  if (!draft) blockers.push("current page is not a draft");
+  if (!elements.some((item) => item.type === "Body" && item.children)) blockers.push("editable Body not found");
+  const existingComponents = componentNames.filter((name) => /^SmashBurger(?:\b|\s)/i.test(name));
+  if (existingComponents.length) blockers.push(`existing SmashBurger components: ${existingComponents.join(", ")}`);
+  let existingRoot = false;
+  for (const item of elements) {
+    if (item.attributes && await item.getResolvedAttributeValue("data-mwp-navbar") !== null) {
+      existingRoot = true;
+      break;
+    }
+  }
+  if (existingRoot) blockers.push("current page already has a marked navbar root");
+  const breakpointIds = new Set(queries.map((query) => query.id));
+  const missingBreakpoints = (["medium", "small", "tiny"] as BreakpointId[]).filter((id) => !breakpointIds.has(id));
+  if (missingBreakpoints.length) blockers.push(`missing responsive breakpoints: ${missingBreakpoints.join(", ")}`);
+  if (!permissions.canAccessAssets || !permissions.canManageAssets) blockers.push("asset access or management permission unavailable");
+  const bundledNames = Object.keys(ICON_SOURCES).map((key) => `SmashBurger App — ${key} icon.svg`);
+  const duplicates = bundledNames.filter((name) => assetNames.filter((candidate) => candidate === name).length > 1);
+  if (duplicates.length) blockers.push(`duplicate bundled asset names: ${duplicates.join(", ")}`);
+  const existingIcons = bundledNames.filter((name) => assetNames.includes(name)).length;
+  const result = blockers.length ? `Preflight needs attention: ${blockers.join("; ")}` : "Preflight checks passed";
+  return `${result}. Site=${site.siteName}; page=${slug}; app-visible bundled icons=${existingIcons}/9. Read-only; no installer has run.`;
+}
+
 async function probeAssetUpload(): Promise<string> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
@@ -1980,6 +2015,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Asset access check stopped: ${String(error)}`); }
     finally { setBusy(false); }
   };
+  const checkInstallTarget = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await checkInstallReadiness()); }
+    catch (error) { setMessage(`Install preflight stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const checkUpload = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await probeAssetUpload()); }
@@ -2027,6 +2068,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSecondaryVisibility(); }}>Bind secondary visibility</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void installTrialIcons(); }}>Install bundled icons on trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger"} onClick={() => { void checkAssets(); }}>Check asset access</button>
+      <button className="secondary" disabled={busy} onClick={() => { void checkInstallTarget(); }}>Check install target (read only)</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger"} onClick={() => { void checkUpload(); }}>Test one asset upload</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureVariants(); }}>Create core variant names</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void activateVariants(); }}>Activate core variant bridge</button>
