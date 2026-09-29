@@ -30,16 +30,20 @@ const CORE_VARIANT_BRIDGE = `<script>
 })();
 </script>`;
 const CORE_EMBED_CODE_V3 = `${CORE_DISPLAY_BRIDGE_V2}\n${CORE_VARIANT_BRIDGE}\n${cdnLoader}`;
-const CORE_DISPLAY_BRIDGE = `<style>
+const CORE_DISPLAY_BRIDGE_V4 = `<style>
 .sb-app-nav[data-collapse="always"] .sb-app-menu,
 .sb-app-nav[data-mwp-collapsed="true"] .sb-app-menu { display: block; }
 .sb-app-nav[data-mwp-collapsed="false"] .sb-app-inner { flex-wrap: nowrap; }
 .sb-app-nav[data-mwp-collapsed="false"] .sb-app-menu { display: none; }
 .sb-app-nav[data-mwp-collapsed="false"] .sb-app-panel { flex-basis: auto; }
 .sb-app-nav[data-mwp-collapsed="false"] .sb-app-links { flex-direction: row; align-items: center; }
-.sb-app-nav[data-mwp-collapsed="false"] .sb-app-secondary-icon { filter: brightness(0) invert(1); }
 .sb-app-nav .sb-app-infrastructure { display: none; }
 </style>`;
+const CORE_EMBED_CODE_V4 = `${CORE_DISPLAY_BRIDGE_V4}\n${CORE_VARIANT_BRIDGE}\n${cdnLoader}`;
+const CORE_DISPLAY_BRIDGE = CORE_DISPLAY_BRIDGE_V4.replace(
+  "</style>",
+  '.sb-app-nav[data-mwp-collapsed="false"] .sb-app-secondary-icon { filter: brightness(0) invert(1); }\n</style>',
+);
 const CORE_EMBED_CODE = `${CORE_DISPLAY_BRIDGE}\n${CORE_VARIANT_BRIDGE}\n${cdnLoader}`;
 const CORE_PROPERTIES: CreatePropOptions[] = [
   { type: "string", name: "Collapse breakpoint", group: "Behavior", defaultValue: "", tooltip: "Leave blank to follow the selected variant; enter never, tablet, mobile-landscape, mobile-portrait, or always to override it" },
@@ -321,7 +325,7 @@ async function activateCoreVariants(): Promise<string> {
     ? (await details.getChildren()).find((child) => child.type === "HtmlEmbed") : undefined;
   if (!embed?.elementSettings) throw new Error("The native core runtime Embed is missing.");
   const code = (await embed.getSettings()).code;
-  if (code !== CORE_EMBED_CODE_V2 && code !== CORE_EMBED_CODE_V3 && code !== CORE_EMBED_CODE) {
+  if (code !== CORE_EMBED_CODE_V2 && code !== CORE_EMBED_CODE_V3 && code !== CORE_EMBED_CODE_V4 && code !== CORE_EMBED_CODE) {
     throw new Error("The runtime Embed differs from the known trial version; no code was replaced.");
   }
   if (collapse.defaultValue !== "") {
@@ -502,7 +506,7 @@ async function configureNativeCore(report: (message: string) => void, knownCompo
     throw new Error("The native core runtime Embed is missing; no properties were added.");
   }
   const existingCode = (await embed.getSettings()).code;
-  if (existingCode !== cdnLoader && existingCode !== CORE_EMBED_CODE_V1 && existingCode !== CORE_EMBED_CODE_V2 && existingCode !== CORE_EMBED_CODE_V3 && existingCode !== CORE_EMBED_CODE) {
+  if (existingCode !== cdnLoader && existingCode !== CORE_EMBED_CODE_V1 && existingCode !== CORE_EMBED_CODE_V2 && existingCode !== CORE_EMBED_CODE_V3 && existingCode !== CORE_EMBED_CODE_V4 && existingCode !== CORE_EMBED_CODE) {
     throw new Error("The native core Embed differs from the known trial versions; no code was replaced.");
   }
   const [brand, menu, panel] = await inner.getChildren();
