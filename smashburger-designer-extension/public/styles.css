@@ -6,6 +6,9 @@ main { padding: 20px; max-width: 760px; }
 h1 { font-size: 24px; line-height: 1.15; margin: 10px 0; }
 p { margin: 0 0 16px; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.toolbox { margin-top: 16px; border: 1px solid #c9d3c9; border-radius: 4px; padding: 10px 12px; }
+.toolbox summary { cursor: pointer; font-weight: 700; }
+.toolbox .actions { margin-top: 12px; }
 button { padding: 9px 12px; border: 1px solid #17251e; border-radius: 4px; background: #17251e; color: white; font: inherit; cursor: pointer; }
 button.secondary { color: #17251e; background: transparent; }
 button:disabled { opacity: .45; cursor: not-allowed; }

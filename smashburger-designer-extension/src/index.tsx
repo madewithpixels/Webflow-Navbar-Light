@@ -2346,10 +2346,29 @@ const App: React.FC = () => {
   };
   return <main>
     <div className="eyebrow">SmashBurger · private prototype</div>
-    <h1>Designer capability check</h1>
-    <p>Inspect a navbar or create a disposable native proof on a spare page. This is not the production menu.</p>
+    <h1>{snapshot?.site === "Smashburger" ? "Designer capability check" : "Native alpha installer"}</h1>
+    <p>{snapshot?.site === "Smashburger"
+      ? "Inspect the private API Lab or use its individual capability tests."
+      : "Use a clean draft page for this private alpha. Check the target before installing; inspect Canvas and Preview before publishing."}</p>
     <div className="actions">
       <button disabled={busy} onClick={() => { void refresh(); }}>Inspect selection</button>
+      <button className="secondary" disabled={busy} onClick={() => { void checkInstallTarget(); }}>Check install target (read only)</button>
+      <button disabled={busy} onClick={() => { void installAllAlpha(); }}>Install complete alpha on clean draft</button>
+    </div>
+    <details className="toolbox">
+      <summary>Individual alpha actions and recovery</summary>
+      <div className="actions">
+        <button className="secondary" disabled={busy} onClick={() => { void installAlpha(); }}>Install native alpha on draft page</button>
+        <button className="secondary" disabled={busy} onClick={() => { void expandAlpha(); }}>Expand native alpha on draft page</button>
+        <button className="secondary" disabled={busy} onClick={() => { void installAlphaImages(); }}>Install native alpha icons</button>
+        <button className="secondary" disabled={busy} onClick={() => { void repairAlphaCollapse(); }}>Repair alpha Tablet default</button>
+        <button className="secondary" disabled={busy} onClick={() => { void inspectAlphaCollapse(); }}>Inspect alpha variants (read only)</button>
+        <button className="secondary" disabled={busy} onClick={() => { void configureAlphaCollapse(); }}>Configure native alpha variants</button>
+      </div>
+    </details>
+    {snapshot?.site === "Smashburger" && <details className="toolbox">
+      <summary>API Lab capability tools</summary>
+      <div className="actions">
       <button className="secondary" disabled={busy || !snapshot?.canAppend || snapshot.proofExists} onClick={() => { void makeProof(); }}>Create native proof</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || snapshot.proofExists} onClick={() => { void makeLab(); }}>Create draft lab and proof</button>
       <button className="secondary" disabled={busy || !snapshot?.proofExists} onClick={() => { void checkProof(); }}>Verify existing proof</button>
@@ -2367,19 +2386,12 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSecondaryVisibility(); }}>Bind secondary visibility</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void installTrialIcons(); }}>Install bundled icons on trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger"} onClick={() => { void checkAssets(); }}>Check asset access</button>
-      <button className="secondary" disabled={busy} onClick={() => { void checkInstallTarget(); }}>Check install target (read only)</button>
-      <button className="secondary" disabled={busy} onClick={() => { void installAllAlpha(); }}>Install complete alpha on clean draft</button>
-      <button className="secondary" disabled={busy} onClick={() => { void installAlpha(); }}>Install native alpha on draft page</button>
-      <button className="secondary" disabled={busy} onClick={() => { void expandAlpha(); }}>Expand native alpha on draft page</button>
-      <button className="secondary" disabled={busy} onClick={() => { void installAlphaImages(); }}>Install native alpha icons</button>
-      <button className="secondary" disabled={busy} onClick={() => { void repairAlphaCollapse(); }}>Repair alpha Tablet default</button>
-      <button className="secondary" disabled={busy} onClick={() => { void inspectAlphaCollapse(); }}>Inspect alpha variants (read only)</button>
-      <button className="secondary" disabled={busy} onClick={() => { void configureAlphaCollapse(); }}>Configure native alpha variants</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger"} onClick={() => { void checkUpload(); }}>Test one asset upload</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureVariants(); }}>Create core variant names</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void activateVariants(); }}>Activate core variant bridge</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void styleVariants(); }}>Style core variants</button>
-    </div>
+      </div>
+    </details>}
     <p className="status" role="status">{message}</p>
     {snapshot && <dl>
       <dt>Site</dt><dd>{snapshot.site}</dd>
