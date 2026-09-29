@@ -1108,6 +1108,58 @@ async function configureNativeSubmenuProperties(report: (message: string) => voi
   return `Native submenu properties saved: ${definitions.length} grouped controls and ${definitions.length} bindings verified.`;
 }
 
+async function configureNativeMotion(report: (message: string) => void): Promise<string> {
+  const site = await webflow.getSiteInfo();
+  const page = await webflow.getCurrentPage();
+  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error("Open the SmashBurger App API Lab draft page before binding motion controls.");
+  }
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(CORE_NAME)];
+  if (!component || component.codeComponent !== false || component.library || component.readOnly ||
+    await component.getInstanceCount() !== 1) {
+    throw new Error("Expected one editable project-native core trial instance.");
+  }
+  const root = await component.getRootElement();
+  if (!root?.attributes || !root.children ||
+    await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native core marker has changed; no motion properties were added.");
+  }
+  const controls = [
+    { name: "Distance", group: "Motion", value: "1.5rem", attribute: "data-distance" },
+    { name: "Easing", group: "Motion", value: "cubic-bezier(0.22, 1, 0.36, 1)", attribute: "data-easing" },
+    { name: "Opening duration", group: "Motion", value: "280ms", attribute: "data-open-duration" },
+    { name: "Closing duration", group: "Motion", value: "220ms", attribute: "data-close-duration" },
+    { name: "Item stagger", group: "Motion", value: "0ms", attribute: "data-stagger" },
+    { name: "Icon duration", group: "Motion", value: "220ms", attribute: "data-icon-duration" },
+    { name: "Icon lines", group: "Trigger", value: "3", attribute: "data-icon-lines" },
+  ] as const;
+  const existing = await component.getProps();
+  for (const control of controls) {
+    const found = existing.find((prop) => prop.name === control.name);
+    if (found && (found.type !== "string" || found.group !== control.group)) {
+      throw new Error(`${control.name} has a different type or group; no bindings were changed.`);
+    }
+  }
+  const missing: CreatePropOptions[] = controls.filter((control) => !existing.some((prop) => prop.name === control.name))
+    .map((control) => ({ type: "string", name: control.name, group: control.group, defaultValue: control.value }));
+  if (missing.length) {
+    report(`Creating ${missing.length} native motion and trigger properties…`);
+    await component.createProps(missing);
+  }
+  const props = await component.getProps();
+  for (const control of controls) {
+    const prop = props.find((item) => item.name === control.name && item.type === "string");
+    if (!prop) throw new Error(`${control.name} was not saved.`);
+    await root.setAttribute(control.attribute, { sourceType: "prop", propId: prop.id });
+    if (!isBoundTo(await root.getAttributeValue(control.attribute), prop.id)) {
+      throw new Error(`${control.name} root binding did not pass readback.`);
+    }
+  }
+  return "Native motion controls saved: seven grouped properties and seven root attribute bindings verified.";
+}
+
 async function configureNativeSecondary(report: (message: string) => void): Promise<string> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
@@ -1892,6 +1944,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native submenu properties stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
+  const configureMotion = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await configureNativeMotion(setMessage)); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Native motion controls stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const configureSecondary = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await configureNativeSecondary(setMessage)); setSnapshot(await inspect()); }
@@ -1963,6 +2021,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configurePrimary(); }}>Build native primary navigation</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSubmenu(); }}>Build native submenu</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSubmenuProperties(); }}>Bind native submenu properties</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureMotion(); }}>Bind native motion controls</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSecondary(); }}>Build native secondary links</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureIcons(); }}>Bind native icon properties</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSecondaryVisibility(); }}>Bind secondary visibility</button>

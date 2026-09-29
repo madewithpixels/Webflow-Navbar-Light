@@ -14,14 +14,14 @@ Published acceptance builds:
 - Clean Library installation: <https://smashburger-4b8f18.webflow.io/>
 - Five-layout demo area: <https://smashburger-4b8f18.webflow.io/demo>
 
-## Project status — 27 September 2026
+## Project status — 29 September 2026
 
 | Track | Verified position | Still open |
 | --- | --- | --- |
 | Webflow component and demos | The pinned `v0.2.3` release supplies five distinct layout defaults. The Smashburger site has six published demo pages, including an overview; the five layout pages passed closed/open checks at eight tested widths from 320 to 1920px. The Dropdown page has a Webflow native GSAP fixture and Overview has a Webflow scroll interaction. See [demo acceptance](webflow/demo-qa.md). | A fresh assistive-technology check of the `v0.2.3` consumer and Windows NVDA verification. |
-| Private Designer Extension | A draft-only API Lab proves direct creation of a project-native header with a pinned runtime Embed, compact Canvas infrastructure, one shared set of links and 20 grouped/bound component properties. With the app closed, Tablet Preview opens all five layouts without horizontal overflow; link text/destination, panel width and first-link focus overrides were checked and reset. See the [extension trial record](smashburger-designer-extension/README.md). | The generated component has three sample links and one Base variant. It needs the complete content/schema, five functional variants, clean-site installation, published runtime checks and an adoption path for Library instances. |
+| Private Designer Extension | The draft API Lab now has a project-native component with five functional collapse variants, primary and secondary navigation, nine replaceable bundled SVGs, a native submenu, and 65 component properties. Webflow readback confirms the structure and bindings; Michael checked the submenu in Desktop and Tablet Preview. See the [extension trial record](smashburger-designer-extension/README.md). | The trial schema still differs from the released component, some links use placeholders, and a clean-site installer, published runtime checks and Library adoption path remain open. |
 
-The private extension is a capability trial, not the distribution route for the current release. Install the released component from the MWP Component Library as described below. This snapshot was checked against implementation commit `8be9e8b`; the API Lab page remains a draft and was not published for the extension trial. Local checks at that commit passed 21 runtime tests, the distribution integrity check, extension type checking, linting and bundling.
+The private extension is a capability trial, not the distribution route for the current release. Install the released component from the MWP Component Library as described below. The draft API Lab page has not been published. The extension's latest submenu work was checked at commit `437f145` with type checking, linting and bundling; the release's earlier runtime and distribution checks are recorded in [demo acceptance](webflow/demo-qa.md).
 
 ## Design constraints
 
