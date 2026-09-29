@@ -1742,6 +1742,111 @@ async function installBundledIconsOnTrial(report: (message: string) => void): Pr
   return `Bundled trial icons installed: ${uploaded} uploaded, ${9 - uploaded} reused; nine native Image property defaults now reference app-visible site assets.`;
 }
 
+async function installAlphaIcons(report: (message: string) => void): Promise<string> {
+  const page = await webflow.getCurrentPage();
+  if (!await page.isDraft()) throw new Error("Open the draft page containing the native alpha component.");
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(ALPHA_NAME)];
+  if (!component || component.codeComponent !== false || component.library || component.readOnly ||
+    await component.getInstanceCount() !== 1) {
+    throw new Error("Expected one editable native alpha instance; no icons were installed.");
+  }
+  const root = await component.getRootElement();
+  if (!root?.children || !root.attributes ||
+    await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native alpha marker changed; no icons were installed.");
+  }
+  const [inner] = await root.getChildren();
+  const [, , panel] = inner?.children ? await inner.getChildren() : [];
+  const [, secondary] = panel?.children ? await panel.getChildren() : [];
+  const groups = secondary?.children ? await secondary.getChildren() : [];
+  if (!secondary?.attributes || await secondary.getResolvedAttributeValue("data-mwp-secondary") === null ||
+    groups.length !== 2 || !groups[0].children || !groups[1].children) {
+    throw new Error("Expand the native alpha secondary links before installing icons.");
+  }
+  const specs = [
+    { key: "facebook", label: "Facebook", group: "Social links" },
+    { key: "instagram", label: "Instagram", group: "Social links" },
+    { key: "linkedin", label: "LinkedIn", group: "Social links" },
+    { key: "tiktok", label: "TikTok", group: "Social links" },
+    { key: "threads", label: "Threads", group: "Social links" },
+    { key: "x", label: "X", group: "Social links" },
+    { key: "whatsapp", label: "WhatsApp", group: "Social links" },
+    { key: "telephone", label: "Telephone", group: "Contact links" },
+    { key: "email", label: "Email", group: "Contact links" },
+  ] as const;
+  const links = [...await groups[0].getChildren(), ...await groups[1].getChildren()];
+  if (links.length !== specs.length) throw new Error("Expected nine native alpha secondary links.");
+  const iconStyle = await style("sb-app-secondary-icon");
+  await iconStyle.setProperties({ display: "block", width: "18px", height: "18px", "min-width": "18px", "max-width": "18px", "min-height": "18px", "max-height": "18px", "object-fit": "contain", "margin-right": "6px" });
+  const icons: ImageElement[] = [];
+  for (const [index, spec] of specs.entries()) {
+    const link = links[index];
+    if (!link.children || !link.attributes ||
+      await link.getResolvedAttributeValue("data-mwp-secondary-item") !== spec.key) {
+      throw new Error(`${spec.label} native alpha link changed; no asset was uploaded.`);
+    }
+    const children = await link.getChildren();
+    const label = children[children.length - 1];
+    if (children.length < 1 || children.length > 2 || !label?.attributes ||
+      await label.getResolvedAttributeValue("data-mwp-secondary-label") === null ||
+      (children.length === 2 && (children[0].type !== "Image" || !children[0].attributes ||
+        await children[0].getResolvedAttributeValue("data-mwp-secondary-icon") === null))) {
+      throw new Error(`${spec.label} icon or label structure changed; no asset was uploaded.`);
+    }
+    let icon = children.length === 2 ? children[0] : undefined;
+    if (!icon) {
+      report(`Adding ${spec.label} native Image…`);
+      icon = await link.prepend(webflow.elementPresets.Image);
+    }
+    if (icon.type !== "Image" || !icon.attributes) throw new Error(`${spec.label} Image could not be created.`);
+    await icon.setAttribute("data-mwp-secondary-icon", "");
+    await icon.setStyles([iconStyle]);
+    await icon.setAltText("");
+    icons.push(icon);
+  }
+  const visibleAssets = await webflow.getAllAssets();
+  const visibleNames = await Promise.all(visibleAssets.map((asset) => asset.getName()));
+  const installed: Array<{ label: string; group: string; asset: Asset }> = [];
+  let uploaded = 0;
+  for (const spec of specs) {
+    const fileName = `SmashBurger App — ${spec.key} icon.svg`;
+    const matches = visibleAssets.filter((_, index) => visibleNames[index] === fileName);
+    if (matches.length > 1) throw new Error(`Multiple app-visible ${spec.label} icons share one name; inspect assets before retrying.`);
+    let asset = matches[0];
+    if (!asset) {
+      report(`Uploading bundled ${spec.label} SVG…`);
+      asset = await webflow.createAsset(new File([ICON_SOURCES[spec.key]], fileName, { type: "image/svg+xml" }));
+      uploaded++;
+    }
+    if (await asset.getName() !== fileName || !await webflow.getAssetById(asset.id)) {
+      throw new Error(`${spec.label} asset did not pass Designer readback.`);
+    }
+    installed.push({ label: spec.label, group: spec.group, asset });
+  }
+  const existing = await component.getProps();
+  for (const { label, group, asset } of installed) {
+    const found = existing.find((prop) => prop.name === `${label} icon`);
+    if (found && (found.type !== "image" || found.group !== group || found.defaultValue !== asset.id)) {
+      throw new Error(`${label} icon property differs from the bundled asset; no default was replaced.`);
+    }
+  }
+  const missing: CreatePropOptions[] = installed.filter(({ label }) => !existing.some((prop) => prop.name === `${label} icon`))
+    .map(({ label, group, asset }) => ({ type: "image", name: `${label} icon`, group, defaultValue: asset.id }));
+  if (missing.length) await component.createProps(missing);
+  const props = await component.getProps();
+  for (const [index, { label, asset }] of installed.entries()) {
+    const prop = props.find((item) => item.name === `${label} icon` && item.type === "image");
+    if (!prop || prop.defaultValue !== asset.id) throw new Error(`${label} icon property did not pass readback.`);
+    await icons[index].setSettings({ assetId: { sourceType: "prop", propId: prop.id } });
+    if (!isBoundTo((await icons[index].getSettings()).assetId, prop.id)) {
+      throw new Error(`${label} Image binding did not pass readback.`);
+    }
+  }
+  return `Native alpha icons installed: ${uploaded} uploaded, ${9 - uploaded} reused; nine native Images and image properties verified.`;
+}
+
 async function createNativeCore(report: (message: string) => void, alpha = false): Promise<void> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
@@ -2098,6 +2203,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native alpha expansion stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
+  const installAlphaImages = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await installAlphaIcons(setMessage)); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Native alpha icons stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const checkUpload = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await probeAssetUpload()); }
@@ -2148,6 +2259,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy} onClick={() => { void checkInstallTarget(); }}>Check install target (read only)</button>
       <button className="secondary" disabled={busy} onClick={() => { void installAlpha(); }}>Install native alpha on draft page</button>
       <button className="secondary" disabled={busy} onClick={() => { void expandAlpha(); }}>Expand native alpha on draft page</button>
+      <button className="secondary" disabled={busy} onClick={() => { void installAlphaImages(); }}>Install native alpha icons</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger"} onClick={() => { void checkUpload(); }}>Test one asset upload</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureVariants(); }}>Create core variant names</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void activateVariants(); }}>Activate core variant bridge</button>
