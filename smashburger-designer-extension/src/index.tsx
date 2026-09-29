@@ -54,9 +54,14 @@ const CORE_DISPLAY_BRIDGE_V4 = `<style>
 .sb-app-nav .sb-app-infrastructure { display: none; }
 </style>`;
 const CORE_EMBED_CODE_V4 = `${CORE_DISPLAY_BRIDGE_V4}\n${CORE_VARIANT_BRIDGE}\n${cdnLoader}`;
-const CORE_DISPLAY_BRIDGE = CORE_DISPLAY_BRIDGE_V4.replace(
+const CORE_DISPLAY_BRIDGE_V5 = CORE_DISPLAY_BRIDGE_V4.replace(
   "</style>",
   '.sb-app-nav[data-mwp-collapsed="false"] .sb-app-secondary-icon { filter: brightness(0) invert(1); }\n</style>',
+);
+const CORE_EMBED_CODE_V5 = `${CORE_DISPLAY_BRIDGE_V5}\n${CORE_VARIANT_BRIDGE}\n${cdnLoader}`;
+const CORE_DISPLAY_BRIDGE = CORE_DISPLAY_BRIDGE_V5.replace(
+  "</style>",
+  '.sb-app-nav [data-mwp-submenu]:not([open]) > [data-mwp-submenu-list] { display: none; }\n.sb-app-nav [data-mwp-submenu][open] [data-mwp-submenu-icon] { transform: rotate(var(--mwp-nav-submenu-icon-rotation, 180deg)); }\n.sb-app-nav[data-mwp-collapsed="true"] [data-mwp-submenu-list] { position: static; box-shadow: none; }\n</style>',
 );
 const CORE_EMBED_CODE = `${CORE_DISPLAY_BRIDGE}\n${CORE_VARIANT_BRIDGE}\n${cdnLoader}`;
 const CORE_PROPERTIES: CreatePropOptions[] = [
@@ -369,7 +374,7 @@ async function activateCoreVariants(): Promise<string> {
     ? (await details.getChildren()).find((child) => child.type === "HtmlEmbed") : undefined;
   if (!embed?.elementSettings) throw new Error("The native core runtime Embed is missing.");
   const code = (await embed.getSettings()).code;
-  if (code !== CORE_EMBED_CODE_V2 && code !== CORE_EMBED_CODE_V3 && code !== CORE_EMBED_CODE_V4 && code !== CORE_EMBED_CODE) {
+  if (code !== CORE_EMBED_CODE_V2 && code !== CORE_EMBED_CODE_V3 && code !== CORE_EMBED_CODE_V4 && code !== CORE_EMBED_CODE_V5 && code !== CORE_EMBED_CODE) {
     throw new Error("The runtime Embed differs from the known trial version; no code was replaced.");
   }
   if (collapse.defaultValue !== "") {
@@ -550,7 +555,7 @@ async function configureNativeCore(report: (message: string) => void, knownCompo
     throw new Error("The native core runtime Embed is missing; no properties were added.");
   }
   const existingCode = (await embed.getSettings()).code;
-  if (existingCode !== cdnLoader && existingCode !== CORE_EMBED_CODE_V1 && existingCode !== CORE_EMBED_CODE_V2 && existingCode !== CORE_EMBED_CODE_V3 && existingCode !== CORE_EMBED_CODE_V4 && existingCode !== CORE_EMBED_CODE) {
+  if (existingCode !== cdnLoader && existingCode !== CORE_EMBED_CODE_V1 && existingCode !== CORE_EMBED_CODE_V2 && existingCode !== CORE_EMBED_CODE_V3 && existingCode !== CORE_EMBED_CODE_V4 && existingCode !== CORE_EMBED_CODE_V5 && existingCode !== CORE_EMBED_CODE) {
     throw new Error("The native core Embed differs from the known trial versions; no code was replaced.");
   }
   const [brand, menu, panel] = await inner.getChildren();
@@ -687,8 +692,8 @@ async function configureNativeContent(report: (message: string) => void): Promis
     await linksContainer.getResolvedAttributeValue("data-mwp-links") === null) {
     throw new Error("The native link container has changed; no content was changed.");
   }
-  const links = await linksContainer.getChildren();
-  if (links.length !== 3 || links.some((link) => link.type !== "Link")) {
+  const links = (await linksContainer.getChildren()).filter((child) => child.type === "Link");
+  if (links.length !== 3) {
     throw new Error("Expected the trial's three native links; no content was changed.");
   }
   const targets = [brand, ...links] as LinkElement[];
@@ -885,6 +890,103 @@ async function configureNativePrimary(report: (message: string) => void): Promis
     throw new Error("The primary navigation structure did not pass readback.");
   }
   return "Native primary navigation saved: original links preserved, editable CTA added, four visibility controls bound.";
+}
+
+async function configureNativeSubmenu(report: (message: string) => void): Promise<string> {
+  const site = await webflow.getSiteInfo();
+  const page = await webflow.getCurrentPage();
+  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error("Open the SmashBurger App API Lab draft page before building its submenu.");
+  }
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(CORE_NAME)];
+  if (!component || component.codeComponent !== false || component.library || component.readOnly ||
+    await component.getInstanceCount() !== 1) {
+    throw new Error("Expected one editable project-native core trial instance; no submenu was changed.");
+  }
+  const root = await component.getRootElement();
+  if (!root?.children || !root.attributes ||
+    await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native core marker has changed; no submenu was changed.");
+  }
+  const [inner] = await root.getChildren();
+  const [, , panel] = inner?.children ? await inner.getChildren() : [];
+  const [primary] = panel?.children ? await panel.getChildren() : [];
+  const [links] = primary?.children ? await primary.getChildren() : [];
+  if (!panel?.attributes || await panel.getResolvedAttributeValue("data-mwp-panel") === null ||
+    !primary?.attributes || await primary.getResolvedAttributeValue("data-mwp-primary") === null ||
+    !links?.children || !links.attributes || await links.getResolvedAttributeValue("data-mwp-links") === null) {
+    throw new Error("The native primary link container has changed; no submenu was added.");
+  }
+  const children = await links.getChildren();
+  if (children.length < 3 || children.length > 4 || children.slice(0, 3).some((child) => child.type !== "Link")) {
+    throw new Error("Expected three primary links and at most one submenu; inspect the structure first.");
+  }
+  const [submenuStyle, triggerStyle, iconStyle, lineStyle, listStyle, linkStyle] = await Promise.all([
+    style("sb-app-submenu"), style("sb-app-submenu-trigger"), style("sb-app-submenu-icon"),
+    style("sb-app-submenu-icon-line"), style("sb-app-submenu-list"), style("sb-app-submenu-link"),
+  ]);
+  await submenuStyle.setProperties({ position: "relative" });
+  await triggerStyle.setProperties({ display: "flex", "align-items": "center", gap: "8px", cursor: "pointer", "min-height": "32px" });
+  await iconStyle.setProperties({ display: "flex", "align-items": "center", gap: "2px", "transform-origin": "center", "transition-property": "transform", "transition-duration": "220ms", "transition-timing-function": "ease" });
+  await lineStyle.setProperties({ width: "7px", height: "2px", "min-width": "7px", "min-height": "2px", "background-color": "currentColor" });
+  await listStyle.setProperties({ display: "grid", gap: "4px", position: "absolute", top: "100%", right: "0", "min-width": "180px", "background-color": "#ffffff", color: "#17251e", "border-radius": "8px", "padding-top": "8px", "padding-bottom": "8px", "padding-left": "8px", "padding-right": "8px", "box-shadow": "0 12px 32px rgba(0,0,0,.16)", "z-index": "3" });
+  await linkStyle.setProperties({ display: "block", color: "inherit", "text-decoration": "none", "padding-top": "8px", "padding-bottom": "8px", "padding-left": "10px", "padding-right": "10px" });
+  await listStyle.setProperties({ position: "static", "box-shadow": "none", "min-width": "0", "padding-left": "16px" }, { breakpoint: "medium" });
+  let submenu = children[3];
+  if (submenu && (!submenu.attributes || await submenu.getResolvedAttributeValue("data-mwp-submenu") === null)) {
+    throw new Error("The fourth primary child is not the trial submenu; no submenu was changed.");
+  }
+  if (!submenu) {
+    report("Adding a native details submenu and two editable links…");
+    submenu = await links.append(webflow.elementPresets.DOM);
+    await submenu.setTag("details");
+    await submenu.setStyles([submenuStyle]);
+    await submenu.setAttribute("data-mwp-submenu", "");
+    await submenu.setAttribute("data-mwp-item", "");
+  }
+  if (!submenu.children) throw new Error("The submenu cannot contain native children.");
+  let [summary, list] = await submenu.getChildren();
+  if (!summary) {
+    summary = await submenu.append(webflow.elementPresets.DOM);
+    await summary.setTag("summary");
+    await summary.setStyles([triggerStyle]);
+    const label = await summary.append(webflow.elementPresets.DOM);
+    await label.setTag("span");
+    await label.setTextContent("More");
+    const icon = await summary.append(webflow.elementPresets.DivBlock);
+    await icon.setStyles([iconStyle]);
+    await icon.setAttribute("data-mwp-submenu-icon", "");
+    await icon.setAttribute("aria-hidden", "true");
+    for (let index = 0; index < 2; index++) {
+      const line = await icon.append(webflow.elementPresets.DivBlock);
+      await line.setStyles([lineStyle]);
+      await line.setAttribute("data-mwp-submenu-arrow-line", "");
+    }
+  }
+  if (!list) {
+    list = await submenu.append(webflow.elementPresets.DivBlock);
+    await list.setStyles([listStyle]);
+    await list.setAttribute("data-mwp-submenu-list", "");
+    for (const label of ["Services", "Projects"]) {
+      const link = await list.append(webflow.elementPresets.TextLink);
+      await link.setStyles([linkStyle]);
+      await link.setSettings("url", "#");
+      await link.setTextContent(label);
+      await link.setAttribute("data-mwp-item", "");
+    }
+  }
+  const saved = await submenu.getChildren();
+  const savedLinks = saved[1]?.children ? await saved[1].getChildren() : [];
+  if (saved.length !== 2 || saved[0].type !== "DOM" || !saved[1].attributes ||
+    await saved[1].getResolvedAttributeValue("data-mwp-submenu-list") === null ||
+    savedLinks.length !== 2 || savedLinks.some((link) => link.type !== "Link")) {
+    throw new Error("The native submenu structure did not pass readback.");
+  }
+  report("Updating the scoped runtime Embed for the native submenu…");
+  await configureNativeCore(report, component);
+  return "Native submenu saved: editable details and summary, two native links, scoped open-state styling and runtime Embed verified. Check its layout in Preview.";
 }
 
 async function configureNativeSecondary(report: (message: string) => void): Promise<string> {
@@ -1659,6 +1761,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native primary navigation stopped: ${String(error)}`); }
     finally { setBusy(false); }
   };
+  const configureSubmenu = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await configureNativeSubmenu(setMessage)); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Native submenu stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const configureSecondary = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await configureNativeSecondary(setMessage)); setSnapshot(await inspect()); }
@@ -1728,6 +1836,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureCore(); }}>Configure native core trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureContent(); }}>Configure native content trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configurePrimary(); }}>Build native primary navigation</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSubmenu(); }}>Build native submenu</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSecondary(); }}>Build native secondary links</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureIcons(); }}>Bind native icon properties</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSecondaryVisibility(); }}>Bind secondary visibility</button>
