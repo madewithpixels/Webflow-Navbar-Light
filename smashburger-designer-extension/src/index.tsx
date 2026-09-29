@@ -16,6 +16,9 @@ const PROOF_NAME = "SmashBurger API proof";
 const LAB_PAGE_SLUG = "smashburger-app-api-lab";
 const CORE_NAME = "SmashBurger native core trial";
 const ALPHA_NAME = "SmashBurger native alpha";
+async function isCoreTargetPage(alpha: boolean, siteName: string, page: Page): Promise<boolean> {
+  return alpha ? page.isDraft() : siteName === "Smashburger" && await page.getSlug() === LAB_PAGE_SLUG;
+}
 const FACEBOOK_ASSET_ID = "6a7e4cb1eafcdf0550a61dc6";
 const ICON_SOURCES = {
   facebook: facebookSvg, instagram: instagramSvg, linkedin: linkedinSvg,
@@ -233,6 +236,37 @@ async function installNativeAlpha(report: (message: string) => void): Promise<st
     throw new Error("The native alpha was created but its project component did not pass readback.");
   }
   return `Native alpha core created on draft page ${readiness.pageSlug}: one editable project component with a pinned runtime. This is an incomplete installation fixture; inspect Canvas before adding more content.`;
+}
+
+async function expandNativeAlpha(report: (message: string) => void): Promise<string> {
+  const page = await webflow.getCurrentPage();
+  if (!await page.isDraft()) throw new Error("Open the draft page containing the native alpha component.");
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(ALPHA_NAME)];
+  if (!component || component.codeComponent !== false || component.library || component.readOnly ||
+    await component.getInstanceCount() !== 1) {
+    throw new Error("Expected one editable native alpha instance; no expansion was started.");
+  }
+  const root = await component.getRootElement();
+  if (!root?.attributes || await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native alpha root marker changed; no expansion was started.");
+  }
+  report("Adding primary navigation and editable content…");
+  await configureNativePrimary(report, true);
+  await configureNativeContent(report, true);
+  report("Adding secondary links and submenu…");
+  await configureNativeSecondary(report, true);
+  await configureNativeSubmenu(report, true);
+  await configureNativeSubmenuProperties(report, true);
+  report("Binding motion and visibility controls…");
+  await configureNativeMotion(report, true);
+  await bindSecondaryVisibility(report, true);
+  const saved = await component.getProps();
+  const required = ["Show CTA", "Brand text", "Facebook destination", "Show secondary navigation", "Submenu link 1 text", "Distance"];
+  const missing = required.filter((name) => !saved.some((prop) => prop.name === name));
+  if (missing.length) throw new Error(`Native alpha expansion is missing ${missing.join(", ")}; inspect before retrying.`);
+  return `Native alpha expanded: primary links and CTA, nine text-only secondary links, submenu and grouped controls saved. Icons, full variants and published checks remain pending. Properties=${saved.length}.`;
 }
 
 async function probeAssetUpload(): Promise<string> {
@@ -722,15 +756,15 @@ async function configureNativeCore(report: (message: string) => void, knownCompo
   return `Native core configured: ${CORE_PROPERTIES.length} grouped properties, ${checks.length} attribute bindings and compact runtime Details saved.`;
 }
 
-async function configureNativeContent(report: (message: string) => void): Promise<string> {
+async function configureNativeContent(report: (message: string) => void, alpha = false): Promise<string> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
-  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+  if (!await isCoreTargetPage(alpha, site.siteName, page)) {
     throw new Error("Open the SmashBurger App API Lab draft page before configuring native content.");
   }
   const components = await webflow.getAllComponents();
   const names = await Promise.all(components.map((component) => component.getName()));
-  const component = components[names.indexOf(CORE_NAME)];
+  const component = components[names.indexOf(alpha ? ALPHA_NAME : CORE_NAME)];
   if (!component || component.readOnly || await component.getInstanceCount() !== 1) {
     throw new Error("Expected one editable native core trial instance; no content was changed.");
   }
@@ -824,15 +858,15 @@ async function configureNativeContent(report: (message: string) => void): Promis
   return `Native content configured: ${definitions.length} text and destination properties saved and bound.`;
 }
 
-async function configureNativePrimary(report: (message: string) => void): Promise<string> {
+async function configureNativePrimary(report: (message: string) => void, alpha = false): Promise<string> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
-  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+  if (!await isCoreTargetPage(alpha, site.siteName, page)) {
     throw new Error("Open the SmashBurger App API Lab draft page before expanding its native navigation.");
   }
   const components = await webflow.getAllComponents();
   const names = await Promise.all(components.map((item) => item.getName()));
-  const component = components[names.indexOf(CORE_NAME)];
+  const component = components[names.indexOf(alpha ? ALPHA_NAME : CORE_NAME)];
   if (!component || component.library || component.readOnly || await component.getInstanceCount() !== 1) {
     throw new Error("Expected one editable native core trial instance; no navigation was changed.");
   }
@@ -955,15 +989,15 @@ async function configureNativePrimary(report: (message: string) => void): Promis
   return "Native primary navigation saved: original links preserved, editable CTA added, four visibility controls bound.";
 }
 
-async function configureNativeSubmenu(report: (message: string) => void): Promise<string> {
+async function configureNativeSubmenu(report: (message: string) => void, alpha = false): Promise<string> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
-  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+  if (!await isCoreTargetPage(alpha, site.siteName, page)) {
     throw new Error("Open the SmashBurger App API Lab draft page before building its submenu.");
   }
   const components = await webflow.getAllComponents();
   const names = await Promise.all(components.map((item) => item.getName()));
-  const component = components[names.indexOf(CORE_NAME)];
+  const component = components[names.indexOf(alpha ? ALPHA_NAME : CORE_NAME)];
   if (!component || component.codeComponent !== false || component.library || component.readOnly ||
     await component.getInstanceCount() !== 1) {
     throw new Error("Expected one editable project-native core trial instance; no submenu was changed.");
@@ -1053,19 +1087,19 @@ async function configureNativeSubmenu(report: (message: string) => void): Promis
     throw new Error("The native submenu structure did not pass readback.");
   }
   report("Updating the scoped runtime Embed for the native submenu…");
-  await configureNativeCore(report, component);
+  await configureNativeCore(report, component, alpha);
   return "Native submenu saved: editable details and summary, two native links, scoped open-state styling and runtime Embed verified. Check its layout in Preview.";
 }
 
-async function configureNativeSubmenuProperties(report: (message: string) => void): Promise<string> {
+async function configureNativeSubmenuProperties(report: (message: string) => void, alpha = false): Promise<string> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
-  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+  if (!await isCoreTargetPage(alpha, site.siteName, page)) {
     throw new Error("Open the SmashBurger App API Lab draft page before binding submenu properties.");
   }
   const components = await webflow.getAllComponents();
   const names = await Promise.all(components.map((item) => item.getName()));
-  const component = components[names.indexOf(CORE_NAME)];
+  const component = components[names.indexOf(alpha ? ALPHA_NAME : CORE_NAME)];
   if (!component || component.codeComponent !== false || component.library || component.readOnly ||
     await component.getInstanceCount() !== 1) {
     throw new Error("Expected one editable project-native core trial instance.");
@@ -1171,15 +1205,15 @@ async function configureNativeSubmenuProperties(report: (message: string) => voi
   return `Native submenu properties saved: ${definitions.length} grouped controls and ${definitions.length} bindings verified.`;
 }
 
-async function configureNativeMotion(report: (message: string) => void): Promise<string> {
+async function configureNativeMotion(report: (message: string) => void, alpha = false): Promise<string> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
-  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+  if (!await isCoreTargetPage(alpha, site.siteName, page)) {
     throw new Error("Open the SmashBurger App API Lab draft page before binding motion controls.");
   }
   const components = await webflow.getAllComponents();
   const names = await Promise.all(components.map((item) => item.getName()));
-  const component = components[names.indexOf(CORE_NAME)];
+  const component = components[names.indexOf(alpha ? ALPHA_NAME : CORE_NAME)];
   if (!component || component.codeComponent !== false || component.library || component.readOnly ||
     await component.getInstanceCount() !== 1) {
     throw new Error("Expected one editable project-native core trial instance.");
@@ -1223,15 +1257,15 @@ async function configureNativeMotion(report: (message: string) => void): Promise
   return "Native motion controls saved: seven grouped properties and seven root attribute bindings verified.";
 }
 
-async function configureNativeSecondary(report: (message: string) => void): Promise<string> {
+async function configureNativeSecondary(report: (message: string) => void, alpha = false): Promise<string> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
-  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+  if (!await isCoreTargetPage(alpha, site.siteName, page)) {
     throw new Error("Open the SmashBurger App API Lab draft page before building secondary navigation.");
   }
   const components = await webflow.getAllComponents();
   const names = await Promise.all(components.map((item) => item.getName()));
-  const component = components[names.indexOf(CORE_NAME)];
+  const component = components[names.indexOf(alpha ? ALPHA_NAME : CORE_NAME)];
   if (!component || component.codeComponent !== false) {
     throw new Error("Expected an editable project-native core trial component.");
   }
@@ -1419,7 +1453,7 @@ async function configureNativeSecondary(report: (message: string) => void): Prom
       }
     }
   }
-  await configureNativeCore(report, component);
+  await configureNativeCore(report, component, alpha);
   return "Native secondary navigation verified: seven social and two contact links, four visibility controls, nine editable destinations; any existing icon images styled and the scoped runtime Embed updated.";
 }
 
@@ -1527,15 +1561,15 @@ async function bindNativeIcons(report: (message: string) => void): Promise<strin
   return "Nine replaceable icon properties saved and bound to native Images; each retained its site SVG as the default.";
 }
 
-async function bindSecondaryVisibility(report: (message: string) => void): Promise<string> {
+async function bindSecondaryVisibility(report: (message: string) => void, alpha = false): Promise<string> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
-  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+  if (!await isCoreTargetPage(alpha, site.siteName, page)) {
     throw new Error("Open the SmashBurger App API Lab draft page before binding secondary visibility.");
   }
   const components = await webflow.getAllComponents();
   const names = await Promise.all(components.map((item) => item.getName()));
-  const component = components[names.indexOf(CORE_NAME)];
+  const component = components[names.indexOf(alpha ? ALPHA_NAME : CORE_NAME)];
   if (!component || component.codeComponent !== false || component.library || component.readOnly ||
     await component.getInstanceCount() !== 1) {
     throw new Error("Expected one editable native core trial instance; no visibility properties were added.");
@@ -2058,6 +2092,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native alpha install stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
+  const expandAlpha = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await expandNativeAlpha(setMessage)); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Native alpha expansion stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const checkUpload = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await probeAssetUpload()); }
@@ -2107,6 +2147,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger"} onClick={() => { void checkAssets(); }}>Check asset access</button>
       <button className="secondary" disabled={busy} onClick={() => { void checkInstallTarget(); }}>Check install target (read only)</button>
       <button className="secondary" disabled={busy} onClick={() => { void installAlpha(); }}>Install native alpha on draft page</button>
+      <button className="secondary" disabled={busy} onClick={() => { void expandAlpha(); }}>Expand native alpha on draft page</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger"} onClick={() => { void checkUpload(); }}>Test one asset upload</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureVariants(); }}>Create core variant names</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void activateVariants(); }}>Activate core variant bridge</button>
