@@ -2,11 +2,25 @@ import type {} from "@webflow/designer-extension-typings";
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
 import cdnLoader from "../../webflow/navbar-light-cdn-loader.html";
+import facebookSvg from "./icons/facebook.svg";
+import instagramSvg from "./icons/instagram.svg";
+import linkedinSvg from "./icons/linkedin.svg";
+import tiktokSvg from "./icons/tiktok.svg";
+import threadsSvg from "./icons/threads.svg";
+import xSvg from "./icons/x.svg";
+import whatsappSvg from "./icons/whatsapp.svg";
+import telephoneSvg from "./icons/telephone.svg";
+import emailSvg from "./icons/email.svg";
 
 const PROOF_NAME = "SmashBurger API proof";
 const LAB_PAGE_SLUG = "smashburger-app-api-lab";
 const CORE_NAME = "SmashBurger native core trial";
 const FACEBOOK_ASSET_ID = "6a7e4cb1eafcdf0550a61dc6";
+const ICON_SOURCES = {
+  facebook: facebookSvg, instagram: instagramSvg, linkedin: linkedinSvg,
+  tiktok: tiktokSvg, threads: threadsSvg, x: xSvg,
+  whatsapp: whatsappSvg, telephone: telephoneSvg, email: emailSvg,
+} as const;
 const CORE_DISPLAY_BRIDGE_V1 = `<style>
 .sb-app-nav[data-collapse="always"] .sb-app-menu,
 .sb-app-nav[data-mwp-collapsed="true"] .sb-app-menu { display: block; }
@@ -152,6 +166,30 @@ async function checkAssetAccess(): Promise<string> {
     known = `error (${String(error)})`;
   }
   return `Asset access: canAccessAssets=${permissions.canAccessAssets}; canManageAssets=${permissions.canManageAssets}; getAllAssets=${listed}; known Facebook asset=${known}. Read-only check.`;
+}
+
+async function probeAssetUpload(): Promise<string> {
+  const site = await webflow.getSiteInfo();
+  const page = await webflow.getCurrentPage();
+  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error("Open the SmashBurger App API Lab draft page before testing asset upload.");
+  }
+  const proofName = "SmashBurger bundled Facebook proof 542.svg";
+  const prior = await webflow.getAllAssets();
+  const priorNames = await Promise.all(prior.map((item) => item.getName()));
+  const existing = prior[priorNames.indexOf(proofName)];
+  if (existing) {
+    const byIdFound = Boolean(await webflow.getAssetById(existing.id).catch(() => null));
+    return `Upload proof reused: id=${existing.id}; getAssetById=${byIdFound ? "found" : "null"}; getAllAssets=${prior.length}. This disposable site asset should be removed after independent readback.`;
+  }
+  const file = new File([ICON_SOURCES.facebook], proofName, { type: "image/svg+xml" });
+  const asset = await webflow.createAsset(file).catch((error: unknown) => {
+    throw new Error(`createAsset failed: ${describeError(error)}`);
+  });
+  const name: string = await asset.getName().catch((error: unknown) => `error: ${describeError(error)}`);
+  const byIdFound = Boolean(await webflow.getAssetById(asset.id).catch(() => null));
+  const allCount = (await webflow.getAllAssets().catch((): Asset[] => [])).length;
+  return `Upload proof created: id=${asset.id}; name=${name}; getAssetById=${byIdFound ? "found" : "null"}; getAllAssets=${allCount}. This disposable site asset should be removed after independent readback.`;
 }
 
 async function style(name: string): Promise<Style> {
@@ -1241,6 +1279,99 @@ async function bindSecondaryVisibility(report: (message: string) => void): Promi
   return "Ten secondary visibility controls saved and bound: one master switch plus nine individual links.";
 }
 
+async function installBundledIconsOnTrial(report: (message: string) => void): Promise<string> {
+  const site = await webflow.getSiteInfo();
+  const page = await webflow.getCurrentPage();
+  if (site.siteName !== "Smashburger" || await page.getSlug() !== LAB_PAGE_SLUG) {
+    throw new Error("Open the SmashBurger App API Lab draft page before installing bundled icons.");
+  }
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(CORE_NAME)];
+  if (!component || component.codeComponent !== false || component.library || component.readOnly ||
+    await component.getInstanceCount() !== 1) {
+    throw new Error("Expected one editable native core trial instance; no icons were uploaded.");
+  }
+  const root = await component.getRootElement();
+  if (!root?.children || !root.attributes ||
+    await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native core marker changed; no icons were uploaded.");
+  }
+  const [inner] = await root.getChildren();
+  const [, , panel] = inner?.children ? await inner.getChildren() : [];
+  const [, secondary] = panel?.children ? await panel.getChildren() : [];
+  if (!secondary?.children || !secondary.attributes ||
+    await secondary.getResolvedAttributeValue("data-mwp-secondary") === null) {
+    throw new Error("The native secondary wrapper is missing; no icons were uploaded.");
+  }
+  const groups = await secondary.getChildren();
+  if (groups.length !== 2 || !groups[0].children || !groups[1].children) {
+    throw new Error("The native secondary groups changed; no icons were uploaded.");
+  }
+  const specs = [
+    { key: "facebook", label: "Facebook", group: 0 },
+    { key: "instagram", label: "Instagram", group: 0 },
+    { key: "linkedin", label: "LinkedIn", group: 0 },
+    { key: "tiktok", label: "TikTok", group: 0 },
+    { key: "threads", label: "Threads", group: 0 },
+    { key: "x", label: "X", group: 0 },
+    { key: "whatsapp", label: "WhatsApp", group: 0 },
+    { key: "telephone", label: "Telephone", group: 1 },
+    { key: "email", label: "Email", group: 1 },
+  ] as const;
+  const links = [...await groups[0].getChildren(), ...await groups[1].getChildren()];
+  if (links.length !== specs.length) throw new Error("Expected nine native secondary links; no icons were uploaded.");
+  const props = await component.getProps();
+  for (const [index, spec] of specs.entries()) {
+    const link = links[index];
+    if (!link.children || !link.attributes ||
+      await link.getResolvedAttributeValue("data-mwp-secondary-item") !== spec.key) {
+      throw new Error(`${spec.label} link changed; no icons were uploaded.`);
+    }
+    const [icon] = await link.getChildren();
+    const prop = props.find((item) => item.name === `${spec.label} icon` && item.type === "image");
+    if (icon?.type !== "Image" || !icon.attributes || !prop ||
+      await icon.getResolvedAttributeValue("data-mwp-secondary-icon") === null ||
+      !isBoundTo((await icon.getSettings()).assetId, prop.id)) {
+      throw new Error(`${spec.label} native Image or property binding changed; no icons were uploaded.`);
+    }
+  }
+  const visibleAssets = await webflow.getAllAssets();
+  const visibleNames = await Promise.all(visibleAssets.map((asset) => asset.getName()));
+  const installed: Array<{ label: string; asset: Asset }> = [];
+  let uploaded = 0;
+  for (const spec of specs) {
+    const fileName = `SmashBurger App — ${spec.key} icon.svg`;
+    const matches = visibleAssets.filter((_, index) => visibleNames[index] === fileName);
+    if (matches.length > 1) throw new Error(`Multiple app-visible ${spec.label} icons have the same name; inspect assets before retrying.`);
+    let asset = matches[0];
+    if (!asset) {
+      report(`Uploading bundled ${spec.label} SVG…`);
+      asset = await webflow.createAsset(new File([ICON_SOURCES[spec.key]], fileName, { type: "image/svg+xml" }))
+        .catch((error: unknown) => { throw new Error(`${spec.label} upload failed: ${describeError(error)}`); });
+      uploaded++;
+    }
+    const name = await asset.getName();
+    if (name !== fileName || !await webflow.getAssetById(asset.id)) {
+      throw new Error(`${spec.label} asset did not pass Designer readback; no image property was changed.`);
+    }
+    installed.push({ label: spec.label, asset });
+  }
+  report(`All nine bundled SVG assets are available; updating native image defaults…`);
+  for (const { label, asset } of installed) {
+    const prop = props.find((item) => item.name === `${label} icon` && item.type === "image");
+    if (!prop) throw new Error(`${label} image property disappeared during installation.`);
+    if (prop.defaultValue !== asset.id) await component.setProp(prop.id, { defaultValue: asset.id });
+  }
+  const saved = await component.getProps();
+  for (const { label, asset } of installed) {
+    if (saved.find((item) => item.name === `${label} icon`)?.defaultValue !== asset.id) {
+      throw new Error(`${label} bundled icon default did not pass readback.`);
+    }
+  }
+  return `Bundled trial icons installed: ${uploaded} uploaded, ${9 - uploaded} reused; nine native Image property defaults now reference app-visible site assets.`;
+}
+
 async function createNativeCore(report: (message: string) => void): Promise<void> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
@@ -1546,10 +1677,22 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Secondary visibility stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
+  const installTrialIcons = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await installBundledIconsOnTrial(setMessage)); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Bundled icon install stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const checkAssets = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await checkAssetAccess()); }
     catch (error) { setMessage(`Asset access check stopped: ${String(error)}`); }
+    finally { setBusy(false); }
+  };
+  const checkUpload = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await probeAssetUpload()); }
+    catch (error) { setMessage(`Asset upload proof stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
   const configureVariants = async (): Promise<void> => {
@@ -1588,7 +1731,9 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSecondary(); }}>Build native secondary links</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureIcons(); }}>Bind native icon properties</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureSecondaryVisibility(); }}>Bind secondary visibility</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void installTrialIcons(); }}>Install bundled icons on trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger"} onClick={() => { void checkAssets(); }}>Check asset access</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger"} onClick={() => { void checkUpload(); }}>Test one asset upload</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureVariants(); }}>Create core variant names</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void activateVariants(); }}>Activate core variant bridge</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void styleVariants(); }}>Style core variants</button>

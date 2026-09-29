@@ -25,7 +25,7 @@ export default {
         use: ["style-loader", "css-loader"],
       },
       {
-        test: /\.html$/,
+        test: /\.(html|svg)$/,
         type: "asset/source",
       },
     ],
