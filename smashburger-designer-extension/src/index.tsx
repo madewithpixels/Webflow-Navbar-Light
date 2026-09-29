@@ -6,6 +6,7 @@ import cdnLoader from "../../webflow/navbar-light-cdn-loader.html";
 const PROOF_NAME = "SmashBurger API proof";
 const LAB_PAGE_SLUG = "smashburger-app-api-lab";
 const CORE_NAME = "SmashBurger native core trial";
+const FACEBOOK_ASSET_ID = "6a7e4cb1eafcdf0550a61dc6";
 const CORE_DISPLAY_BRIDGE_V1 = `<style>
 .sb-app-nav[data-collapse="always"] .sb-app-menu,
 .sb-app-nav[data-mwp-collapsed="true"] .sb-app-menu { display: block; }
@@ -120,6 +121,32 @@ async function inspect(): Promise<Snapshot> {
     nativeCoreExists: names.includes(CORE_NAME),
     whtml: Boolean(whtml),
   };
+}
+
+async function checkAssetAccess(): Promise<string> {
+  const site = await webflow.getSiteInfo();
+  if (site.siteName !== "Smashburger") {
+    throw new Error("Open the Smashburger site before checking its assets.");
+  }
+  const permissions = await webflow.canForAppMode([
+    webflow.appModes.canAccessAssets,
+    webflow.appModes.canManageAssets,
+  ]);
+  let listed: string;
+  try {
+    const assets = await webflow.getAllAssets();
+    listed = String(assets.length);
+  } catch (error) {
+    listed = `error (${String(error)})`;
+  }
+  let known: string;
+  try {
+    const asset = await webflow.getAssetById(FACEBOOK_ASSET_ID);
+    known = asset ? `${asset.id}: ${await asset.getName()}` : "null";
+  } catch (error) {
+    known = `error (${String(error)})`;
+  }
+  return `Asset access: canAccessAssets=${permissions.canAccessAssets}; canManageAssets=${permissions.canManageAssets}; getAllAssets=${listed}; known Facebook asset=${known}. Read-only check.`;
 }
 
 async function style(name: string): Promise<Style> {
@@ -1098,6 +1125,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native primary navigation stopped: ${String(error)}`); }
     finally { setBusy(false); }
   };
+  const checkAssets = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await checkAssetAccess()); }
+    catch (error) { setMessage(`Asset access check stopped: ${String(error)}`); }
+    finally { setBusy(false); }
+  };
   const configureVariants = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await configureCoreVariants()); setSnapshot(await inspect()); }
@@ -1131,6 +1164,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureCore(); }}>Configure native core trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureContent(); }}>Configure native content trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configurePrimary(); }}>Build native primary navigation</button>
+      <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger"} onClick={() => { void checkAssets(); }}>Check asset access</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void configureVariants(); }}>Create core variant names</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void activateVariants(); }}>Activate core variant bridge</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void styleVariants(); }}>Style core variants</button>
