@@ -323,6 +323,31 @@ async function configureAlphaVariants(report: (message: string) => void): Promis
   return "Native alpha variants saved: Never, Tablet, Mobile landscape, Mobile portrait and Always, with variant-aware collapse and responsive Canvas styles. Check all five in Preview before publishing.";
 }
 
+async function installCompleteAlpha(report: (message: string) => void): Promise<string> {
+  const readiness = await inspectInstallReadiness();
+  if (readiness.blockers.length) {
+    throw new Error(`Install preflight needs attention: ${readiness.blockers.join("; ")}. No element or component was created.`);
+  }
+  let phase = 0;
+  try {
+    phase = 1;
+    report("Phase 1/4: creating the native alpha core…");
+    await installNativeAlpha(report);
+    phase = 2;
+    report("Phase 2/4: adding editable links and controls…");
+    await expandNativeAlpha(report);
+    phase = 3;
+    report("Phase 3/4: installing bundled icon Images and assets…");
+    await installAlphaIcons(report);
+    phase = 4;
+    report("Phase 4/4: configuring five collapse variants…");
+    await configureAlphaVariants(report);
+  } catch (error) {
+    throw new Error(`Phase ${phase}/4 stopped: ${describeError(error)}`);
+  }
+  return `Native alpha installed on draft page ${readiness.pageSlug}: core, content, nine icons and five collapse variants passed Designer readback. Check Canvas and Preview before publishing.`;
+}
+
 async function probeAssetUpload(): Promise<string> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
@@ -2259,6 +2284,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native alpha install stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
+  const installAllAlpha = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await installCompleteAlpha(setMessage)); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Complete alpha install stopped: ${describeError(error)} Inspect the draft before using a phase action to resume.`); }
+    finally { setBusy(false); }
+  };
   const expandAlpha = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await expandNativeAlpha(setMessage)); setSnapshot(await inspect()); }
@@ -2337,6 +2368,7 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger" || !snapshot.nativeCoreExists} onClick={() => { void installTrialIcons(); }}>Install bundled icons on trial</button>
       <button className="secondary" disabled={busy || snapshot?.site !== "Smashburger"} onClick={() => { void checkAssets(); }}>Check asset access</button>
       <button className="secondary" disabled={busy} onClick={() => { void checkInstallTarget(); }}>Check install target (read only)</button>
+      <button className="secondary" disabled={busy} onClick={() => { void installAllAlpha(); }}>Install complete alpha on clean draft</button>
       <button className="secondary" disabled={busy} onClick={() => { void installAlpha(); }}>Install native alpha on draft page</button>
       <button className="secondary" disabled={busy} onClick={() => { void expandAlpha(); }}>Expand native alpha on draft page</button>
       <button className="secondary" disabled={busy} onClick={() => { void installAlphaImages(); }}>Install native alpha icons</button>
