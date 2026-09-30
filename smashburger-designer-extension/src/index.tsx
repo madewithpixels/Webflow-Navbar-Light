@@ -249,6 +249,36 @@ async function checkAlphaLinkDefaults(): Promise<string> {
   return `Alpha link defaults: ${ALPHA_DESTINATION_NAMES.length - missing.length}/${ALPHA_DESTINATION_NAMES.length} properties found; ${placeholders.length} placeholder destinations (# or empty). ${missing.length ? `Missing: ${missing.join(", ")}. ` : ""}${placeholders.length ? `Placeholders: ${placeholders.join(", ")}. ` : ""}Component defaults only; instance overrides are not checked. Read-only check.`;
 }
 
+async function checkSelectedAlphaLinks(): Promise<string> {
+  const selected = await webflow.getSelectedElement();
+  if (selected?.type !== "ComponentInstance") {
+    return "Select the installed SmashBurger native alpha component instance, then run this read-only check.";
+  }
+  const component = await selected.getComponent();
+  if (await component.getName() !== ALPHA_NAME) {
+    return "The selected instance is not SmashBurger native alpha. Read-only check.";
+  }
+  const root = await component.getRootElement();
+  if (!root?.attributes || await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native alpha marker has changed; instance links cannot be audited.");
+  }
+  const [props, summaries, resolved] = await Promise.all([
+    component.getProps(), selected.getProps(), selected.getResolvedProps(),
+  ]);
+  const placeholders: string[] = [];
+  const overrides: string[] = [];
+  const unresolved: string[] = [];
+  for (const name of ALPHA_DESTINATION_NAMES) {
+    const prop = props.find((item) => item.name === name && item.type === "link");
+    if (!prop) { unresolved.push(name); continue; }
+    if (summaries.find((item) => item.propId === prop.id)?.hasOverride) overrides.push(name);
+    const value = resolved.find((item) => item.propId === prop.id)?.value;
+    if (!value || typeof value !== "object" || !("mode" in value)) { unresolved.push(name); continue; }
+    if (value.mode === "url" && (value.to === "#" || value.to === "" || !value.to)) placeholders.push(name);
+  }
+  return `Selected alpha instance: ${placeholders.length} placeholder destination(s), ${overrides.length} overridden link(s), ${unresolved.length} unresolved link(s). ${placeholders.length ? `Placeholders: ${placeholders.join(", ")}. ` : ""}${unresolved.length ? `Unresolved: ${unresolved.join(", ")}. ` : ""}Read only; no navigation or publication tested.`;
+}
+
 async function loadAlphaLinkDefaults(): Promise<Record<string, string>> {
   const components = await webflow.getAllComponents();
   const names = await Promise.all(components.map((item) => item.getName()));
@@ -2523,6 +2553,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Alpha link audit stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
+  const checkInstanceLinks = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await checkSelectedAlphaLinks()); }
+    catch (error) { setMessage(`Alpha instance link check stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const loadLinkDefaults = async (): Promise<void> => {
     setBusy(true);
     try {
@@ -2635,6 +2671,7 @@ const App: React.FC = () => {
       <button disabled={busy} onClick={() => { void refresh(); }}>Inspect selection</button>
       <button className="secondary" disabled={busy} onClick={() => { void checkInstallTarget(); }}>Check install target (read only)</button>
       <button className="secondary" disabled={busy} onClick={() => { void checkAlphaLinks(); }}>Check alpha link defaults (read only)</button>
+      <button className="secondary" disabled={busy} onClick={() => { void checkInstanceLinks(); }}>Check selected alpha links (read only)</button>
       <button disabled={busy} onClick={() => { void installAllAlpha(); }}>Install complete alpha on clean draft</button>
     </div>
     <details className="toolbox">

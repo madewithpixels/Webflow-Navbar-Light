@@ -255,7 +255,7 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 ### Private installer MVP
 
 - [ ] Add an Insert SmashBurger workflow.
-- [ ] Guide authors through primary, CTA, submenu and optional secondary link destinations during installation. Show unconfigured `#` links clearly, preserve intentional instance overrides, and do not describe the generated menu as publish-ready while required destinations are placeholders.
+- [ ] Guide authors through primary, CTA, submenu and optional secondary link destinations during installation. The alpha editor now loads all 16 defaults and one guarded change passed Designer readback; a selected-instance audit has been added but still needs live verification. Show unconfigured `#` links clearly, preserve intentional instance overrides, and do not describe the generated menu as publish-ready while required destinations are placeholders.
 - [ ] Expose collapse breakpoint, layout, alignment, panel width and motion settings.
 - [ ] Expose duration, easing, distance, stagger, icon and accessibility/behaviour settings.
 - [ ] Generate a reusable native Webflow component whose semantic `sb-*` classes remain visible in the Navigator, with no custom structural display names masking them; keep property groups clear and purposeful.
