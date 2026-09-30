@@ -75,3 +75,8 @@ The main work in that interval was roughly two dozen Chrome UI operations plus l
 - Attempted to open a local visual fixture in Chrome, but browser-use security policy blocked the `file:` URL and explicitly disallowed workarounds. No rendered visual or device-pixel-ratio claim is made; do not retry the same fixture by changing its URL or browser surface.
 - Added an unreleased low-specificity `--mwp-nav-icon-filter` fallback for secondary Images. It defaults to no filter and lets a destination class or project token supply contrast on dark surfaces; the separate Overlay white-icon rule remains. A CSSOM cascade check passes for an ordinary destination class, bringing the local suite to **29/29**. Browser rendering and Webflow installation remain unverified.
 - Account-wide usage at **20:08:03 UTC** was **68%** five-hour and **27%** weekly, up **10/2 percentage points** since **20:02:59 UTC** during the icon CSS, tests, docs and one blocked browser attempt. This rolling meter is not per-task billing. The free reset remained unused.
+
+## Fresh alpha style guard
+
+- Added a Designer Style API readback gate for the fresh light alpha's root surface, root ink and inherited brand/link ink before appending the component. If Webflow rejects those values, the installer stops before creating the component. Extension type checking, linting and production webpack compilation pass; the bundle-size advisory is 267 KiB. This guard itself still needs live API validation on a clean draft site.
+- Account-wide usage at **20:09:52 UTC** was **72%** five-hour and **27%** weekly, up **4/0 points** since **20:08:03 UTC** across this local edit, build and documentation. It remains an account-wide rolling observation. The free reset remained unused.

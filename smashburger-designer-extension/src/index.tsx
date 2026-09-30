@@ -2383,6 +2383,16 @@ async function createNativeCore(report: (message: string) => void, alpha = false
   await linksStyle.setProperties({ "flex-direction": "column", "align-items": "flex-start" }, { breakpoint: "medium" });
   await rootStyle.setProperties({ "padding-left": "16px", "padding-right": "16px" }, { breakpoint: "small" });
   await rootStyle.setProperties({ "padding-left": "12px", "padding-right": "12px" }, { breakpoint: "tiny" });
+  if (alpha) {
+    const [rootProperties, brandProperties, linkProperties] = await Promise.all([
+      rootStyle.getProperties(), brandStyle.getProperties(), linkStyle.getProperties(),
+    ]);
+    if (rootProperties["background-color"] !== "var(--mwp-nav-surface, #ffffff)" ||
+      rootProperties.color !== "var(--mwp-nav-ink, #111827)" ||
+      brandProperties.color !== "inherit" || linkProperties.color !== "inherit") {
+      throw new Error("Light alpha style defaults did not pass Designer readback; no component was created.");
+    }
+  }
 
   report("Building the native header, details trigger and shared links…");
   const root = await body.append(webflow.elementPresets.DivBlock);
