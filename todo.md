@@ -58,8 +58,8 @@ The current released installation path remains the MWP Component Library. The pr
 - [x] Support two-bar and three-bar icon configurations.
 - [x] Add an optional visible Menu label.
 - [x] Transform the burger into a close icon without pseudo-elements.
-- [ ] Refactor the open icon geometry so the first and final native line Divs converge on exactly the same centre instead of relying on one fixed `--mwp-nav-icon-shift`; keep the X symmetrical when destination projects change line thickness, gap or icon scale.
-- [ ] Add visual regression checks for the open two-line and three-line icons at common device-pixel ratios, including odd/even line thicknesses and project-overridden spacing.
+- [ ] Refactor the open icon geometry so the first and final native line Divs converge on exactly the same centre instead of relying on one fixed shift. The unreleased source candidate now positions both at the icon's 50% centre and passes a CSSOM check with custom width, height and thickness in two- and three-line modes; real-browser visual acceptance remains.
+- [ ] Add visual regression checks for the open two-line and three-line icons at common device-pixel ratios, including odd/even line thicknesses and project-overridden spacing. A local `file:` fixture was prepared, but Chrome's browser-use URL policy blocked opening it; no visual result is claimed.
 - [x] Synchronize native open state, lifecycle state, ARIA and panel inertness.
 - [x] Close on Escape and return focus to the trigger.
 - [x] Add optional first-link focus, outside close and link close.

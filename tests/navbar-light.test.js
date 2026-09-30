@@ -60,6 +60,36 @@ test('navigation inner has no source width cap and accepts a destination contain
   fixture.window.close();
 });
 
+test('open icon bars meet at one centre with two or three lines and custom sizing', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  for (const lineCount of ['2', '3']) {
+    const fixture = new JSDOM(`<style>${css}
+      .site-icon { width: 31px; height: 23px; gap: 7px; }
+      .site-line { width: 27px; height: 3px; }
+    </style><header data-mwp-navbar data-icon-lines="${lineCount}">
+      <details data-mwp-menu open><summary data-mwp-trigger>
+        <span data-mwp-icon class="site-icon">
+          <span data-mwp-line class="site-line"></span>
+          <span data-mwp-line class="site-line"></span>
+          <span data-mwp-line class="site-line"></span>
+        </span>
+      </summary></details>
+    </header>`);
+    const lines = fixture.window.document.querySelectorAll('[data-mwp-line]');
+    const first = fixture.window.getComputedStyle(lines[0]);
+    const middle = fixture.window.getComputedStyle(lines[1]);
+    const last = fixture.window.getComputedStyle(lines[2]);
+    assert.equal(first.top, '50%', `${lineCount} first bar centre`);
+    assert.equal(last.top, first.top, `${lineCount} last bar centre`);
+    assert.equal(first.left, last.left, `${lineCount} horizontal centre`);
+    assert.match(first.transform, /^translate\(-50%, -50%\) rotate\(45deg\)$/);
+    assert.match(last.transform, /^translate\(-50%, -50%\) rotate\(-45deg\)$/);
+    assert.equal(middle.display, lineCount === '2' ? 'none' : 'block');
+    fixture.window.close();
+  }
+  assert.doesNotMatch(css, /--mwp-nav-icon-shift/);
+});
+
 test('custom motion keeps the panel hidden when closed and reserves time for GSAP', () => {
   const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
   assert.match(css, /\[data-motion="custom"\] \[data-mwp-panel\],[\s\S]*?opacity:\s*0;[\s\S]*?visibility:\s*hidden;/);

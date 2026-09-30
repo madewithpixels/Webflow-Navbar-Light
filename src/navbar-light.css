@@ -54,43 +54,50 @@
 }
 
 :where([data-mwp-icon]) {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  position: relative;
 }
 
-:where([data-mwp-line]) {
+[data-mwp-icon] [data-mwp-line] {
   display: block;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
   transform-origin: center;
   transition-duration: var(--mwp-nav-icon-duration);
-  transition-property: opacity, transform;
+  transition-property: opacity, top, transform;
   transition-timing-function: var(--mwp-nav-ease);
 }
 
-/* Default shift matches the native bar thickness plus its vertical gap.
- * Set --mwp-nav-icon-shift when a destination project changes that spacing. */
-[data-mwp-menu][open] [data-mwp-line]:nth-child(1) {
-  transform: translateY(var(--mwp-nav-icon-shift, 0.4375rem)) rotate(45deg);
+[data-mwp-icon] [data-mwp-line]:nth-child(1) {
+  top: 0;
 }
 
-[data-mwp-menu][open] [data-mwp-line]:nth-child(2) {
+[data-mwp-icon] [data-mwp-line]:nth-child(2) {
+  top: 50%;
+}
+
+[data-mwp-icon] [data-mwp-line]:nth-child(3) {
+  top: 100%;
+}
+
+/* The first and last native bars share an exact centre when open, regardless
+ * of bar thickness, icon height or the destination's closed-state spacing. */
+[data-mwp-menu][open] [data-mwp-icon] [data-mwp-line]:nth-child(1) {
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+[data-mwp-menu][open] [data-mwp-icon] [data-mwp-line]:nth-child(2) {
   opacity: 0;
 }
 
-[data-mwp-menu][open] [data-mwp-line]:nth-child(3) {
-  transform: translateY(calc(var(--mwp-nav-icon-shift, 0.4375rem) * -1)) rotate(-45deg);
+[data-mwp-menu][open] [data-mwp-icon] [data-mwp-line]:nth-child(3) {
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(-45deg);
 }
 
 [data-mwp-navbar][data-icon-lines="2"] [data-mwp-line]:nth-child(2) {
   display: none;
-}
-
-[data-mwp-navbar][data-icon-lines="2"] [data-mwp-menu][open] [data-mwp-line]:nth-child(1) {
-  transform: translateY(calc(var(--mwp-nav-icon-shift, 0.4375rem) * 0.5)) rotate(45deg);
-}
-
-[data-mwp-navbar][data-icon-lines="2"] [data-mwp-menu][open] [data-mwp-line]:nth-child(3) {
-  transform: translateY(calc(var(--mwp-nav-icon-shift, 0.4375rem) * -0.5)) rotate(-45deg);
 }
 
 :where([data-mwp-panel]) {
