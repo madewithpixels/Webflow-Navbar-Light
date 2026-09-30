@@ -57,7 +57,7 @@ The current release does not include a `Show brand` property. After unlinking, t
 
 Audit inherited presentation values while integrating the current component. In particular, `background: inherit` can make a trigger or panel depend unexpectedly on whichever wrapper it is moved into. Prefer an explicit project colour when styling an unlinked instance. A source-component audit is planned to replace accidental background inheritance with component-scoped colour defaults that remain straightforward to override.
 
-The current navigation inner also carries a component-level `max-width: 80rem`. That is a presentation choice rather than functional navigation behavior and can obstruct an existing project's container system. For an unlinked integration, remove or override it on the local inner and apply any width constraint through a destination-project container class. The source-component roadmap removes the fixed maximum so the portable default uses the available width.
+The published navigation inner has carried a component-level `max-width: 80rem`, a presentation choice that can obstruct a destination project's container system. For an unlinked integration, remove or override it on the local inner and apply any width constraint through a destination-project container class. On 30 September, the source Library's shared `mwp-css-nav_inner` class was changed to Max W None in Designer and checked on its Canvas, but that draft change has not been published or verified on a destination site.
 
 ## Panel placement and CSS priority
 
