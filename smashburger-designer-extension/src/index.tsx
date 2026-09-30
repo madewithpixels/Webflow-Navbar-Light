@@ -302,6 +302,18 @@ async function loadAlphaLinkDefaults(): Promise<Record<string, string>> {
   return values;
 }
 
+async function selectedAlphaLinkOverrides(): Promise<string[] | null> {
+  const selected = await webflow.getSelectedElement();
+  if (selected?.type !== "ComponentInstance") return null;
+  const component = await selected.getComponent();
+  if (await component.getName() !== ALPHA_NAME) return null;
+  const [props, summaries] = await Promise.all([component.getProps(), selected.getProps()]);
+  return ALPHA_DESTINATION_NAMES.filter((name) => {
+    const prop = props.find((item) => item.name === name && item.type === "link");
+    return prop && summaries.some((item) => item.propId === prop.id && item.hasOverride);
+  });
+}
+
 function normalizedDestination(input: string): string {
   const value = input.trim();
   if (value === "" || value === "#") throw new Error("Enter a real destination, not an empty value or #.");
@@ -2426,6 +2438,7 @@ const App: React.FC = () => {
   const [busy, setBusy] = useState(false);
   const [originalLinkDefaults, setOriginalLinkDefaults] = useState<Record<string, string> | null>(null);
   const [linkDefaults, setLinkDefaults] = useState<Record<string, string> | null>(null);
+  const [linkOverrides, setLinkOverrides] = useState<string[] | null>(null);
   const refresh = async (): Promise<void> => {
     setBusy(true);
     try { setSnapshot(await inspect()); setMessage("Inspection updated."); }
@@ -2565,9 +2578,11 @@ const App: React.FC = () => {
     setBusy(true);
     try {
       const values = await loadAlphaLinkDefaults();
+      const overrides = await selectedAlphaLinkOverrides();
       setOriginalLinkDefaults(values);
       setLinkDefaults({ ...values });
-      setMessage("Loaded 16 alpha link defaults. Edit only the destinations you want to set, then save.");
+      setLinkOverrides(overrides);
+      setMessage(`Loaded 16 alpha link defaults.${overrides ? ` Selected instance has ${overrides.length} link override(s).` : " Select the alpha instance to see its overrides."} Edit only the destinations you want to set, then save.`);
     } catch (error) { setMessage(`Link defaults could not be loaded: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
@@ -2579,8 +2594,10 @@ const App: React.FC = () => {
     try {
       const result = await saveAlphaLinkDefaults(changes, setMessage);
       const values = await loadAlphaLinkDefaults();
+      const overrides = await selectedAlphaLinkOverrides();
       setOriginalLinkDefaults(values);
       setLinkDefaults({ ...values });
+      setLinkOverrides(overrides);
       setMessage(result);
     } catch (error) { setMessage(`Link default save stopped: ${describeError(error)} Reload defaults before another save.`); }
     finally { setBusy(false); }
@@ -2681,12 +2698,14 @@ const App: React.FC = () => {
       <p className="toolbox-note">Load the alpha component defaults, edit the links you need, and save. Only changed fields are written. Instance overrides may take precedence; this does not publish the page.</p>
       <button className="secondary" disabled={busy} onClick={() => { void loadLinkDefaults(); }}>Load current defaults</button>
       {linkDefaults && <div className="link-fields">
+        {linkOverrides && <p className="toolbox-note">Selected instance: {linkOverrides.length ? `${linkOverrides.length} link override(s). Fields marked below will continue to use their instance value.` : "no link overrides."}</p>}
         {ALPHA_DESTINATION_GROUPS.map((group) => <fieldset key={group.title}>
           <legend>{group.title}</legend>
           {group.names.map((name) => <label key={name}>
             <span>{name.replace(" destination", "")}</span>
             <input type="text" value={linkDefaults[name] ?? ""} placeholder="/page or https://example.com"
               disabled={busy} onChange={(event) => setLinkDefaults((current) => current ? { ...current, [name]: event.target.value } : current)} />
+            {linkOverrides?.includes(name) && <span className="link-override">Instance override: this menu uses its own value.</span>}
           </label>)}
         </fieldset>)}
         <button disabled={busy || !originalLinkDefaults || !ALPHA_DESTINATION_NAMES.some((name) => linkDefaults[name] !== originalLinkDefaults[name])}

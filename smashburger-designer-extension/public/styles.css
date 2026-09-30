@@ -17,6 +17,7 @@ p { margin: 0 0 16px; }
 .link-fields label span { display: block; margin-bottom: 3px; font-size: 12px; }
 .link-fields input { width: 100%; padding: 8px; border: 1px solid #9bac9e; border-radius: 4px; background: #fff; color: #17251e; font: inherit; }
 .link-fields input:focus-visible { outline: 2px solid #ad5839; outline-offset: 2px; }
+.link-fields .link-override { margin-top: 3px; color: #8c431e; font-size: 12px; }
 button { padding: 9px 12px; border: 1px solid #17251e; border-radius: 4px; background: #17251e; color: white; font: inherit; cursor: pointer; }
 button.secondary { color: #17251e; background: transparent; }
 button:disabled { opacity: .45; cursor: not-allowed; }
