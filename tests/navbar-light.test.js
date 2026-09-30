@@ -168,6 +168,7 @@ test('runtime open state presents a panel separated from its trigger by a wrappe
   const opened = waitForEvent(root, 'mwp-nav:opened');
   menu.open = true;
   await opened;
+  delete root.dataset.state;
   assert.equal(dom.window.getComputedStyle(panel).visibility, 'visible');
   assert.equal(dom.window.getComputedStyle(panel).opacity, '1');
   assert.equal(dom.window.getComputedStyle(panel).pointerEvents, 'auto');
