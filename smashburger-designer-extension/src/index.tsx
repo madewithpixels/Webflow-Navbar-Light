@@ -268,6 +268,7 @@ async function checkSelectedAlphaLinks(): Promise<string> {
   const placeholders: string[] = [];
   const overrides: string[] = [];
   const unresolved: string[] = [];
+  const otherValues: string[] = [];
   for (const name of ALPHA_DESTINATION_NAMES) {
     const prop = props.find((item) => item.name === name && item.type === "link");
     if (!prop) { unresolved.push(name); continue; }
@@ -275,8 +276,9 @@ async function checkSelectedAlphaLinks(): Promise<string> {
     const value = resolved.find((item) => item.propId === prop.id)?.value;
     if (!value || typeof value !== "object" || !("mode" in value)) { unresolved.push(name); continue; }
     if (value.mode === "url" && (value.to === "#" || value.to === "" || !value.to)) placeholders.push(name);
+    else otherValues.push(name);
   }
-  return `Selected alpha instance: ${placeholders.length} placeholder destination(s), ${overrides.length} overridden link(s), ${unresolved.length} unresolved link(s). ${placeholders.length ? `Placeholders: ${placeholders.join(", ")}. ` : ""}${unresolved.length ? `Unresolved: ${unresolved.join(", ")}. ` : ""}Read only; no navigation or publication tested.`;
+  return `Selected alpha instance: ${placeholders.length} placeholder destination(s), ${otherValues.length} other value(s), ${overrides.length} overridden link(s), ${unresolved.length} unresolved link(s). ${otherValues.length ? `Other values: ${otherValues.join(", ")}. ` : ""}${overrides.length ? `Overrides: ${overrides.join(", ")}. ` : ""}${placeholders.length ? `Placeholders: ${placeholders.join(", ")}. ` : ""}${unresolved.length ? `Unresolved: ${unresolved.join(", ")}. ` : ""}Read only; non-placeholder values may still be test URLs. No navigation or publication tested.`;
 }
 
 async function loadAlphaLinkDefaults(): Promise<Record<string, string>> {
