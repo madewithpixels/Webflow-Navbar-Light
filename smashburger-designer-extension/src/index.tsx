@@ -256,6 +256,7 @@ async function expandNativeAlpha(report: (message: string) => void): Promise<str
   await configureNativePrimary(report, true);
   await configureNativeContent(report, true);
   await bindAlphaCtaContent(report);
+  await bindAlphaMenuLabel();
   report("Adding secondary links and submenu…");
   await configureNativeSecondary(report, true);
   await configureNativeSubmenu(report, true);
@@ -264,7 +265,7 @@ async function expandNativeAlpha(report: (message: string) => void): Promise<str
   await configureNativeMotion(report, true);
   await bindSecondaryVisibility(report, true);
   const saved = await component.getProps();
-  const required = ["Show CTA", "Brand text", "Facebook destination", "Show secondary navigation", "Submenu link 1 text", "Distance"];
+  const required = ["Show CTA", "CTA text", "CTA destination", "Menu label", "Brand text", "Facebook destination", "Show secondary navigation", "Submenu link 1 text", "Distance"];
   const missing = required.filter((name) => !saved.some((prop) => prop.name === name));
   if (missing.length) throw new Error(`Native alpha expansion is missing ${missing.join(", ")}; inspect before retrying.`);
   return `Native alpha expanded: primary links and CTA, nine text-only secondary links, submenu and grouped controls saved. Icons, full variants and published checks remain pending. Properties=${saved.length}.`;
@@ -1154,9 +1155,10 @@ async function bindAlphaCtaContent(report: (message: string) => void): Promise<s
 
 async function bindAlphaMenuLabel(): Promise<string> {
   const [site, page] = await Promise.all([webflow.getSiteInfo(), webflow.getCurrentPage()]);
-  const slug = await page.getSlug();
-  if (!(["Disposable Testing Site", "another disposable site"].includes(site.siteName) && slug === "sb-test")) {
-    throw new Error(`Open /sb-test on a disposable test site before binding the Menu label (current: ${site.siteName}/${slug}); no property was changed.`);
+  const [slug, draft] = await Promise.all([page.getSlug(), page.isDraft()]);
+  const publishedFixture = ["Disposable Testing Site", "another disposable site"].includes(site.siteName) && slug === "sb-test";
+  if (!draft && !publishedFixture) {
+    throw new Error(`Open a draft alpha page or /sb-test on a disposable test site before binding the Menu label (current: ${site.siteName}/${slug}); no property was changed.`);
   }
   const components = await webflow.getAllComponents();
   const names = await Promise.all(components.map((item) => item.getName()));
