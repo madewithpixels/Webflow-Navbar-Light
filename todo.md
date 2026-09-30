@@ -204,7 +204,7 @@ Keep the current Canvas-visible, self-contained Embed as the dependable default.
 - [ ] Add a native-like `--mwp-nav-z-index` custom property with a documented default and confirm it can be overridden by destination projects.
 - [ ] Add regression coverage for a trigger moved inside one ordinary layout wrapper while the panel remains elsewhere under the same root.
 - [ ] Add regression coverage for panel state presentation above ordinary sticky content and for the `Show brand` property in both delivery editions.
-- [ ] Add regression coverage for optional Dropdown and Full-width backdrops: opening/closing presentation, stacking below the panel, click-to-close with trigger focus return, and no unintended scroll lock. The private alpha passed a manual 820px Preview check on 30 September; automated coverage and released-component checks remain.
+- [ ] Add regression coverage for optional Dropdown and Full-width backdrops: opening/closing presentation, stacking below the panel, click-to-close with trigger focus return, and no unintended scroll lock. Runtime tests now cover no automatic scroll lock and backdrop dismissal for both layouts (23/23 suite passing). The private alpha also passed a manual 820px Preview check on 30 September. Presentation, stacking and released-component checks remain.
 - [ ] Re-run the complete layout/motion, collapse-breakpoint, keyboard, focus, ARIA/inert, reduced-motion and distribution checks before releasing these changes.
 - [ ] After every relevant source-component release, review and deliberately backport the change to the unlinked/local madewithpixels implementation created from this trial; verify it there before rolling that local component across the project.
 

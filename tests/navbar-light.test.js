@@ -204,6 +204,30 @@ test('locks scrolling for drawer layouts and restores prior styles', async () =>
   navbar.destroy();
 });
 
+for (const layout of ['dropdown', 'full-width']) {
+  test(`${layout} allows page scrolling while its backdrop is open by default`, async () => {
+    const root = document.querySelector('[data-mwp-navbar]');
+    root.dataset.layout = layout;
+    document.documentElement.style.overflow = 'clip';
+    const navbar = new NavbarLight(root);
+    const menu = root.querySelector('[data-mwp-menu]');
+
+    const opened = waitForEvent(root, 'mwp-nav:opened');
+    menu.open = true;
+    await opened;
+    assert.equal(root.dataset.state, 'open');
+    assert.equal(document.documentElement.dataset.mwpScrollLocked, undefined);
+    assert.equal(document.documentElement.style.overflow, 'clip');
+
+    const closed = waitForEvent(root, 'mwp-nav:closed');
+    root.querySelector('[data-mwp-backdrop]').dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }));
+    await closed;
+    assert.equal(menu.open, false);
+    assert.equal(document.documentElement.style.overflow, 'clip');
+    navbar.destroy();
+  });
+}
+
 test('expanded mode keeps the shared panel available and the trigger inactive', () => {
   const root = document.querySelector('[data-mwp-navbar]');
   root.dataset.collapse = 'never';
