@@ -346,6 +346,11 @@ async function saveAlphaLinkDefaults(changes: Record<string, string>, report: (m
     !root?.attributes || await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
     throw new Error("Expected one editable marked alpha component; no defaults were changed.");
   }
+  const pageInstances = (await webflow.getAllElements()).filter((item) => item.type === "ComponentInstance");
+  const pageComponentIds = await Promise.all(pageInstances.map(async (item) => (await item.getComponent()).id));
+  if (pageComponentIds.filter((id) => id === component.id).length !== 1) {
+    throw new Error("The current page must contain the one installed alpha instance; no defaults were changed.");
+  }
   const props = await component.getProps();
   const targets = normalized.map(({ name, to }) => {
     const prop = props.find((item) => item.name === name && item.type === "link");
