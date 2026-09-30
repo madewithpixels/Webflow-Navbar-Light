@@ -255,6 +255,7 @@ async function expandNativeAlpha(report: (message: string) => void): Promise<str
   report("Adding primary navigation and editable content…");
   await configureNativePrimary(report, true);
   await configureNativeContent(report, true);
+  await bindAlphaCtaContent(report);
   report("Adding secondary links and submenu…");
   await configureNativeSecondary(report, true);
   await configureNativeSubmenu(report, true);
@@ -1074,6 +1075,81 @@ async function configureNativePrimary(report: (message: string) => void, alpha =
     throw new Error("The primary navigation structure did not pass readback.");
   }
   return "Native primary navigation saved: original links preserved, editable CTA added, four visibility controls bound.";
+}
+
+async function bindAlphaCtaContent(report: (message: string) => void): Promise<string> {
+  const page = await webflow.getCurrentPage();
+  if (!await page.isDraft()) throw new Error("Open the draft page containing the native alpha component.");
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(ALPHA_NAME)];
+  if (!component || component.library || component.readOnly || await component.getInstanceCount() !== 1) {
+    throw new Error("Expected one editable native alpha instance; no CTA properties were changed.");
+  }
+  const root = await component.getRootElement();
+  if (!root?.children || !root.attributes ||
+    await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native alpha root marker changed; no CTA properties were changed.");
+  }
+  const [inner] = await root.getChildren();
+  const [, , panel] = inner?.children ? await inner.getChildren() : [];
+  const [primary] = panel?.children ? await panel.getChildren() : [];
+  if (!primary?.children || !primary.attributes ||
+    await primary.getResolvedAttributeValue("data-mwp-primary") === null) {
+    throw new Error("The native primary navigation changed; no CTA properties were changed.");
+  }
+  const primaryChildren = await primary.getChildren();
+  const cta = primaryChildren[1];
+  if (primaryChildren.length !== 2 || cta?.type !== "Link" || !cta.attributes ||
+    await cta.getResolvedAttributeValue("data-mwp-cta") === null) {
+    throw new Error("The native CTA changed; no CTA properties were changed.");
+  }
+  const available = await cta.searchSettings();
+  if (available.text?.valueType !== "textContent" || !available.text.canBind ||
+    available.link?.valueType !== "link" || !available.link.canBind) {
+    throw new Error("This Designer session cannot bind the CTA text and destination; no properties were created.");
+  }
+  const resolved = await cta.getResolvedSettings();
+  const text = resolved.text;
+  const textValue = typeof text === "string" ? text :
+    text && typeof text === "object" && "innerText" in text ? text.innerText : null;
+  const destination = resolved.link;
+  if (typeof textValue !== "string" || !destination ||
+    typeof destination !== "object" || !("mode" in destination)) {
+    throw new Error("Could not preserve the CTA text and destination; no properties were created.");
+  }
+  const definitions: CreatePropOptions[] = [
+    { type: "textContent", name: "CTA text", group: "Content", defaultValue: textValue },
+    { type: "link", name: "CTA destination", group: "Links", defaultValue: destination },
+  ];
+  const existing = await component.getProps();
+  for (const expected of definitions) {
+    const found = existing.find((prop) => prop.name === expected.name);
+    if (found && (found.type !== expected.type || found.group !== expected.group)) {
+      throw new Error(`Property ${expected.name} has a different type or group; no CTA bindings were changed.`);
+    }
+  }
+  const missing = definitions.filter((expected) => !existing.some((prop) => prop.name === expected.name));
+  if (missing.length) {
+    report(`Creating ${missing.length} native CTA content properties…`);
+    await component.createProps(missing);
+  }
+  const props = await component.getProps();
+  const propId = (name: string): string => {
+    const id = props.find((prop) => prop.name === name)?.id;
+    if (!id) throw new Error(`CTA property ${name} was not saved.`);
+    return id;
+  };
+  await cta.setSettings({
+    text: { sourceType: "prop", propId: propId("CTA text") },
+    link: { sourceType: "prop", propId: propId("CTA destination") },
+  });
+  const saved = await cta.getSettings();
+  if (!isBoundTo(saved.text, propId("CTA text")) ||
+    !isBoundTo(saved.link, propId("CTA destination"))) {
+    throw new Error("The CTA content bindings did not pass readback.");
+  }
+  return "Native CTA text and destination properties saved and bound.";
 }
 
 async function configureNativeSubmenu(report: (message: string) => void, alpha = false): Promise<string> {
@@ -2296,6 +2372,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native alpha expansion stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
+  const bindAlphaCta = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await bindAlphaCtaContent(setMessage)); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Native CTA binding stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const installAlphaImages = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await installAlphaIcons(setMessage)); setSnapshot(await inspect()); }
@@ -2360,6 +2442,7 @@ const App: React.FC = () => {
       <div className="actions">
         <button className="secondary" disabled={busy} onClick={() => { void installAlpha(); }}>Install native alpha on draft page</button>
         <button className="secondary" disabled={busy} onClick={() => { void expandAlpha(); }}>Expand native alpha on draft page</button>
+        <button className="secondary" disabled={busy} onClick={() => { void bindAlphaCta(); }}>Bind alpha CTA content</button>
         <button className="secondary" disabled={busy} onClick={() => { void installAlphaImages(); }}>Install native alpha icons</button>
         <button className="secondary" disabled={busy} onClick={() => { void repairAlphaCollapse(); }}>Repair alpha Tablet default</button>
         <button className="secondary" disabled={busy} onClick={() => { void inspectAlphaCollapse(); }}>Inspect alpha variants (read only)</button>
