@@ -427,6 +427,46 @@ async function updateAlphaBackdrop(): Promise<string> {
   return "Alpha backdrop rules saved and read back. Dropdown and Full width now show the backdrop when enabled; Preview behavior remains unverified. Automatic scroll lock remains limited to drawers and overlay.";
 }
 
+async function addScrollTestContent(): Promise<string> {
+  const [site, page, elements] = await Promise.all([
+    webflow.getSiteInfo(), webflow.getCurrentPage(), webflow.getAllElements(),
+  ]);
+  const slug = await page.getSlug();
+  if (!["Disposable Testing Site", "another disposable site"].includes(site.siteName) || slug !== "sb-test") {
+    throw new Error("Open /sb-test on a disposable site; no content was added.");
+  }
+  for (const element of elements) {
+    if (element.attributes && await element.getResolvedAttributeValue("data-sb-scroll-test") !== null) {
+      return "Scroll test content already exists on this page; no duplicate was added.";
+    }
+  }
+  const body = elements.find((element) => element.type === "Body" && element.children);
+  if (!body?.children) throw new Error("The page Body is unavailable; no content was added.");
+  const [sectionStyle, titleStyle, endStyle] = await Promise.all([
+    style("sb-app-scroll-test"), style("sb-app-scroll-test-title"), style("sb-app-scroll-test-end"),
+  ]);
+  await sectionStyle.setProperties({ display: "flex", "flex-direction": "column", "justify-content": "space-between", "min-height": "220vh", "padding-top": "48px", "padding-bottom": "48px", "padding-left": "24px", "padding-right": "24px", "background-color": "#f5f4ef", color: "#17251e" });
+  await titleStyle.setProperties({ "font-size": "24px", "font-weight": "700", "line-height": "1.2" });
+  await endStyle.setProperties({ "font-size": "16px", "line-height": "1.4" });
+  const section = await body.append(webflow.elementPresets.DOM);
+  await section.setAttribute("data-sb-scroll-test", "");
+  await section.setTag("section");
+  await section.setStyles([sectionStyle]);
+  const title = await section.append(webflow.elementPresets.DOM);
+  await title.setTag("h1");
+  await title.setStyles([titleStyle]);
+  await title.setTextContent("Scroll test: menu backdrop");
+  const end = await section.append(webflow.elementPresets.DOM);
+  await end.setTag("p");
+  await end.setStyles([endStyle]);
+  await end.setTextContent("End of scroll test area");
+  const saved = (await webflow.getAllElements()).find((element) => element.id.element === section.id.element);
+  if (!saved?.attributes || await saved.getResolvedAttributeValue("data-sb-scroll-test") === null) {
+    throw new Error("Scroll test content was added but did not pass readback; inspect the page before retrying.");
+  }
+  return "Scroll test content added below the menu: a 220vh native section with visible start and end markers. Preview is ready for the Dropdown scroll check.";
+}
+
 async function installNativeAlpha(report: (message: string) => void): Promise<string> {
   const readiness = await inspectInstallReadiness();
   if (readiness.blockers.length) {
@@ -2664,6 +2704,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Alpha backdrop update stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
+  const createScrollFixture = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await addScrollTestContent()); }
+    catch (error) { setMessage(`Scroll test content stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const installAlpha = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await installNativeAlpha(setMessage)); setSnapshot(await inspect()); }
@@ -2786,6 +2832,7 @@ const App: React.FC = () => {
         <button className="secondary" disabled={busy} onClick={() => { void inspectAlphaCollapse(); }}>Inspect alpha variants (read only)</button>
         <button className="secondary" disabled={busy} onClick={() => { void configureAlphaCollapse(); }}>Configure native alpha variants</button>
         <button className="secondary" disabled={busy} onClick={() => { void refreshAlphaBackdrop(); }}>Update alpha backdrop rules</button>
+        <button className="secondary" disabled={busy} onClick={() => { void createScrollFixture(); }}>Add scroll test content to /sb-test</button>
       </div>
     </details>
     {snapshot?.site === "Smashburger" && <details className="toolbox">
