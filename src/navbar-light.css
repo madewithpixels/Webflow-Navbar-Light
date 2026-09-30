@@ -205,7 +205,8 @@
   [data-mwp-navbar][data-mwp-collapsed="true"],
   [data-mwp-navbar][data-collapse="always"],
   [data-mwp-navbar][data-wf--navbar-light--variant="always"]
-) [data-mwp-menu][open] + [data-mwp-panel] {
+) [data-mwp-menu][open] + [data-mwp-panel],
+[data-mwp-navbar][data-mwp-collapsed="true"]:is([data-state="opening"], [data-state="open"]) [data-mwp-panel] {
   opacity: 1;
   pointer-events: auto;
   transform: none;

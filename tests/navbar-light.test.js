@@ -71,6 +71,19 @@ test('all collapsed layouts present the backdrop below navigation only while ope
   }
 });
 
+test('adjacent native details exposes its panel without runtime state', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  const fixture = new JSDOM(`<style>${css}</style>
+    <header data-mwp-navbar data-collapse="always">
+      <details data-mwp-menu open><summary data-mwp-trigger>Menu</summary></details>
+      <nav data-mwp-panel><a href="#one">One</a></nav>
+    </header>`);
+  const panel = fixture.window.document.querySelector('[data-mwp-panel]');
+  assert.equal(fixture.window.getComputedStyle(panel).visibility, 'visible');
+  assert.equal(fixture.window.getComputedStyle(panel).opacity, '1');
+  fixture.window.close();
+});
+
 const markup = `
   <header data-mwp-navbar data-collapse="always" data-motion="none" data-close-on-link="true" data-close-on-outside="true">
     <div>
@@ -134,6 +147,31 @@ test('opens, emits lifecycle events and exposes public controls', async () => {
   assert.equal(root.dataset.state, 'open');
   assert.deepEqual(events, ['open', 'opened']);
   assert.equal(root.mwpNavbarLight.state, 'open');
+  navbar.destroy();
+});
+
+test('runtime open state presents a panel separated from its trigger by a wrapper', async () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  const style = document.createElement('style');
+  style.textContent = css;
+  document.head.append(style);
+  const root = document.querySelector('[data-mwp-navbar]');
+  const menu = root.querySelector('[data-mwp-menu]');
+  const panel = root.querySelector('[data-mwp-panel]');
+  const wrapper = document.createElement('div');
+  menu.parentElement.insertBefore(wrapper, menu);
+  wrapper.append(menu);
+  assert.notEqual(menu.nextElementSibling, panel);
+
+  const navbar = new NavbarLight(root);
+  assert.equal(dom.window.getComputedStyle(panel).visibility, 'hidden');
+  const opened = waitForEvent(root, 'mwp-nav:opened');
+  menu.open = true;
+  await opened;
+  assert.equal(dom.window.getComputedStyle(panel).visibility, 'visible');
+  assert.equal(dom.window.getComputedStyle(panel).opacity, '1');
+  assert.equal(dom.window.getComputedStyle(panel).pointerEvents, 'auto');
+  assert.equal(dom.window.getComputedStyle(panel).transform, 'none');
   navbar.destroy();
 });
 
