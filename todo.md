@@ -255,6 +255,7 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 ### Private installer MVP
 
 - [ ] Add an Insert SmashBurger workflow.
+- [ ] Align newly generated alpha component styles with the agreed light drop-in default. The current private installer still creates a dark green root, white brand/links, a light desktop icon-inversion bridge and a white translucent divider; update those together and validate on a fresh clean-site install before treating the new Library source colours as app output.
 - [ ] Guide authors through primary, CTA, submenu and optional secondary link destinations during installation. The alpha editor now loads all 16 defaults and one guarded change passed Designer readback; a selected-instance audit has been added but still needs live verification. Show unconfigured `#` links clearly, preserve intentional instance overrides, and do not describe the generated menu as publish-ready while required destinations are placeholders.
 - [ ] Expose collapse breakpoint, layout, alignment, panel width and motion settings.
 - [ ] Expose duration, easing, distance, stagger, icon and accessibility/behaviour settings.
