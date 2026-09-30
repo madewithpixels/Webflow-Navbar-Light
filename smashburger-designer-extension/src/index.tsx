@@ -16,6 +16,13 @@ const PROOF_NAME = "SmashBurger API proof";
 const LAB_PAGE_SLUG = "smashburger-app-api-lab";
 const CORE_NAME = "SmashBurger native core trial";
 const ALPHA_NAME = "SmashBurger native alpha";
+const ALPHA_DESTINATION_GROUPS: ReadonlyArray<{ title: string; names: ReadonlyArray<string> }> = [
+  { title: "Main navigation", names: ["Brand destination", "Link 1 destination", "Link 2 destination", "Link 3 destination", "CTA destination"] },
+  { title: "Submenu", names: ["Submenu link 1 destination", "Submenu link 2 destination"] },
+  { title: "Social links", names: ["Facebook destination", "Instagram destination", "LinkedIn destination", "TikTok destination", "Threads destination", "X destination", "WhatsApp destination"] },
+  { title: "Contact links", names: ["Telephone destination", "Email destination"] },
+];
+const ALPHA_DESTINATION_NAMES = ALPHA_DESTINATION_GROUPS.flatMap((group) => [...group.names]);
 async function isCoreTargetPage(alpha: boolean, siteName: string, page: Page): Promise<boolean> {
   return alpha ? page.isDraft() : siteName === "Smashburger" && await page.getSlug() === LAB_PAGE_SLUG;
 }
@@ -229,23 +236,95 @@ async function checkAlphaLinkDefaults(): Promise<string> {
   if (!root?.attributes || await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
     throw new Error("The native alpha marker has changed; link defaults cannot be audited.");
   }
-  const destinationNames = [
-    "Brand destination", "Link 1 destination", "Link 2 destination", "Link 3 destination", "CTA destination",
-    "Submenu link 1 destination", "Submenu link 2 destination",
-    ...["Facebook", "Instagram", "LinkedIn", "TikTok", "Threads", "X", "WhatsApp", "Telephone", "Email"]
-      .map((name) => `${name} destination`),
-  ];
   const props = await component.getProps();
   const missing: string[] = [];
   const placeholders: string[] = [];
-  for (const name of destinationNames) {
+  for (const name of ALPHA_DESTINATION_NAMES) {
     const prop = props.find((item) => item.name === name && item.type === "link");
     if (!prop) { missing.push(name); continue; }
     const value = prop.defaultValue;
     if (value && typeof value === "object" && "mode" in value && value.mode === "url" &&
       "to" in value && (value.to === "#" || value.to === "")) placeholders.push(name);
   }
-  return `Alpha link defaults: ${destinationNames.length - missing.length}/${destinationNames.length} properties found; ${placeholders.length} placeholder destinations (# or empty). ${missing.length ? `Missing: ${missing.join(", ")}. ` : ""}${placeholders.length ? `Placeholders: ${placeholders.join(", ")}. ` : ""}Component defaults only; instance overrides are not checked. Read-only check.`;
+  return `Alpha link defaults: ${ALPHA_DESTINATION_NAMES.length - missing.length}/${ALPHA_DESTINATION_NAMES.length} properties found; ${placeholders.length} placeholder destinations (# or empty). ${missing.length ? `Missing: ${missing.join(", ")}. ` : ""}${placeholders.length ? `Placeholders: ${placeholders.join(", ")}. ` : ""}Component defaults only; instance overrides are not checked. Read-only check.`;
+}
+
+async function loadAlphaLinkDefaults(): Promise<Record<string, string>> {
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(ALPHA_NAME)];
+  const root = await component?.getRootElement();
+  if (!component || component.library || component.readOnly || !root?.attributes ||
+    await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The editable native alpha component is unavailable; no defaults were loaded.");
+  }
+  const props = await component.getProps();
+  const values: Record<string, string> = {};
+  for (const name of ALPHA_DESTINATION_NAMES) {
+    const prop = props.find((item) => item.name === name && item.type === "link");
+    if (!prop) throw new Error(`Missing ${name}; no defaults were loaded.`);
+    const value = prop.defaultValue;
+    values[name] = value && typeof value === "object" && "mode" in value && value.mode === "url" &&
+      "to" in value && typeof value.to === "string" ? value.to : "";
+  }
+  return values;
+}
+
+function normalizedDestination(input: string): string {
+  const value = input.trim();
+  if (value === "" || value === "#") throw new Error("Enter a real destination, not an empty value or #.");
+  if (value.startsWith("/") && !value.startsWith("//")) return value;
+  if (/^#[a-z][\w-]*$/i.test(value)) return value;
+  if (/^(mailto:[^\s@]+@[^\s@]+|tel:\+?[\d\s().-]{3,})$/i.test(value)) return value;
+  const absolute = /^[\w-]+\.[\w.-]+(?:\/[^\s]*)?$/i.test(value) ? `https://${value}` : value;
+  try {
+    const url = new URL(absolute);
+    if ((url.protocol === "https:" || url.protocol === "http:") && url.hostname) return url.href;
+  } catch { /* The error below explains the accepted formats. */ }
+  throw new Error(`Invalid destination ${JSON.stringify(value)}. Use /page, https://example.com, mailto:, or tel:.`);
+}
+
+async function saveAlphaLinkDefaults(changes: Record<string, string>, report: (message: string) => void): Promise<string> {
+  const entries = Object.entries(changes).filter(([name]) => ALPHA_DESTINATION_NAMES.includes(name));
+  if (!entries.length) return "No link defaults were changed.";
+  const normalized = entries.map(([name, value]) => ({ name, to: normalizedDestination(value) }));
+  const [site, page] = await Promise.all([webflow.getSiteInfo(), webflow.getCurrentPage()]);
+  const [slug, draft] = await Promise.all([page.getSlug(), page.isDraft()]);
+  const publishedFixture = ["Disposable Testing Site", "another disposable site"].includes(site.siteName) && slug === "sb-test";
+  if (!draft && !publishedFixture) {
+    throw new Error(`Open the installed alpha's draft page or a disposable /sb-test fixture (current: ${site.siteName}/${slug}); no defaults were changed.`);
+  }
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(ALPHA_NAME)];
+  const root = await component?.getRootElement();
+  if (!component || component.library || component.readOnly || await component.getInstanceCount() !== 1 ||
+    !root?.attributes || await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("Expected one editable marked alpha component; no defaults were changed.");
+  }
+  const props = await component.getProps();
+  const targets = normalized.map(({ name, to }) => {
+    const prop = props.find((item) => item.name === name && item.type === "link");
+    if (!prop) throw new Error(`Missing ${name}; no defaults were changed.`);
+    return { prop, name, to };
+  });
+  const savedNames: string[] = [];
+  for (const { prop, name, to } of targets) {
+    report(`Saving ${name} (${savedNames.length + 1}/${targets.length})…`);
+    const previous = prop.defaultValue;
+    const openInNewTab = previous && typeof previous === "object" && "openInNewTab" in previous &&
+      typeof previous.openInNewTab === "boolean" ? previous.openInNewTab : undefined;
+    try {
+      await component.setProp(prop.id, { defaultValue: { mode: "url", to, ...(openInNewTab === undefined ? {} : { openInNewTab }) } });
+      const saved = (await component.getProps()).find((item) => item.id === prop.id)?.defaultValue;
+      if (!saved || typeof saved !== "object" || !("mode" in saved) || saved.mode !== "url" ||
+        !("to" in saved) || saved.to !== to) throw new Error("default did not pass readback");
+      savedNames.push(name);
+    } catch (error) {
+      throw new Error(`${name} stopped after ${savedNames.length} saved default(s): ${describeError(error)}. Inspect before retrying.`);
+    }
+  }
+  return `Saved ${savedNames.length} alpha link default(s): ${savedNames.join(", ")}. Instance overrides may still take precedence; Preview and published navigation are not verified.`;
 }
 
 async function installNativeAlpha(report: (message: string) => void): Promise<string> {
@@ -2313,6 +2392,8 @@ const App: React.FC = () => {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [message, setMessage] = useState("Select an element, then inspect it.");
   const [busy, setBusy] = useState(false);
+  const [originalLinkDefaults, setOriginalLinkDefaults] = useState<Record<string, string> | null>(null);
+  const [linkDefaults, setLinkDefaults] = useState<Record<string, string> | null>(null);
   const refresh = async (): Promise<void> => {
     setBusy(true);
     try { setSnapshot(await inspect()); setMessage("Inspection updated."); }
@@ -2442,6 +2523,30 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Alpha link audit stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
+  const loadLinkDefaults = async (): Promise<void> => {
+    setBusy(true);
+    try {
+      const values = await loadAlphaLinkDefaults();
+      setOriginalLinkDefaults(values);
+      setLinkDefaults({ ...values });
+      setMessage("Loaded 16 alpha link defaults. Edit only the destinations you want to set, then save.");
+    } catch (error) { setMessage(`Link defaults could not be loaded: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
+  const saveLinkDefaults = async (): Promise<void> => {
+    if (!originalLinkDefaults || !linkDefaults) return;
+    const changes = Object.fromEntries(ALPHA_DESTINATION_NAMES.filter((name) =>
+      linkDefaults[name] !== originalLinkDefaults[name]).map((name) => [name, linkDefaults[name]]));
+    setBusy(true);
+    try {
+      const result = await saveAlphaLinkDefaults(changes, setMessage);
+      const values = await loadAlphaLinkDefaults();
+      setOriginalLinkDefaults(values);
+      setLinkDefaults({ ...values });
+      setMessage(result);
+    } catch (error) { setMessage(`Link default save stopped: ${describeError(error)} Reload defaults before another save.`); }
+    finally { setBusy(false); }
+  };
   const installAlpha = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await installNativeAlpha(setMessage)); setSnapshot(await inspect()); }
@@ -2532,6 +2637,23 @@ const App: React.FC = () => {
       <button className="secondary" disabled={busy} onClick={() => { void checkAlphaLinks(); }}>Check alpha link defaults (read only)</button>
       <button disabled={busy} onClick={() => { void installAllAlpha(); }}>Install complete alpha on clean draft</button>
     </div>
+    <details className="toolbox">
+      <summary>Set link destinations</summary>
+      <p className="toolbox-note">Load the alpha component defaults, edit the links you need, and save. Only changed fields are written. Instance overrides may take precedence; this does not publish the page.</p>
+      <button className="secondary" disabled={busy} onClick={() => { void loadLinkDefaults(); }}>Load current defaults</button>
+      {linkDefaults && <div className="link-fields">
+        {ALPHA_DESTINATION_GROUPS.map((group) => <fieldset key={group.title}>
+          <legend>{group.title}</legend>
+          {group.names.map((name) => <label key={name}>
+            <span>{name.replace(" destination", "")}</span>
+            <input type="text" value={linkDefaults[name] ?? ""} placeholder="/page or https://example.com"
+              disabled={busy} onChange={(event) => setLinkDefaults((current) => current ? { ...current, [name]: event.target.value } : current)} />
+          </label>)}
+        </fieldset>)}
+        <button disabled={busy || !originalLinkDefaults || !ALPHA_DESTINATION_NAMES.some((name) => linkDefaults[name] !== originalLinkDefaults[name])}
+          onClick={() => { void saveLinkDefaults(); }}>Save changed defaults</button>
+      </div>}
+    </details>
     <details className="toolbox">
       <summary>Individual alpha actions and recovery</summary>
       <div className="actions">

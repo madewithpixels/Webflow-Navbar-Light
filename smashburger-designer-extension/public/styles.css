@@ -9,6 +9,14 @@ p { margin: 0 0 16px; }
 .toolbox { margin-top: 16px; border: 1px solid #c9d3c9; border-radius: 4px; padding: 10px 12px; }
 .toolbox summary { cursor: pointer; font-weight: 700; }
 .toolbox .actions { margin-top: 12px; }
+.toolbox-note { margin: 12px 0; font-size: 13px; }
+.link-fields { margin-top: 12px; }
+.link-fields fieldset { margin: 0 0 12px; padding: 10px; border: 1px solid #c9d3c9; border-radius: 4px; }
+.link-fields legend { font-weight: 700; }
+.link-fields label { display: block; margin: 0 0 10px; }
+.link-fields label span { display: block; margin-bottom: 3px; font-size: 12px; }
+.link-fields input { width: 100%; padding: 8px; border: 1px solid #9bac9e; border-radius: 4px; background: #fff; color: #17251e; font: inherit; }
+.link-fields input:focus-visible { outline: 2px solid #ad5839; outline-offset: 2px; }
 button { padding: 9px 12px; border: 1px solid #17251e; border-radius: 4px; background: #17251e; color: white; font: inherit; cursor: pointer; }
 button.secondary { color: #17251e; background: transparent; }
 button:disabled { opacity: .45; cursor: not-allowed; }
