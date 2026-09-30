@@ -1153,8 +1153,11 @@ async function bindAlphaCtaContent(report: (message: string) => void): Promise<s
 }
 
 async function bindAlphaMenuLabel(): Promise<string> {
-  const page = await webflow.getCurrentPage();
-  if (!await page.isDraft()) throw new Error("Open the draft page containing the native alpha component.");
+  const [site, page] = await Promise.all([webflow.getSiteInfo(), webflow.getCurrentPage()]);
+  const slug = await page.getSlug();
+  if (!(["Disposable Testing Site", "another disposable site"].includes(site.siteName) && slug === "sb-test")) {
+    throw new Error(`Open /sb-test on a disposable test site before binding the Menu label (current: ${site.siteName}/${slug}); no property was changed.`);
+  }
   const components = await webflow.getAllComponents();
   const names = await Promise.all(components.map((item) => item.getName()));
   const component = components[names.indexOf(ALPHA_NAME)];
