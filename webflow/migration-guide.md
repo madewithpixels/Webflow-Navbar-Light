@@ -71,7 +71,7 @@ For a `v0.2.0` integration, add one deliberately named combo class to `mwp-css-n
 
 An open navigation panel can appear clipped when sticky or positioned page content is actually painting above it. Inspect stacking before changing overflow, masks or containment.
 
-For the current release, give the root a positioned, project-appropriate z-index above normal page content. A future release will add a native-like default through an overridable `--mwp-nav-z-index` custom property.
+The pinned v0.2.3 CSS already gives the root a positioned stacking context with `--mwp-nav-z-index: 100`. Set that custom property on the destination root when ordinary page content needs a different stack position. A destination-project override still needs a live check before this is treated as a verified portability feature.
 
 ## Backdrop behavior
 
