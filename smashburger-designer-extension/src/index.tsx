@@ -1152,6 +1152,55 @@ async function bindAlphaCtaContent(report: (message: string) => void): Promise<s
   return "Native CTA text and destination properties saved and bound.";
 }
 
+async function bindAlphaMenuLabel(): Promise<string> {
+  const page = await webflow.getCurrentPage();
+  if (!await page.isDraft()) throw new Error("Open the draft page containing the native alpha component.");
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(ALPHA_NAME)];
+  if (!component || component.library || component.readOnly || await component.getInstanceCount() !== 1) {
+    throw new Error("Expected one editable native alpha instance; no Menu label property was changed.");
+  }
+  const root = await component.getRootElement();
+  if (!root?.children || !root.attributes ||
+    await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native alpha root marker changed; no Menu label property was changed.");
+  }
+  const [inner] = await root.getChildren();
+  const [, menu] = inner?.children ? await inner.getChildren() : [];
+  const [summary] = menu?.children ? await menu.getChildren() : [];
+  const [label] = summary?.children ? await summary.getChildren() : [];
+  if (label?.type !== "DOM" || !label.attributes || !label.elementSettings ||
+    await label.getResolvedAttributeValue("data-mwp-label") === null) {
+    throw new Error("The native Menu label changed; no property was created.");
+  }
+  const available = await label.searchSettings();
+  if (available.text?.valueType !== "textContent" || !available.text.canBind) {
+    throw new Error(`The native Menu label text is not bindable in this Designer session (${available.text?.valueType ?? "missing"}/${available.text?.canBind ?? false}); no property was created.`);
+  }
+  const text = (await label.getResolvedSettings()).text;
+  const textValue = typeof text === "string" ? text :
+    text && typeof text === "object" && "innerText" in text ? text.innerText : null;
+  if (typeof textValue !== "string") {
+    throw new Error("Could not preserve the native Menu label text; no property was created.");
+  }
+  const existing = await component.getProps();
+  const named = existing.find((prop) => prop.name === "Menu label");
+  if (named && (named.type !== "textContent" || named.group !== "Trigger")) {
+    throw new Error("Menu label already exists with a different type or group; no binding was changed.");
+  }
+  if (!named) {
+    await component.createProps([{ type: "textContent", name: "Menu label", group: "Trigger", defaultValue: textValue }]);
+  }
+  const savedProp = (await component.getProps()).find((prop) => prop.name === "Menu label" && prop.type === "textContent");
+  if (!savedProp) throw new Error("The Menu label property did not pass readback.");
+  await label.setSettings({ text: { sourceType: "prop", propId: savedProp.id } });
+  if (!isBoundTo((await label.getSettings()).text, savedProp.id)) {
+    throw new Error("The Menu label text binding did not pass readback.");
+  }
+  return "Native Menu label text property saved and bound.";
+}
+
 async function configureNativeSubmenu(report: (message: string) => void, alpha = false): Promise<string> {
   const site = await webflow.getSiteInfo();
   const page = await webflow.getCurrentPage();
@@ -2378,6 +2427,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native CTA binding stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
+  const bindAlphaLabel = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await bindAlphaMenuLabel()); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Native Menu label binding stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const installAlphaImages = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await installAlphaIcons(setMessage)); setSnapshot(await inspect()); }
@@ -2443,6 +2498,7 @@ const App: React.FC = () => {
         <button className="secondary" disabled={busy} onClick={() => { void installAlpha(); }}>Install native alpha on draft page</button>
         <button className="secondary" disabled={busy} onClick={() => { void expandAlpha(); }}>Expand native alpha on draft page</button>
         <button className="secondary" disabled={busy} onClick={() => { void bindAlphaCta(); }}>Bind alpha CTA content</button>
+        <button className="secondary" disabled={busy} onClick={() => { void bindAlphaLabel(); }}>Bind alpha Menu label</button>
         <button className="secondary" disabled={busy} onClick={() => { void installAlphaImages(); }}>Install native alpha icons</button>
         <button className="secondary" disabled={busy} onClick={() => { void repairAlphaCollapse(); }}>Repair alpha Tablet default</button>
         <button className="secondary" disabled={busy} onClick={() => { void inspectAlphaCollapse(); }}>Inspect alpha variants (read only)</button>
