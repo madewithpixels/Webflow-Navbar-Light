@@ -81,7 +81,7 @@ The current released installation path remains the MWP Component Library. The pr
 - [x] Left, center and right dropdown alignment.
 - [x] Configurable panel width.
 - [x] Native editable backdrop.
-- [ ] When `Show backdrop` is enabled, support it consistently in every collapsed layout, including Dropdown and Full width as well as Left drawer, Right drawer and Overlay; do not make a dropdown backdrop imply page scroll locking.
+- [ ] When `Show backdrop` is enabled, support it consistently in every collapsed layout, including Dropdown and Full width as well as Left drawer, Right drawer and Overlay; do not make a dropdown backdrop imply page scroll locking. A scoped private-alpha Embed candidate now adds Dropdown/Full-width open-state styling without changing the pinned v0.2.3 release; Designer and Preview checks remain.
 - [x] Panel padding, gap, border, radius and shadow remain normal Webflow class styles.
 - [x] Native nested-details submenu with independent Escape handling.
 - [x] Optional CTA and secondary/social regions.

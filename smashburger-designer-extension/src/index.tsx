@@ -70,9 +70,14 @@ const CORE_DISPLAY_BRIDGE_V5 = CORE_DISPLAY_BRIDGE_V4.replace(
   '.sb-app-nav[data-mwp-collapsed="false"] .sb-app-secondary-icon { filter: brightness(0) invert(1); }\n</style>',
 );
 const CORE_EMBED_CODE_V5 = `${CORE_DISPLAY_BRIDGE_V5}\n${CORE_VARIANT_BRIDGE}\n${cdnLoader}`;
-const CORE_DISPLAY_BRIDGE = CORE_DISPLAY_BRIDGE_V5.replace(
+const CORE_DISPLAY_BRIDGE_V6 = CORE_DISPLAY_BRIDGE_V5.replace(
   "</style>",
   '.sb-app-nav [data-mwp-submenu]:not([open]) > [data-mwp-submenu-list] { display: none; }\n.sb-app-nav [data-mwp-submenu][open] [data-mwp-submenu-icon] { transform: rotate(var(--mwp-nav-submenu-icon-rotation, 180deg)); }\n.sb-app-nav[data-mwp-collapsed="true"] [data-mwp-submenu-list] { position: static; box-shadow: none; }\n</style>',
+);
+const CORE_EMBED_CODE_V6 = `${CORE_DISPLAY_BRIDGE_V6}\n${CORE_VARIANT_BRIDGE}\n${cdnLoader}`;
+const CORE_DISPLAY_BRIDGE = CORE_DISPLAY_BRIDGE_V6.replace(
+  "</style>",
+  '.sb-app-nav[data-mwp-collapsed="true"]:is([data-layout="dropdown"], [data-layout="full-width"]):is([data-state="opening"], [data-state="open"]) [data-mwp-backdrop] { opacity: 1; pointer-events: auto; transition-delay: 0s; visibility: visible; }\n</style>',
 );
 const CORE_EMBED_CODE = `${CORE_DISPLAY_BRIDGE}\n${CORE_VARIANT_BRIDGE}\n${cdnLoader}`;
 const CORE_PROPERTIES: CreatePropOptions[] = [
@@ -374,6 +379,52 @@ async function saveAlphaLinkDefaults(changes: Record<string, string>, report: (m
     }
   }
   return `Saved ${savedNames.length} alpha link default(s): ${savedNames.join(", ")}. Instance overrides may still take precedence; Preview and published navigation are not verified.`;
+}
+
+async function updateAlphaBackdrop(): Promise<string> {
+  const [site, page, components, elements] = await Promise.all([
+    webflow.getSiteInfo(), webflow.getCurrentPage(), webflow.getAllComponents(), webflow.getAllElements(),
+  ]);
+  const [slug, draft, names] = await Promise.all([
+    page.getSlug(), page.isDraft(), Promise.all(components.map((item) => item.getName())),
+  ]);
+  const publishedFixture = ["Disposable Testing Site", "another disposable site"].includes(site.siteName) && slug === "sb-test";
+  if (!draft && !publishedFixture) throw new Error("Open the alpha draft page or a disposable /sb-test fixture; no Embed was changed.");
+  const component = components[names.indexOf(ALPHA_NAME)];
+  const root = await component?.getRootElement();
+  if (!component || component.library || component.readOnly || await component.getInstanceCount() !== 1 ||
+    !root?.children || !root.attributes || await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("Expected one editable marked alpha component; no Embed was changed.");
+  }
+  const pageInstances = elements.filter((item) => item.type === "ComponentInstance");
+  const pageComponentIds = await Promise.all(pageInstances.map(async (item) => (await item.getComponent()).id));
+  if (pageComponentIds.filter((id) => id === component.id).length !== 1) {
+    throw new Error("The current page must contain the one installed alpha instance; no Embed was changed.");
+  }
+  const children = await root.getChildren();
+  let infrastructure: AnyElement | undefined;
+  for (const child of children) {
+    if (child.attributes && await child.getResolvedAttributeValue("data-mwp-infrastructure") !== null) {
+      infrastructure = child;
+      break;
+    }
+  }
+  const infrastructureChildren = infrastructure?.children ? await infrastructure.getChildren() : [];
+  const embeds = [...children, ...infrastructureChildren].filter((item) => item.type === "HtmlEmbed");
+  if (embeds.length !== 1 || !embeds[0].elementSettings) {
+    throw new Error("Expected exactly one alpha runtime Embed; no code was changed.");
+  }
+  const embed = embeds[0];
+  const code = (await embed.getSettings()).code;
+  if (code !== CORE_EMBED_CODE_V6 && code !== CORE_EMBED_CODE) {
+    throw new Error("The alpha Embed differs from the known version; no code was replaced.");
+  }
+  if (code === CORE_EMBED_CODE) return "Alpha backdrop rules already current; no Embed was changed.";
+  await embed.setSettings({ code: CORE_EMBED_CODE });
+  if ((await embed.getSettings()).code !== CORE_EMBED_CODE) {
+    throw new Error("Alpha backdrop Embed did not pass readback; inspect before retrying.");
+  }
+  return "Alpha backdrop rules saved and read back. Dropdown and Full width now show the backdrop when enabled; Preview behavior remains unverified. Automatic scroll lock remains limited to drawers and overlay.";
 }
 
 async function installNativeAlpha(report: (message: string) => void): Promise<string> {
@@ -707,7 +758,7 @@ async function activateCoreVariants(alpha = false): Promise<string> {
     ? (await details.getChildren()).find((child) => child.type === "HtmlEmbed") : undefined;
   if (!embed?.elementSettings) throw new Error("The native core runtime Embed is missing.");
   const code = (await embed.getSettings()).code;
-  if (code !== CORE_EMBED_CODE_V2 && code !== CORE_EMBED_CODE_V3 && code !== CORE_EMBED_CODE_V4 && code !== CORE_EMBED_CODE_V5 && code !== CORE_EMBED_CODE) {
+  if (code !== CORE_EMBED_CODE_V2 && code !== CORE_EMBED_CODE_V3 && code !== CORE_EMBED_CODE_V4 && code !== CORE_EMBED_CODE_V5 && code !== CORE_EMBED_CODE_V6 && code !== CORE_EMBED_CODE) {
     throw new Error("The runtime Embed differs from the known trial version; no code was replaced.");
   }
   if (collapse.defaultValue !== "") {
@@ -895,7 +946,7 @@ async function configureNativeCore(report: (message: string) => void, knownCompo
     throw new Error("The native core runtime Embed is missing; no properties were added.");
   }
   const existingCode = (await embed.getSettings()).code;
-  if (existingCode !== cdnLoader && existingCode !== CORE_EMBED_CODE_V1 && existingCode !== CORE_EMBED_CODE_V2 && existingCode !== CORE_EMBED_CODE_V3 && existingCode !== CORE_EMBED_CODE_V4 && existingCode !== CORE_EMBED_CODE_V5 && existingCode !== CORE_EMBED_CODE) {
+  if (existingCode !== cdnLoader && existingCode !== CORE_EMBED_CODE_V1 && existingCode !== CORE_EMBED_CODE_V2 && existingCode !== CORE_EMBED_CODE_V3 && existingCode !== CORE_EMBED_CODE_V4 && existingCode !== CORE_EMBED_CODE_V5 && existingCode !== CORE_EMBED_CODE_V6 && existingCode !== CORE_EMBED_CODE) {
     throw new Error("The native core Embed differs from the known trial versions; no code was replaced.");
   }
   const [brand, menu, panel] = await inner.getChildren();
@@ -2607,6 +2658,12 @@ const App: React.FC = () => {
     } catch (error) { setMessage(`Link default save stopped: ${describeError(error)} Reload defaults before another save.`); }
     finally { setBusy(false); }
   };
+  const refreshAlphaBackdrop = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await updateAlphaBackdrop()); }
+    catch (error) { setMessage(`Alpha backdrop update stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const installAlpha = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await installNativeAlpha(setMessage)); setSnapshot(await inspect()); }
@@ -2728,6 +2785,7 @@ const App: React.FC = () => {
         <button className="secondary" disabled={busy} onClick={() => { void repairAlphaCollapse(); }}>Repair alpha Tablet default</button>
         <button className="secondary" disabled={busy} onClick={() => { void inspectAlphaCollapse(); }}>Inspect alpha variants (read only)</button>
         <button className="secondary" disabled={busy} onClick={() => { void configureAlphaCollapse(); }}>Configure native alpha variants</button>
+        <button className="secondary" disabled={busy} onClick={() => { void refreshAlphaBackdrop(); }}>Update alpha backdrop rules</button>
       </div>
     </details>
     {snapshot?.site === "Smashburger" && <details className="toolbox">
