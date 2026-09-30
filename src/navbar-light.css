@@ -57,6 +57,10 @@
   position: relative;
 }
 
+:where([data-mwp-secondary-icon]) {
+  filter: var(--mwp-nav-icon-filter, none);
+}
+
 [data-mwp-icon] [data-mwp-line] {
   display: block;
   position: absolute;

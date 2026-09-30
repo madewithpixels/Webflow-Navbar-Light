@@ -90,6 +90,20 @@ test('open icon bars meet at one centre with two or three lines and custom sizin
   assert.doesNotMatch(css, /--mwp-nav-icon-shift/);
 });
 
+test('destination classes can set icon contrast without replacing the functional CSS', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  const fixture = new JSDOM(`<style>${css}
+    .dark-project-icon { filter: brightness(0) invert(1); }
+  </style><header data-mwp-navbar>
+    <img data-mwp-secondary-icon src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'/%3E">
+    <img data-mwp-secondary-icon class="dark-project-icon" src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'/%3E">
+  </header>`);
+  const [plain, themed] = fixture.window.document.querySelectorAll('[data-mwp-secondary-icon]');
+  assert.equal(fixture.window.getComputedStyle(plain).filter, 'var(--mwp-nav-icon-filter, none)');
+  assert.equal(fixture.window.getComputedStyle(themed).filter, 'brightness(0) invert(1)');
+  fixture.window.close();
+});
+
 test('custom motion keeps the panel hidden when closed and reserves time for GSAP', () => {
   const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
   assert.match(css, /\[data-motion="custom"\] \[data-mwp-panel\],[\s\S]*?opacity:\s*0;[\s\S]*?visibility:\s*hidden;/);
