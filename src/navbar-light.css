@@ -331,11 +331,11 @@
 
 /* Layouts */
 [data-mwp-navbar][data-mwp-collapsed="true"] [data-mwp-panel] {
-  background: var(--mwp-nav-panel-surface, #fff);
+  background: var(--mwp-nav-panel-surface, var(--mwp-nav-surface, #fff));
   border: 1px solid var(--mwp-nav-panel-border, rgb(0 0 0 / 0.14));
   box-shadow: var(--mwp-nav-panel-shadow, 0 1rem 2.5rem rgb(0 0 0 / 0.12));
   box-sizing: border-box;
-  color: var(--mwp-nav-panel-ink, #1d2022);
+  color: var(--mwp-nav-panel-ink, var(--mwp-nav-ink, #111827));
   gap: clamp(1rem, 2vw, 2rem);
   max-height: calc(100dvh - var(--mwp-nav-header-height, 4.5rem));
   overflow-x: hidden;

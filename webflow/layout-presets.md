@@ -13,7 +13,7 @@ collapsed. Expanded navigation remains an ordinary horizontal Webflow header.
 | Overlay | Viewport-filling dark panel with large, centred links and a visible close button. |
 
 The neutral baseline uses these optional CSS custom properties on the navbar
-root or a project wrapper: `--mwp-nav-panel-surface`,
+root or a project wrapper: `--mwp-nav-surface`, `--mwp-nav-ink`, `--mwp-nav-panel-surface`,
 `--mwp-nav-panel-ink`, `--mwp-nav-panel-border`,
 `--mwp-nav-panel-shadow`, `--mwp-nav-overlay-surface`,
 `--mwp-nav-overlay-ink`, `--mwp-nav-close-surface`,
@@ -23,6 +23,12 @@ root or a project wrapper: `--mwp-nav-panel-surface`,
 `--mwp-nav-panel-width` controls the
 dropdown and drawer width. Native Webflow classes remain editable for the
 brand, links, icons, CTA and project-specific typography.
+
+The unpublished Library source now uses white and dark-ink fallbacks for the
+header. The next-release source CSS also lets a collapsed panel inherit the
+header's `--mwp-nav-surface` and `--mwp-nav-ink` unless panel-specific tokens
+are supplied. The current pinned release and installed Library copies have
+not been updated to that colour contract.
 
 The Library versions include `data-mwp-inner`, `data-mwp-primary`,
 `data-mwp-links`, and `data-mwp-secondary` hooks. These keep the preset CSS

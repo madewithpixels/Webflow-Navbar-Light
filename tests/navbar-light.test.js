@@ -45,6 +45,21 @@ test('panel layout defaults stay below ordinary Webflow class styles', () => {
   assert.doesNotMatch(css.replaceAll(/\/\*[\s\S]*?\*\//g, ''), /!important/);
 });
 
+test('navigation inner has no source width cap and accepts a destination container', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  const fixture = new JSDOM(`<style>${css}
+    .site-container { max-width: 72rem; margin-inline: auto; }
+  </style><header data-mwp-navbar>
+    <div data-mwp-inner></div>
+    <div data-mwp-inner class="site-container"></div>
+  </header>`);
+  const [bare, constrained] = fixture.window.document.querySelectorAll('[data-mwp-inner]');
+  assert.equal(fixture.window.getComputedStyle(bare).maxWidth, '');
+  assert.equal(fixture.window.getComputedStyle(constrained).maxWidth, '72rem');
+  assert.equal(fixture.window.getComputedStyle(constrained).marginInline, 'auto');
+  fixture.window.close();
+});
+
 test('custom motion keeps the panel hidden when closed and reserves time for GSAP', () => {
   const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
   assert.match(css, /\[data-motion="custom"\] \[data-mwp-panel\],[\s\S]*?opacity:\s*0;[\s\S]*?visibility:\s*hidden;/);
