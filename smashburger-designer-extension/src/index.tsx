@@ -80,6 +80,15 @@ const CORE_DISPLAY_BRIDGE = CORE_DISPLAY_BRIDGE_V6.replace(
   '.sb-app-nav[data-mwp-collapsed="true"]:is([data-layout="dropdown"], [data-layout="full-width"]):is([data-state="opening"], [data-state="open"]) [data-mwp-backdrop] { opacity: 1; pointer-events: auto; transition-delay: 0s; visibility: visible; }\n</style>',
 );
 const CORE_EMBED_CODE = `${CORE_DISPLAY_BRIDGE}\n${CORE_VARIANT_BRIDGE}\n${cdnLoader}`;
+// Fresh alpha installs use dark SVGs on a light surface. Keep the preceding
+// Embed byte-for-byte for existing dark alpha fixtures and their recovery steps.
+const LIGHT_ALPHA_EMBED_CODE = `${CORE_DISPLAY_BRIDGE.replace(
+  '.sb-app-nav[data-mwp-collapsed="false"] .sb-app-secondary-icon { filter: brightness(0) invert(1); }\n',
+  '',
+)}\n${CORE_VARIANT_BRIDGE}\n${cdnLoader}`;
+function currentCoreEmbedCode(code: unknown): string {
+  return code === LIGHT_ALPHA_EMBED_CODE ? LIGHT_ALPHA_EMBED_CODE : CORE_EMBED_CODE;
+}
 const CORE_PROPERTIES: CreatePropOptions[] = [
   { type: "string", name: "Collapse breakpoint", group: "Behavior", defaultValue: "", tooltip: "Leave blank to follow the selected variant; enter never, tablet, mobile-landscape, mobile-portrait, or always to override it" },
   { type: "string", name: "Menu layout", group: "Layout", defaultValue: "dropdown", tooltip: "dropdown, full-width, left, right, or overlay" },
@@ -416,9 +425,10 @@ async function updateAlphaBackdrop(): Promise<string> {
   }
   const embed = embeds[0];
   const code = (await embed.getSettings()).code;
-  if (code !== CORE_EMBED_CODE_V6 && code !== CORE_EMBED_CODE) {
+  if (code !== CORE_EMBED_CODE_V6 && code !== CORE_EMBED_CODE && code !== LIGHT_ALPHA_EMBED_CODE) {
     throw new Error("The alpha Embed differs from the known version; no code was replaced.");
   }
+  if (code === LIGHT_ALPHA_EMBED_CODE) return "Light alpha backdrop rules already current; no Embed was changed.";
   if (code === CORE_EMBED_CODE) return "Alpha backdrop rules already current; no Embed was changed.";
   await embed.setSettings({ code: CORE_EMBED_CODE });
   if ((await embed.getSettings()).code !== CORE_EMBED_CODE) {
@@ -798,18 +808,19 @@ async function activateCoreVariants(alpha = false): Promise<string> {
     ? (await details.getChildren()).find((child) => child.type === "HtmlEmbed") : undefined;
   if (!embed?.elementSettings) throw new Error("The native core runtime Embed is missing.");
   const code = (await embed.getSettings()).code;
-  if (code !== CORE_EMBED_CODE_V2 && code !== CORE_EMBED_CODE_V3 && code !== CORE_EMBED_CODE_V4 && code !== CORE_EMBED_CODE_V5 && code !== CORE_EMBED_CODE_V6 && code !== CORE_EMBED_CODE) {
+  if (code !== CORE_EMBED_CODE_V2 && code !== CORE_EMBED_CODE_V3 && code !== CORE_EMBED_CODE_V4 && code !== CORE_EMBED_CODE_V5 && code !== CORE_EMBED_CODE_V6 && code !== CORE_EMBED_CODE && code !== LIGHT_ALPHA_EMBED_CODE) {
     throw new Error("The runtime Embed differs from the known trial version; no code was replaced.");
   }
+  const targetCode = currentCoreEmbedCode(code);
   if (collapse.defaultValue !== "") {
     await component.setProp(collapse.id, {
       defaultValue: "",
       tooltip: "Leave blank to follow the selected variant; enter never, tablet, mobile-landscape, mobile-portrait, or always to override it",
     });
   }
-  if (code !== CORE_EMBED_CODE) await embed.setSettings({ code: CORE_EMBED_CODE });
+  if (code !== targetCode) await embed.setSettings({ code: targetCode });
   const [savedProps, savedCode] = await Promise.all([component.getProps(), embed.getSettings()]);
-  if (savedProps.find((prop) => prop.id === collapse.id)?.defaultValue !== "" || savedCode.code !== CORE_EMBED_CODE) {
+  if (savedProps.find((prop) => prop.id === collapse.id)?.defaultValue !== "" || savedCode.code !== targetCode) {
     throw new Error("Variant bridge settings did not pass readback.");
   }
   return "Native core variant bridge saved: blank Collapse breakpoint follows Webflow’s variant marker; a nonblank value overrides it. Preview behavior still needs checking.";
@@ -986,9 +997,10 @@ async function configureNativeCore(report: (message: string) => void, knownCompo
     throw new Error("The native core runtime Embed is missing; no properties were added.");
   }
   const existingCode = (await embed.getSettings()).code;
-  if (existingCode !== cdnLoader && existingCode !== CORE_EMBED_CODE_V1 && existingCode !== CORE_EMBED_CODE_V2 && existingCode !== CORE_EMBED_CODE_V3 && existingCode !== CORE_EMBED_CODE_V4 && existingCode !== CORE_EMBED_CODE_V5 && existingCode !== CORE_EMBED_CODE_V6 && existingCode !== CORE_EMBED_CODE) {
+  if (existingCode !== cdnLoader && existingCode !== CORE_EMBED_CODE_V1 && existingCode !== CORE_EMBED_CODE_V2 && existingCode !== CORE_EMBED_CODE_V3 && existingCode !== CORE_EMBED_CODE_V4 && existingCode !== CORE_EMBED_CODE_V5 && existingCode !== CORE_EMBED_CODE_V6 && existingCode !== CORE_EMBED_CODE && existingCode !== LIGHT_ALPHA_EMBED_CODE) {
     throw new Error("The native core Embed differs from the known trial versions; no code was replaced.");
   }
+  const targetCode = currentCoreEmbedCode(existingCode);
   const [brand, menu, panel] = await inner.getChildren();
   if (!brand?.attributes || !menu?.children || !panel?.attributes ||
     await menu.getResolvedAttributeValue("data-mwp-menu") === null ||
@@ -1018,7 +1030,7 @@ async function configureNativeCore(report: (message: string) => void, knownCompo
   const [infrastructureStyle, infrastructureSummaryStyle] = await Promise.all([
     style("sb-app-infrastructure"), style("sb-app-infrastructure-summary"),
   ]);
-  await infrastructureStyle.setProperties({ "font-size": "11px", "line-height": "1.3", color: "#b7c8bd", "padding-top": "6px" });
+  await infrastructureStyle.setProperties({ "font-size": "11px", "line-height": "1.3", color: targetCode === LIGHT_ALPHA_EMBED_CODE ? "var(--mwp-nav-muted-ink, #475569)" : "#b7c8bd", "padding-top": "6px" });
   await infrastructureSummaryStyle.setProperties({ cursor: "pointer" });
   if (!infrastructure) {
     infrastructure = await root.append(webflow.elementPresets.DOM);
@@ -1046,10 +1058,10 @@ async function configureNativeCore(report: (message: string) => void, knownCompo
   if (!infrastructureSummary.styles) throw new Error("The infrastructure summary cannot be styled.");
   await infrastructureSummary.setStyles([infrastructureSummaryStyle]);
   if (directEmbed) await infrastructure.append(directEmbed);
-  if (existingCode !== CORE_EMBED_CODE) {
+  if (existingCode !== targetCode) {
     report("Updating the scoped runtime display rules…");
-    await embed.setSettings({ code: CORE_EMBED_CODE });
-    if ((await embed.getSettings()).code !== CORE_EMBED_CODE) {
+    await embed.setSettings({ code: targetCode });
+    if ((await embed.getSettings()).code !== targetCode) {
       throw new Error("The native core Embed update did not pass readback.");
     }
   }
@@ -1741,6 +1753,22 @@ async function configureNativeSecondary(report: (message: string) => void, alpha
     await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
     throw new Error("The native core trial marker has changed; no secondary navigation was changed.");
   }
+  const rootChildren = await root.getChildren();
+  let infrastructure: AnyElement | undefined;
+  for (const child of rootChildren) {
+    if (child.attributes && await child.getResolvedAttributeValue("data-mwp-infrastructure") !== null) {
+      infrastructure = child;
+      break;
+    }
+  }
+  const embedCandidates = [
+    ...rootChildren.filter((child) => child.type === "HtmlEmbed"),
+    ...(infrastructure?.children ? (await infrastructure.getChildren()).filter((child) => child.type === "HtmlEmbed") : []),
+  ];
+  if (embedCandidates.length !== 1 || !embedCandidates[0].elementSettings) {
+    throw new Error("Expected one native runtime Embed before styling secondary navigation.");
+  }
+  const lightAlpha = (await embedCandidates[0].getSettings()).code === LIGHT_ALPHA_EMBED_CODE;
   const [inner] = await root.getChildren();
   const [, , panel] = inner?.children ? await inner.getChildren() : [];
   if (!panel?.children || !panel.attributes ||
@@ -1791,7 +1819,7 @@ async function configureNativeSecondary(report: (message: string) => void, alpha
   await labelStyle.setProperties({ display: "inline-block" });
   await iconStyle.setProperties({ display: "block", width: "18px", height: "18px", "min-width": "18px", "max-width": "18px", "min-height": "18px", "max-height": "18px", "object-fit": "contain", "margin-right": "6px" });
   await panelStyle.setProperties({ "align-items": "stretch" }, { breakpoint: "medium" });
-  await secondaryStyle.setProperties({ "justify-content": "flex-start", "border-top-style": "solid", "border-top-width": "1px", "border-top-color": "#ffffff33", "padding-top": "12px" }, { breakpoint: "medium" });
+  await secondaryStyle.setProperties({ "justify-content": "flex-start", "border-top-style": "solid", "border-top-width": "1px", "border-top-color": lightAlpha ? "var(--mwp-nav-divider, #11182733)" : "#ffffff33", "padding-top": "12px" }, { breakpoint: "medium" });
   let secondary = panelChildren[1];
   if (secondary && (!secondary.attributes ||
     await secondary.getResolvedAttributeValue("data-mwp-secondary") === null)) {
@@ -2337,16 +2365,16 @@ async function createNativeCore(report: (message: string) => void, alpha = false
     style("sb-app-summary"), style("sb-app-icon"), style("sb-app-icon-line"),
     style("sb-app-panel"), style("sb-app-links"), style("sb-app-link"), style("sb-app-backdrop"),
   ]);
-  await rootStyle.setProperties({ "background-color": "#17251e", color: "#ffffff", "padding-top": "16px", "padding-bottom": "16px", "padding-left": "24px", "padding-right": "24px" });
+  await rootStyle.setProperties({ "background-color": alpha ? "var(--mwp-nav-surface, #ffffff)" : "#17251e", color: alpha ? "var(--mwp-nav-ink, #111827)" : "#ffffff", "padding-top": "16px", "padding-bottom": "16px", "padding-left": "24px", "padding-right": "24px" });
   await innerStyle.setProperties({ display: "flex", "align-items": "center", "justify-content": "space-between", gap: "20px" });
-  await brandStyle.setProperties({ color: "#ffffff", "text-decoration": "none", "font-weight": "700" });
+  await brandStyle.setProperties({ color: alpha ? "inherit" : "#ffffff", "text-decoration": "none", "font-weight": "700" });
   await menuStyle.setProperties({ display: "none" });
   await summaryStyle.setProperties({ display: "flex", "align-items": "center", gap: "10px", cursor: "pointer" });
   await iconStyle.setProperties({ display: "flex", "flex-direction": "column", gap: "5px", width: "20px", height: "16px", overflow: "visible", "flex-shrink": "0" });
   await lineStyle.setProperties({ display: "block", width: "20px", height: "2px", "min-width": "20px", "max-width": "20px", "min-height": "2px", "max-height": "2px", "flex-shrink": "0", "background-color": "currentColor" });
   await panelStyle.setProperties({ display: "flex", "align-items": "center" });
   await linksStyle.setProperties({ display: "flex", "align-items": "center", gap: "20px" });
-  await linkStyle.setProperties({ color: "#ffffff", "text-decoration": "none" });
+  await linkStyle.setProperties({ color: alpha ? "inherit" : "#ffffff", "text-decoration": "none" });
   await backdropStyle.setProperties({ position: "fixed", top: "0", right: "0", bottom: "0", left: "0", opacity: "0", visibility: "hidden", "pointer-events": "none" });
   await rootStyle.setProperties({ "padding-left": "20px", "padding-right": "20px" }, { breakpoint: "medium" });
   await innerStyle.setProperties({ "flex-wrap": "wrap" }, { breakpoint: "medium" });
@@ -2417,7 +2445,7 @@ async function createNativeCore(report: (message: string) => void, alpha = false
   await backdrop.setAttribute("data-mwp-backdrop", "");
   await backdrop.setAttribute("aria-hidden", "true");
   const embed = await root.append(webflow.elementPresets.HtmlEmbed);
-  await embed.setSettings({ code: CORE_EMBED_CODE });
+  await embed.setSettings({ code: alpha ? LIGHT_ALPHA_EMBED_CODE : CORE_EMBED_CODE });
   report("Registering the native core as a project component…");
   const component = await webflow.registerComponent({
     name: alpha ? ALPHA_NAME : CORE_NAME, group: "SmashBurger experiments",
