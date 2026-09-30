@@ -75,7 +75,7 @@ An unpublished Library source correction now gives both delivery editions a whit
 
 This means the component can look intentionally plain in the library. Apply project-specific presentation through the existing native `mwp-css-nav_*` classes after pasting; do not edit the delivery Embed or use `!important`. The legacy `v0.2.0` stylesheet had one cascade exception: its collapsed-panel placement and width selector tied a single Webflow class and won because the CDN loaded later. `v0.2.1` demotes panel display, placement, insets, alignment, width and transform-origin to zero-specificity fallbacks so the ordinary panel class can override them directly.
 
-For the burger X, `--mwp-nav-icon-shift` is the line thickness plus the vertical gap between lines. The `v0.2.2` default is `0.4375rem` (7 px at a 16 px root size), matching the original 2 px bars and 5 px gap. The two-line option uses half that shift. If a destination project changes the line thickness or gap, set this variable on its navbar root to the new sum.
+In released `v0.2.3`, the burger X uses `--mwp-nav-icon-shift`. Set it to the line thickness plus the vertical gap when changing those native styles; the two-line option uses half the value. The unreleased next-version source instead positions both open bars on the icon's centre, removing that manual adjustment. It has a CSSOM check but still needs rendered visual checks before release.
 
 ### Replacing an existing Webflow Navbar
 
