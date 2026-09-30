@@ -51,6 +51,26 @@ test('custom motion keeps the panel hidden when closed and reserves time for GSA
   assert.match(css, /\[data-state="closed"\] \[data-mwp-panel\]\s*\{[\s\S]*?visibility:\s*hidden;/);
 });
 
+test('all collapsed layouts present the backdrop below navigation only while opening or open', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  for (const layout of ['dropdown', 'full-width', 'left', 'right', 'overlay']) {
+    for (const state of ['closed', 'opening', 'open']) {
+      const fixture = new JSDOM(`<style>${css}</style>
+        <header data-mwp-navbar data-mwp-collapsed="true" data-layout="${layout}" data-state="${state}">
+          <div data-mwp-inner><nav data-mwp-panel></nav></div><div data-mwp-backdrop></div>
+        </header>`);
+      const { document, getComputedStyle } = fixture.window;
+      const backdrop = getComputedStyle(document.querySelector('[data-mwp-backdrop]'));
+      const inner = getComputedStyle(document.querySelector('[data-mwp-inner]'));
+      assert.equal(backdrop.opacity, state === 'closed' ? '0' : '1', `${layout} ${state} backdrop opacity`);
+      assert.equal(backdrop.visibility, state === 'closed' ? 'hidden' : 'visible', `${layout} ${state} backdrop visibility`);
+      assert.equal(backdrop.pointerEvents, state === 'closed' ? 'none' : 'auto', `${layout} ${state} backdrop pointer events`);
+      assert.ok(Number(backdrop.zIndex) < Number(inner.zIndex), `${layout} ${state} backdrop stacking`);
+      fixture.window.close();
+    }
+  }
+});
+
 const markup = `
   <header data-mwp-navbar data-collapse="always" data-motion="none" data-close-on-link="true" data-close-on-outside="true">
     <div>

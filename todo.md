@@ -81,7 +81,7 @@ The current released installation path remains the MWP Component Library. The pr
 - [x] Left, center and right dropdown alignment.
 - [x] Configurable panel width.
 - [x] Native editable backdrop.
-- [ ] When `Show backdrop` is enabled, support it consistently in every collapsed layout, including Dropdown and Full width as well as Left drawer, Right drawer and Overlay; do not make a dropdown backdrop imply page scroll locking. The scoped private-alpha Embed passed Designer Preview at 820px for Dropdown and Full width, including page scrolling while open, Full-width backdrop dismissal and trigger focus return, and Full-width backdrop-off presentation. The pinned v0.2.3 release is unchanged; broader breakpoint, regression and release checks remain.
+- [ ] When `Show backdrop` is enabled, support it consistently in every collapsed layout, including Dropdown and Full width as well as Left drawer, Right drawer and Overlay; do not make a dropdown backdrop imply page scroll locking. The scoped private-alpha Embed passed Designer Preview at 820px for Dropdown and Full width. Source CSS now includes those two layouts, and computed-style/runtime regression checks pass (24/24). The pinned v0.2.3 release is unchanged; versioned build and published checks remain.
 - [x] Panel padding, gap, border, radius and shadow remain normal Webflow class styles.
 - [x] Native nested-details submenu with independent Escape handling.
 - [x] Optional CTA and secondary/social regions.
@@ -204,7 +204,7 @@ Keep the current Canvas-visible, self-contained Embed as the dependable default.
 - [ ] Add a native-like `--mwp-nav-z-index` custom property with a documented default and confirm it can be overridden by destination projects.
 - [ ] Add regression coverage for a trigger moved inside one ordinary layout wrapper while the panel remains elsewhere under the same root.
 - [ ] Add regression coverage for panel state presentation above ordinary sticky content and for the `Show brand` property in both delivery editions.
-- [ ] Add regression coverage for optional Dropdown and Full-width backdrops: opening/closing presentation, stacking below the panel, click-to-close with trigger focus return, and no unintended scroll lock. Runtime tests now cover no automatic scroll lock and backdrop dismissal for both layouts (23/23 suite passing). The private alpha also passed a manual 820px Preview check on 30 September. Presentation, stacking and released-component checks remain.
+- [ ] Add regression coverage for optional Dropdown and Full-width backdrops: opening/closing presentation, stacking below the panel, click-to-close with trigger focus return, and no unintended scroll lock. Computed-style tests now cover closed/opening/open presentation and stacking for all five layouts; runtime tests cover no automatic scroll lock and backdrop dismissal for Dropdown and Full width (24/24 suite passing). The private alpha also passed a manual 820px Preview check on 30 September. Published output remains unchecked.
 - [ ] Re-run the complete layout/motion, collapse-breakpoint, keyboard, focus, ARIA/inert, reduced-motion and distribution checks before releasing these changes.
 - [ ] After every relevant source-component release, review and deliberately backport the change to the unlinked/local madewithpixels implementation created from this trial; verify it there before rolling that local component across the project.
 

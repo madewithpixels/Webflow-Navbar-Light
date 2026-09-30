@@ -534,8 +534,8 @@
   transform: none;
 }
 
-[data-mwp-navbar][data-mwp-collapsed="true"]:where([data-layout="left"], [data-layout="right"], [data-layout="overlay"])[data-state="open"] [data-mwp-backdrop],
-[data-mwp-navbar][data-mwp-collapsed="true"]:where([data-layout="left"], [data-layout="right"], [data-layout="overlay"])[data-state="opening"] [data-mwp-backdrop] {
+[data-mwp-navbar][data-mwp-collapsed="true"]:where([data-layout="dropdown"], [data-layout="full-width"], [data-layout="left"], [data-layout="right"], [data-layout="overlay"])[data-state="open"] [data-mwp-backdrop],
+[data-mwp-navbar][data-mwp-collapsed="true"]:where([data-layout="dropdown"], [data-layout="full-width"], [data-layout="left"], [data-layout="right"], [data-layout="overlay"])[data-state="opening"] [data-mwp-backdrop] {
   opacity: 1;
   pointer-events: auto;
   transition-delay: 0s;

@@ -20,3 +20,9 @@ The main work in that interval was roughly two dozen Chrome UI operations plus l
 - Browser presentation and stacking checks at more breakpoints, plus published runtime checks for the alpha backdrop candidate.
 - Native installer schema parity, complete destination setup and release/distribution decisions.
 - Removal of the scroll-test section when the disposable fixture is no longer useful.
+
+## Continuation, 15:59–16:02 UTC
+
+- Updated source CSS so all five collapsed layouts, including Dropdown and Full width, expose the backdrop while opening or open. This is a source candidate only; pinned v0.2.3 release artifacts and Webflow sites were not changed in this continuation.
+- Added a computed-style regression check covering backdrop opacity, visibility, pointer events and stacking against the navigation in closed, opening and open states for every layout. `npm test` passed **24/24**; `npm run check` passed.
+- Account-wide meter: five-hour usage **29%** and weekly usage **5%** at **15:59:36 UTC**; **31%** and **5%** at **16:02:01 UTC**. The observed five-hour difference was **2 percentage points** across roughly **2 minutes 25 seconds** of local code, tests and documentation. These rolling-window readings are not per-task billing or a clean comparison with the earlier browser interval.
