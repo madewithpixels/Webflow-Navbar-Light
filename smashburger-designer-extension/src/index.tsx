@@ -220,6 +220,34 @@ async function checkInstallReadiness(): Promise<string> {
   return `${status}. Site=${result.siteName}; page=${result.pageSlug}; app-visible bundled icons=${result.visibleIcons}/9. This check is read-only.`;
 }
 
+async function checkAlphaLinkDefaults(): Promise<string> {
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const component = components[names.indexOf(ALPHA_NAME)];
+  if (!component) return "No SmashBurger native alpha component found on this site. Read-only check.";
+  const root = await component.getRootElement();
+  if (!root?.attributes || await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("The native alpha marker has changed; link defaults cannot be audited.");
+  }
+  const destinationNames = [
+    "Brand destination", "Link 1 destination", "Link 2 destination", "Link 3 destination", "CTA destination",
+    "Submenu link 1 destination", "Submenu link 2 destination",
+    ...["Facebook", "Instagram", "LinkedIn", "TikTok", "Threads", "X", "WhatsApp", "Telephone", "Email"]
+      .map((name) => `${name} destination`),
+  ];
+  const props = await component.getProps();
+  const missing: string[] = [];
+  const placeholders: string[] = [];
+  for (const name of destinationNames) {
+    const prop = props.find((item) => item.name === name && item.type === "link");
+    if (!prop) { missing.push(name); continue; }
+    const value = prop.defaultValue;
+    if (value && typeof value === "object" && "mode" in value && value.mode === "url" &&
+      "to" in value && (value.to === "#" || value.to === "")) placeholders.push(name);
+  }
+  return `Alpha link defaults: ${destinationNames.length - missing.length}/${destinationNames.length} properties found; ${placeholders.length} placeholder destinations (# or empty). ${missing.length ? `Missing: ${missing.join(", ")}. ` : ""}${placeholders.length ? `Placeholders: ${placeholders.join(", ")}. ` : ""}Component defaults only; instance overrides are not checked. Read-only check.`;
+}
+
 async function installNativeAlpha(report: (message: string) => void): Promise<string> {
   const readiness = await inspectInstallReadiness();
   if (readiness.blockers.length) {
@@ -268,7 +296,7 @@ async function expandNativeAlpha(report: (message: string) => void): Promise<str
   const required = ["Show CTA", "CTA text", "CTA destination", "Menu label", "Brand text", "Facebook destination", "Show secondary navigation", "Submenu link 1 text", "Distance"];
   const missing = required.filter((name) => !saved.some((prop) => prop.name === name));
   if (missing.length) throw new Error(`Native alpha expansion is missing ${missing.join(", ")}; inspect before retrying.`);
-  return `Native alpha expanded: primary links and CTA, nine text-only secondary links, submenu and grouped controls saved. Icons, full variants and published checks remain pending. Properties=${saved.length}.`;
+  return `Native alpha expanded: primary links and CTA, nine text-only secondary links, submenu and grouped controls saved. Demo destinations still use #; configure them before publishing. Icons, full variants and published checks remain pending. Properties=${saved.length}.`;
 }
 
 async function repairAlphaCollapseDefault(): Promise<string> {
@@ -347,7 +375,7 @@ async function installCompleteAlpha(report: (message: string) => void): Promise<
   } catch (error) {
     throw new Error(`Phase ${phase}/4 stopped: ${describeError(error)}`);
   }
-  return `Native alpha installed on draft page ${readiness.pageSlug}: core, content, nine icons and five collapse variants passed Designer readback. Check Canvas and Preview before publishing.`;
+  return `Native alpha installed on draft page ${readiness.pageSlug}: core, content, nine icons and five collapse variants passed Designer readback. Its 16 demo link destinations still use #; configure them and check Canvas and Preview before publishing.`;
 }
 
 async function probeAssetUpload(): Promise<string> {
@@ -2408,6 +2436,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Install preflight stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
+  const checkAlphaLinks = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await checkAlphaLinkDefaults()); }
+    catch (error) { setMessage(`Alpha link audit stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const installAlpha = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await installNativeAlpha(setMessage)); setSnapshot(await inspect()); }
@@ -2495,6 +2529,7 @@ const App: React.FC = () => {
     <div className="actions">
       <button disabled={busy} onClick={() => { void refresh(); }}>Inspect selection</button>
       <button className="secondary" disabled={busy} onClick={() => { void checkInstallTarget(); }}>Check install target (read only)</button>
+      <button className="secondary" disabled={busy} onClick={() => { void checkAlphaLinks(); }}>Check alpha link defaults (read only)</button>
       <button disabled={busy} onClick={() => { void installAllAlpha(); }}>Install complete alpha on clean draft</button>
     </div>
     <details className="toolbox">
