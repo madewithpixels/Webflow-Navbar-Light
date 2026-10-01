@@ -517,6 +517,8 @@ async function expandNativeAlpha(report: (message: string) => void): Promise<str
   report("Adding secondary links and submenu…");
   await configureNativeSecondary(report, true);
   await configureNativeSubmenu(report, true);
+  report("Keeping the native icon bars compact on Designer Canvas…");
+  await keepDecorativeBarsVisibleInCanvas(root);
   await configureNativeSubmenuProperties(report, true);
   report("Binding motion and visibility controls…");
   await configureNativeMotion(report, true);
@@ -633,6 +635,50 @@ async function probeAssetUpload(): Promise<string> {
 
 async function style(name: string): Promise<Style> {
   return (await webflow.getStyleByName(name)) ?? webflow.createStyle(name);
+}
+
+async function keepDecorativeBarsVisibleInCanvas(root: AnyElement): Promise<number> {
+  const lines: AnyElement[] = [];
+  const visit = async (element: AnyElement): Promise<void> => {
+    if (element.attributes && (await element.getResolvedAttributeValue("data-mwp-line") !== null ||
+      await element.getResolvedAttributeValue("data-mwp-submenu-arrow-line") !== null)) lines.push(element);
+    if (element.children) for (const child of await element.getChildren()) await visit(child);
+  };
+  await visit(root);
+  if (lines.length !== 5 || lines.some((line) => !line.children)) {
+    throw new Error(`Expected five editable decorative bar containers; found ${lines.length}. No bar content was changed.`);
+  }
+  // Webflow's Designer adds 75px padding to empty Divs via .wf-empty.
+  // DivBlocks cannot hold text directly through the API, so use one marked
+  // native span with a zero-width space instead of altering their CSS size.
+  for (const line of lines) {
+    if (!line.children) throw new Error("A decorative bar cannot contain its Canvas filler.");
+    const existing = await line.getChildren();
+    if (existing.length === 1 && existing[0].attributes &&
+      await existing[0].getResolvedAttributeValue("data-mwp-canvas-bar-filler") !== null) continue;
+    if (existing.length) throw new Error("A decorative bar contains unrecognized content; inspect before retrying.");
+    const filler = await line.append(webflow.elementPresets.DOM);
+    await filler.setTag("span");
+    await filler.setAttribute("data-mwp-canvas-bar-filler", "");
+    await filler.setAttribute("aria-hidden", "true");
+    await filler.setTextContent("\u200b");
+  }
+  return lines.length;
+}
+
+async function repairAlphaCanvasBars(): Promise<string> {
+  const page = await webflow.getCurrentPage();
+  if (!await page.isDraft()) throw new Error("Open a draft page containing the native alpha.");
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((component) => component.getName()));
+  const component = components[names.indexOf(ALPHA_NAME)];
+  const root = await component?.getRootElement();
+  if (!component || component.library || component.readOnly || await component.getInstanceCount() !== 1 ||
+    !root?.children || !root.attributes || await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("Expected one editable marked alpha component; no bar content was changed.");
+  }
+  const count = await keepDecorativeBarsVisibleInCanvas(root);
+  return `Canvas bar repair applied to ${count} decorative Divs. Inspect the submenu arrow and Menu icon on Canvas and in Preview.`;
 }
 
 function isBoundTo(value: unknown, propId: string): boolean {
@@ -2790,6 +2836,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Native alpha collapse repair stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
+  const repairCanvasBars = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await repairAlphaCanvasBars()); setSnapshot(await inspect()); }
+    catch (error) { setMessage(`Canvas bar repair stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const configureAlphaCollapse = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await configureAlphaVariants(setMessage)); setSnapshot(await inspect()); }
@@ -2867,6 +2919,7 @@ const App: React.FC = () => {
         <button className="secondary" disabled={busy} onClick={() => { void bindAlphaLabel(); }}>Bind alpha Menu label</button>
         <button className="secondary" disabled={busy} onClick={() => { void installAlphaImages(); }}>Install native alpha icons</button>
         <button className="secondary" disabled={busy} onClick={() => { void repairAlphaCollapse(); }}>Repair alpha Tablet default</button>
+        <button className="secondary" disabled={busy} onClick={() => { void repairCanvasBars(); }}>Repair empty icon bars on Canvas</button>
         <button className="secondary" disabled={busy} onClick={() => { void inspectAlphaCollapse(); }}>Inspect alpha variants (read only)</button>
         <button className="secondary" disabled={busy} onClick={() => { void configureAlphaCollapse(); }}>Configure native alpha variants</button>
         <button className="secondary" disabled={busy} onClick={() => { void refreshAlphaBackdrop(); }}>Update alpha backdrop rules</button>
