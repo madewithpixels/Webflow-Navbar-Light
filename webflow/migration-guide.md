@@ -29,7 +29,7 @@ Navbar root
    └─ Navigation panel
 ```
 
-`Menu details` and `Navigation panel` must remain adjacent, direct children of `Navbar inner`. Wrapping `Menu details` in a project-specific layout Div can still allow JavaScript to update `aria-expanded`, `aria-hidden`, `inert` and `data-state`, while the current CSS selector leaves the panel visually closed.
+In the current v0.2.3 release, `Menu details` and `Navigation panel` must remain adjacent, direct children of `Navbar inner`. Wrapping `Menu details` in a project-specific layout Div can still allow JavaScript to update `aria-expanded`, `aria-hidden`, `inert` and `data-state`, while the released CSS selector leaves the panel visually closed. The next source candidate adds a panel-state rule that supports one ordinary trigger wrapper after enhancement; its published Webflow behavior still needs validation. The adjacent-sibling rule remains the native no-script baseline.
 
 Keep the functional siblings intact and use Flex or Grid order, margins, gaps, alignment and positioning to achieve the required visual grouping. The roadmap includes changing the enhanced open-state CSS to target the panel's own runtime state, with regression coverage for a rewrapped trigger. The canonical sibling structure will remain the CSS/native no-script baseline.
 
@@ -71,7 +71,7 @@ For a `v0.2.0` integration, add one deliberately named combo class to `mwp-css-n
 
 An open navigation panel can appear clipped when sticky or positioned page content is actually painting above it. Inspect stacking before changing overflow, masks or containment.
 
-For the current release, give the root a positioned, project-appropriate z-index above normal page content. A future release will add a native-like default through an overridable `--mwp-nav-z-index` custom property.
+The v0.2.3 delivery stylesheet positions the root and gives it a default z-index of `100` through `--mwp-nav-z-index`. Set that property directly on the navbar root to override the released default. The next source release also accepts a value inherited from a project wrapper, with `100` as its fallback. Check the actual stacking context in Preview before raising the value: a positioned ancestor can still keep the whole navigation below other page content.
 
 ## Backdrop behavior
 

@@ -17,10 +17,9 @@
   --mwp-nav-submenu-icon-rotation: 180deg;
   --mwp-nav-stagger: 0ms;
   --mwp-nav-backdrop-opacity: 0.45;
-  --mwp-nav-z-index: 100;
   position: relative;
   isolation: isolate;
-  z-index: var(--mwp-nav-z-index);
+  z-index: var(--mwp-nav-z-index, 100);
 }
 
 :where([data-mwp-navbar] .mwp-css-nav_inner) {
@@ -590,6 +589,18 @@
 [data-mwp-menu][data-mwp-motion="mwp-motion-custom"][open] + [data-mwp-panel] {
   opacity: 1;
   pointer-events: auto;
+  visibility: visible;
+}
+
+/* Enhanced menus expose state on the panel itself, so a project layout
+ * wrapper around the trigger need not be adjacent to the panel. The native
+ * details sibling rules above remain the no-script fallback. */
+[data-mwp-navbar][data-mwp-collapsed="true"]:not([data-motion="custom"]) [data-mwp-panel]:is([data-state="opening"], [data-state="open"]) {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+  transition-delay: 0s;
+  transition-duration: var(--mwp-nav-duration-open), var(--mwp-nav-duration-open), 0s;
   visibility: visible;
 }
 

@@ -27,6 +27,31 @@ test('functional CSS keeps a closed native submenu out of the accessibility tree
   assert.doesNotMatch(css, /::before|::after/);
 });
 
+test('navbar stacking default permits a project wrapper to supply its z-index token', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  const rootRule = css.match(/:where\(\[data-mwp-navbar\]\)\s*\{([^}]*)\}/)?.[1];
+  assert.ok(rootRule, 'Expected the low-specificity navbar root rule');
+  assert.match(rootRule, /z-index:\s*var\(--mwp-nav-z-index,\s*100\)/);
+  assert.doesNotMatch(rootRule, /--mwp-nav-z-index\s*:/, 'A root token default would override an inherited project token');
+});
+
+test('enhanced panel state works after wrapping the trigger while native siblings remain supported', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  const stateSelector = '[data-mwp-navbar][data-mwp-collapsed="true"]:not([data-motion="custom"]) [data-mwp-panel]:is([data-state="opening"], [data-state="open"])';
+  assert.ok(css.includes(`${stateSelector} {`));
+  assert.match(css, /\[data-mwp-menu\]\[open\] \+ \[data-mwp-panel\]/);
+
+  const wrapped = new JSDOM('<header data-mwp-navbar data-mwp-collapsed="true"><div><details data-mwp-menu open><summary>Menu</summary></details></div><nav data-mwp-panel data-state="opening"></nav></header>');
+  const panel = wrapped.window.document.querySelector('[data-mwp-panel]');
+  assert.ok(panel.matches(stateSelector));
+  assert.equal(wrapped.window.document.querySelector('[data-mwp-menu][open] + [data-mwp-panel]'), null);
+  wrapped.window.close();
+
+  const native = new JSDOM('<header data-mwp-navbar><details data-mwp-menu open><summary>Menu</summary></details><nav data-mwp-panel></nav></header>');
+  assert.ok(native.window.document.querySelector('[data-mwp-menu][open] + [data-mwp-panel]'));
+  native.window.close();
+});
+
 test('panel layout defaults stay below ordinary Webflow class styles', () => {
   const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
   const panelLayoutProperty = /(?:^|;)\s*(?:display|position|inset|top|right|bottom|left|width|max-width|translate|transform-origin)\s*:/m;
@@ -114,6 +139,30 @@ test('opens, emits lifecycle events and exposes public controls', async () => {
   assert.equal(root.dataset.state, 'open');
   assert.deepEqual(events, ['open', 'opened']);
   assert.equal(root.mwpNavbarLight.state, 'open');
+  navbar.destroy();
+});
+
+test('wrapped trigger drives panel state and closes with focus return', async () => {
+  const root = document.querySelector('[data-mwp-navbar]');
+  const menu = root.querySelector('[data-mwp-menu]');
+  const panel = root.querySelector('[data-mwp-panel]');
+  const trigger = root.querySelector('[data-mwp-trigger]');
+  const wrapper = document.createElement('div');
+  menu.replaceWith(wrapper);
+  wrapper.append(menu);
+  const navbar = new NavbarLight(root);
+
+  const opened = waitForEvent(root, 'mwp-nav:opened');
+  menu.open = true;
+  await opened;
+  assert.equal(panel.dataset.state, 'open');
+  assert.equal(trigger.getAttribute('aria-expanded'), 'true');
+
+  const closed = waitForEvent(root, 'mwp-nav:closed');
+  document.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+  await closed;
+  assert.equal(panel.dataset.state, 'closed');
+  assert.equal(document.activeElement, trigger);
   navbar.destroy();
 });
 

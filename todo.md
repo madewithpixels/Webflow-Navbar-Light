@@ -188,10 +188,10 @@ Keep the current Canvas-visible, self-contained Embed as the dependable default.
 - [ ] Verify the revised background defaults in light, dark and transparent destination wrappers without referencing MWP Component Library demo-theme variables.
 - [ ] Remove the fixed `max-width: 80rem` from the portable navigation inner base. Default to the available width and let destination projects add their own container class, variable or project-specific maximum.
 - [ ] Add wide-layout regression coverage proving the component itself does not impose a content width while an optional destination container can still constrain and centre it.
-- [ ] Make enhanced collapsed-panel presentation respond to `[data-mwp-panel][data-state="opening"]` and `[data-mwp-panel][data-state="open"]` rather than depending only on `[data-mwp-menu][open] + [data-mwp-panel]`.
-- [ ] Retain and test the canonical adjacent-sibling selector as the CSS/native no-script baseline.
-- [ ] Add a native-like `--mwp-nav-z-index` custom property with a documented default and confirm it can be overridden by destination projects.
-- [ ] Add regression coverage for a trigger moved inside one ordinary layout wrapper while the panel remains elsewhere under the same root.
+- [ ] Make enhanced collapsed-panel presentation respond to `[data-mwp-panel][data-state="opening"]` and `[data-mwp-panel][data-state="open"]` rather than depending only on `[data-mwp-menu][open] + [data-mwp-panel]`. Source candidate and local selector/runtime checks pass; Webflow Preview and published checks remain.
+- [ ] Retain and test the canonical adjacent-sibling selector as the CSS/native no-script baseline. The source candidate retains the rule and a local selector check passes; verify in a published no-script fixture.
+- [ ] Add a native-like `--mwp-nav-z-index` custom property with a documented default and confirm it can be overridden by destination projects. v0.2.3 already ships the root token with a `100` default; the source candidate moves `100` into the `z-index` fallback so a project-wrapper token can inherit. Local regression passes; browser stacking acceptance remains.
+- [ ] Add regression coverage for a trigger moved inside one ordinary layout wrapper while the panel remains elsewhere under the same root. Source selector and runtime open/Escape/focus checks pass locally; Webflow Preview and published checks remain.
 - [ ] Add regression coverage for panel state presentation above ordinary sticky content and for the `Show brand` property in both delivery editions.
 - [ ] Add regression coverage for optional Dropdown and Full-width backdrops: opening/closing presentation, stacking below the panel, click-to-close with trigger focus return, and no unintended scroll lock.
 - [ ] Re-run the complete layout/motion, collapse-breakpoint, keyboard, focus, ARIA/inert, reduced-motion and distribution checks before releasing these changes.
