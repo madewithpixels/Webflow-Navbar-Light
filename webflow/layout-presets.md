@@ -41,3 +41,9 @@ These presets ship in the v0.2.3 source and generated distribution files.
 The linked Webflow Library update must be accepted on each site before its
 installed components use the new native styles and CDN Embed. See the
 [demo acceptance record](demo-qa.md) for the Smashburger consumer checks.
+
+The next source candidate supports an explicit `data-backdrop="true"` on the
+navbar root for Dropdown and Full width. It does not change the existing
+drawer/overlay backdrop behavior or enable scroll locking. This source hook
+is not yet bound to a native Webflow property or included in pinned v0.2.3;
+verify it in Preview and on a published test page before distribution.

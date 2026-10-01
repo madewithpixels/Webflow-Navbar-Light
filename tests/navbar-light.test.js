@@ -52,6 +52,20 @@ test('enhanced panel state works after wrapping the trigger while native sibling
   native.window.close();
 });
 
+test('Dropdown and Full width backdrops require an explicit source opt-in', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  const optIn = '[data-mwp-navbar][data-mwp-collapsed="true"][data-backdrop="true"]:where([data-layout="dropdown"], [data-layout="full-width"]):is([data-state="opening"], [data-state="open"]) [data-mwp-backdrop]';
+  assert.ok(css.includes(`${optIn},`));
+  const fixture = new JSDOM('<header data-mwp-navbar data-mwp-collapsed="true" data-layout="dropdown" data-state="open"><div data-mwp-backdrop></div></header>');
+  const backdrop = fixture.window.document.querySelector('[data-mwp-backdrop]');
+  assert.equal(backdrop.matches(optIn), false);
+  fixture.window.document.querySelector('header').dataset.backdrop = 'true';
+  assert.equal(backdrop.matches(optIn), true);
+  fixture.window.document.querySelector('header').dataset.layout = 'full-width';
+  assert.equal(backdrop.matches(optIn), true);
+  fixture.window.close();
+});
+
 test('panel layout defaults stay below ordinary Webflow class styles', () => {
   const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
   const panelLayoutProperty = /(?:^|;)\s*(?:display|position|inset|top|right|bottom|left|width|max-width|translate|transform-origin)\s*:/m;
@@ -229,6 +243,29 @@ test('backdrop closes the menu and restores trigger focus', async () => {
   await closed;
   assert.equal(menu.open, false);
   assert.equal(document.activeElement, trigger);
+  navbar.destroy();
+});
+
+test('Dropdown backdrop opt-in closes without automatic scroll lock', async () => {
+  const root = document.querySelector('[data-mwp-navbar]');
+  root.dataset.layout = 'dropdown';
+  root.dataset.backdrop = 'true';
+  document.documentElement.style.overflow = 'clip';
+  const navbar = new NavbarLight(root);
+  const menu = root.querySelector('[data-mwp-menu]');
+  const trigger = root.querySelector('[data-mwp-trigger]');
+
+  const opened = waitForEvent(root, 'mwp-nav:opened');
+  menu.open = true;
+  await opened;
+  assert.equal(document.documentElement.style.overflow, 'clip');
+
+  const closed = waitForEvent(root, 'mwp-nav:closed');
+  root.querySelector('[data-mwp-backdrop]').dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true }));
+  await closed;
+  assert.equal(menu.open, false);
+  assert.equal(document.activeElement, trigger);
+  assert.equal(document.documentElement.style.overflow, 'clip');
   navbar.destroy();
 });
 
