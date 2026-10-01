@@ -651,12 +651,17 @@ async function keepDecorativeBarsVisibleInCanvas(root: AnyElement): Promise<numb
   // Webflow's Designer adds 75px padding to empty Divs via .wf-empty.
   // DivBlocks cannot hold text directly through the API, so use one marked
   // native span with a zero-width space instead of altering their CSS size.
+  const toFill: AnyElement[] = [];
   for (const line of lines) {
     if (!line.children) throw new Error("A decorative bar cannot contain its Canvas filler.");
     const existing = await line.getChildren();
     if (existing.length === 1 && existing[0].attributes &&
       await existing[0].getResolvedAttributeValue("data-mwp-canvas-bar-filler") !== null) continue;
-    if (existing.length) throw new Error("A decorative bar contains unrecognized content; inspect before retrying.");
+    if (existing.length) throw new Error("A decorative bar contains unrecognized content; no bar content was changed.");
+    toFill.push(line);
+  }
+  for (const line of toFill) {
+    if (!line.children) throw new Error("A decorative bar cannot contain its Canvas filler.");
     const filler = await line.append(webflow.elementPresets.DOM);
     await filler.setTag("span");
     await filler.setAttribute("data-mwp-canvas-bar-filler", "");
