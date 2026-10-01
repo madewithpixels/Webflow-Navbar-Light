@@ -20,6 +20,8 @@
 
 The obsolete `CSS Navbar — Details` test component and instance were removed by the user after creating a backup. The self-contained component remains the sole acceptance component on its test page. The optional CDN edition lives alone on its separate page and differs only in its Canvas-visible Embed. Before that structural addition, the user created backup `V1.0.0 First Release`. Page names and slugs now use SmashBurger; some underlying component and element names still use Navbar Light pending the naming migration.
 
+The demo-specific CDN build, Self-hosted, Style guide and View release links use absolute URLs on `mwp-component-library.webflow.io`. Native Page references resolved on the source site but lost their target in a linked copy on SB Test Four, exposing obsolete custom `href` values. Absolute URLs survived Library sharing, acceptance, Designer Preview and a published consumer-site check. Replace these destinations when adapting the menu to a real site.
+
 ## Native structure
 
 ```text
