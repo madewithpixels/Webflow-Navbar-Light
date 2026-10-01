@@ -682,6 +682,11 @@ async function repairAlphaCanvasBars(): Promise<string> {
     !root?.children || !root.attributes || await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
     throw new Error("Expected one editable marked alpha component; no bar content was changed.");
   }
+  const pageInstances = (await webflow.getAllElements()).filter((item) => item.type === "ComponentInstance");
+  const pageComponentIds = await Promise.all(pageInstances.map(async (item) => (await item.getComponent()).id));
+  if (pageComponentIds.filter((id) => id === component.id).length !== 1) {
+    throw new Error("The current draft page must contain the one alpha instance; no bar content was changed.");
+  }
   const count = await keepDecorativeBarsVisibleInCanvas(root);
   return `Canvas bar repair applied to ${count} decorative Divs. Inspect the submenu arrow and Menu icon on Canvas and in Preview.`;
 }
