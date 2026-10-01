@@ -100,6 +100,31 @@ test('Dropdown and Full width backdrops require an explicit source opt-in', () =
   fixture.window.close();
 });
 
+test('optional backdrop is non-blocking until a collapsed layout opens', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  const fixture = new JSDOM(`<style>${css}</style>
+    <header data-mwp-navbar data-mwp-collapsed="true" data-layout="dropdown" data-state="closed">
+      <nav data-mwp-panel></nav><div data-mwp-backdrop></div>
+    </header>`);
+  const root = fixture.window.document.querySelector('[data-mwp-navbar]');
+  const backdrop = root.querySelector('[data-mwp-backdrop]');
+  const appearance = () => {
+    const style = fixture.window.getComputedStyle(backdrop);
+    return [style.opacity, style.visibility, style.pointerEvents, style.zIndex];
+  };
+
+  assert.deepEqual(appearance(), ['0', 'hidden', 'none', '1']);
+  root.dataset.state = 'open';
+  assert.deepEqual(appearance(), ['0', 'hidden', 'none', '1']);
+  root.dataset.backdrop = 'true';
+  assert.deepEqual(appearance(), ['1', 'visible', 'auto', '1']);
+  root.dataset.layout = 'full-width';
+  assert.deepEqual(appearance(), ['1', 'visible', 'auto', '1']);
+  root.dataset.state = 'closed';
+  assert.deepEqual(appearance(), ['0', 'hidden', 'none', '1']);
+  fixture.window.close();
+});
+
 test('panel layout defaults stay below ordinary Webflow class styles', () => {
   const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
   const panelLayoutProperty = /(?:^|;)\s*(?:display|position|inset|top|right|bottom|left|width|max-width|translate|transform-origin)\s*:/m;
