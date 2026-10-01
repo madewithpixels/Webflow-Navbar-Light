@@ -1,6 +1,6 @@
 # Replacing an existing Webflow Navbar with SmashBurger
 
-This guide covers the reusable lessons from replacing an already styled and rearranged native Webflow Navbar. It applies to the current `v0.2.1` Library and CDN editions. Project-specific navigation content, destinations and visual design deliberately remain outside this guide.
+This guide covers the reusable lessons from replacing an already styled and rearranged native Webflow Navbar. The current published delivery assets are `v0.2.3`; source changes described as candidates below have not been released. Project-specific navigation content, destinations and visual design deliberately remain outside this guide.
 
 ## Recommended workflow
 
@@ -58,6 +58,8 @@ The current release does not include a `Show brand` property. After unlinking, t
 Audit inherited presentation values while integrating the current component. In particular, `background: inherit` can make a trigger or panel depend unexpectedly on whichever wrapper it is moved into. Prefer an explicit project colour when styling an unlinked instance. A source-component audit is planned to replace accidental background inheritance with component-scoped colour defaults that remain straightforward to override.
 
 Older Library copies carry a component-level `max-width: 80rem` on the navigation inner. That presentation choice can obstruct an existing project's container system. On 2026-10-01 the base `mwp-css-nav_inner` class in MWP Component Library was cleared; Designer readback shows `Max W: None` in both delivery editions. The CDN edition passed 1920px and Tablet Preview checks, and both editions passed wide and Tablet checks on the published Library staging site. The revised Library was shared and accepted on SB Test Four; its fresh linked self-contained instance filled a 1734px Preview canvas and worked at 600px in Preview and published staging. An optional destination container override remains untested. For an older unlinked integration, remove or override the maximum on the local inner and apply any width constraint through a destination-project container class.
+
+To constrain a destination header, give its own wrapper a project class such as `site-header_container`. Set that class to `width: 100%`, the project's chosen `max-width`, and horizontal `margin: auto`; add the desired inline padding there. Keep `mwp-css-nav_inner` unrestricted. This preserves the full-width default for a fresh install while letting each site choose its own content width. Verify the resulting header at the widest project breakpoint and at Tablet, then open the menu to check that its panel placement still follows the selected layout. The optional-container acceptance test is still open.
 
 ## Panel placement and CSS priority
 
