@@ -123,6 +123,69 @@ type Snapshot = {
   whtml: boolean;
 };
 
+type AlphaHeaderTheme = { surface: string; ink: string };
+
+function normalizedThemeColor(value: string): string {
+  const normalized = value.trim();
+  if (/^#[0-9a-f]{6}$/i.test(normalized) ||
+    /^var\(--[a-z][a-z0-9-]*,\s*#[0-9a-f]{6}\)$/i.test(normalized)) return normalized;
+  throw new Error("Use a six-digit hex colour or var(--project-colour, #112233) with a fallback.");
+}
+
+async function alphaHeaderStyle(): Promise<Style> {
+  const page = await webflow.getCurrentPage();
+  if (!await page.isDraft()) throw new Error("Open the draft page containing the native alpha.");
+  const components = await webflow.getAllComponents();
+  const names = await Promise.all(components.map((component) => component.getName()));
+  const component = components[names.indexOf(ALPHA_NAME)];
+  const root = await component?.getRootElement();
+  if (!component || component.library || component.readOnly || await component.getInstanceCount() !== 1 ||
+    !root?.styles || !root.attributes || await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") {
+    throw new Error("Expected one editable marked alpha component; no header colour was changed.");
+  }
+  const pageInstances = (await webflow.getAllElements()).filter((item) => item.type === "ComponentInstance");
+  const pageComponentIds = await Promise.all(pageInstances.map(async (item) => (await item.getComponent()).id));
+  if (pageComponentIds.filter((id) => id === component.id).length !== 1) {
+    throw new Error("The current draft page must contain the one alpha instance; no header colour was changed.");
+  }
+  const navStyle = await webflow.getStyleByName("sb-app-nav");
+  const rootStyles = await root.getStyles();
+  if (!navStyle || navStyle.source !== "site" || navStyle.type !== "global" ||
+    !rootStyles?.some((item) => item?.id === navStyle.id)) {
+    throw new Error("The alpha root no longer uses its editable sb-app-nav class; no header colour was changed.");
+  }
+  return navStyle;
+}
+
+async function loadAlphaHeaderTheme(): Promise<AlphaHeaderTheme> {
+  const navStyle = await alphaHeaderStyle();
+  const props = await navStyle.getProperties();
+  if (typeof props["background-color"] !== "string" || typeof props.color !== "string") {
+    throw new Error("Header colour uses a Webflow variable object; edit it in Designer until this workbench supports that binding.");
+  }
+  return { surface: props["background-color"], ink: props.color };
+}
+
+async function saveAlphaHeaderTheme(next: AlphaHeaderTheme, expected: AlphaHeaderTheme): Promise<string> {
+  const surface = normalizedThemeColor(next.surface);
+  const ink = normalizedThemeColor(next.ink);
+  const navStyle = await alphaHeaderStyle();
+  const current = await navStyle.getProperties();
+  if (current["background-color"] !== expected.surface || current.color !== expected.ink) {
+    throw new Error("Header colours changed in Designer after loading; reload them before saving.");
+  }
+  const changes: PropertyMap = {};
+  if (surface !== expected.surface) changes["background-color"] = surface;
+  if (ink !== expected.ink) changes.color = ink;
+  if (!Object.keys(changes).length) return "No header colours were changed.";
+  await navStyle.setProperties(changes);
+  const saved = await navStyle.getProperties();
+  if (saved["background-color"] !== surface || saved.color !== ink) {
+    throw new Error("Header colour save did not pass Designer readback; inspect the class before retrying.");
+  }
+  return "Alpha header colours saved and read back. Check Canvas and Preview; panel and icon colours use their own tokens.";
+}
+
 async function inspect(): Promise<Snapshot> {
   const [site, queries, selected, components] = await Promise.all([
     webflow.getSiteInfo(), webflow.getAllMediaQueries(),
@@ -2629,6 +2692,8 @@ const App: React.FC = () => {
   const [originalLinkDefaults, setOriginalLinkDefaults] = useState<Record<string, string> | null>(null);
   const [linkDefaults, setLinkDefaults] = useState<Record<string, string> | null>(null);
   const [linkOverrides, setLinkOverrides] = useState<string[] | null>(null);
+  const [originalHeaderTheme, setOriginalHeaderTheme] = useState<AlphaHeaderTheme | null>(null);
+  const [headerTheme, setHeaderTheme] = useState<AlphaHeaderTheme | null>(null);
   const refresh = async (): Promise<void> => {
     setBusy(true);
     try { setSnapshot(await inspect()); setMessage("Inspection updated."); }
@@ -2792,6 +2857,28 @@ const App: React.FC = () => {
     } catch (error) { setMessage(`Link default save stopped: ${describeError(error)} Reload defaults before another save.`); }
     finally { setBusy(false); }
   };
+  const loadHeaderTheme = async (): Promise<void> => {
+    setBusy(true);
+    try {
+      const theme = await loadAlphaHeaderTheme();
+      setOriginalHeaderTheme(theme);
+      setHeaderTheme({ ...theme });
+      setMessage("Loaded the alpha header surface and ink. Change only the values you intend to save.");
+    } catch (error) { setMessage(`Header theme could not be loaded: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
+  const saveHeaderTheme = async (): Promise<void> => {
+    if (!headerTheme || !originalHeaderTheme) return;
+    setBusy(true);
+    try {
+      const result = await saveAlphaHeaderTheme(headerTheme, originalHeaderTheme);
+      const saved = await loadAlphaHeaderTheme();
+      setOriginalHeaderTheme(saved);
+      setHeaderTheme({ ...saved });
+      setMessage(result);
+    } catch (error) { setMessage(`Header theme save stopped: ${describeError(error)} Reload values before another save.`); }
+    finally { setBusy(false); }
+  };
   const refreshAlphaBackdrop = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await updateAlphaBackdrop()); }
@@ -2918,6 +3005,20 @@ const App: React.FC = () => {
         </fieldset>)}
         <button disabled={busy || !originalLinkDefaults || !ALPHA_DESTINATION_NAMES.some((name) => linkDefaults[name] !== originalLinkDefaults[name])}
           onClick={() => { void saveLinkDefaults(); }}>Save changed defaults</button>
+      </div>}
+    </details>
+    <details className="toolbox">
+      <summary>Set header colours</summary>
+      <p className="toolbox-note">Edit the native header class. Use #RRGGBB or var(--project-colour, #RRGGBB). The fallback keeps the header legible if the project variable is missing. This does not change the panel, divider or icon treatment.</p>
+      <button className="secondary" disabled={busy} onClick={() => { void loadHeaderTheme(); }}>Load current header colours</button>
+      {headerTheme && <div className="link-fields">
+        <label><span>Header surface</span><input type="text" value={headerTheme.surface} disabled={busy}
+          onChange={(event) => setHeaderTheme((current) => current ? { ...current, surface: event.target.value } : current)} /></label>
+        <label><span>Header ink</span><input type="text" value={headerTheme.ink} disabled={busy}
+          onChange={(event) => setHeaderTheme((current) => current ? { ...current, ink: event.target.value } : current)} /></label>
+        <button disabled={busy || !originalHeaderTheme ||
+          (headerTheme.surface === originalHeaderTheme.surface && headerTheme.ink === originalHeaderTheme.ink)}
+          onClick={() => { void saveHeaderTheme(); }}>Save changed header colours</button>
       </div>}
     </details>
     <details className="toolbox">
