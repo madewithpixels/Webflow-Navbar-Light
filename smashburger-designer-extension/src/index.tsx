@@ -362,6 +362,18 @@ async function auditInstalledAlpha(): Promise<string> {
   for (const [marker, expected] of Object.entries({ "data-mwp-navbar": 1, "data-mwp-menu": 1, "data-mwp-trigger": 1, "data-mwp-panel": 1, "data-mwp-backdrop": 1, "data-mwp-secondary-icon": 9, "data-mwp-canvas-bar-filler": 5 })) {
     if ((markers.get(marker)?.length ?? 0) !== expected) issues.push(`${marker}: ${markers.get(marker)?.length ?? 0}/${expected}`);
   }
+  for (const [marker, className] of Object.entries({
+    "data-mwp-navbar": "sb-app-nav", "data-mwp-menu": "sb-app-menu",
+    "data-mwp-trigger": "sb-app-summary", "data-mwp-panel": "sb-app-panel",
+    "data-mwp-backdrop": "sb-app-backdrop", "data-mwp-secondary-icon": "sb-app-secondary-icon",
+  })) {
+    for (const element of markers.get(marker) ?? []) {
+      const styles = element.styles ? await element.getStyles() : [];
+      if (!styles?.some((item) => item?.name === className && item.source === "site" && item.type === "global")) {
+        issues.push(`${marker} lacks site class ${className}`);
+      }
+    }
+  }
   const [variants, props, assetNames] = await Promise.all([
     component.getVariants(), component.getProps(), Promise.all(assets.map((asset) => asset.getName())),
   ]);
