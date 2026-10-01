@@ -383,6 +383,27 @@ async function auditInstalledAlpha(): Promise<string> {
     if (variants.filter((variant) => variant.name === name).length !== 1) issues.push(`missing or duplicated variant ${name}`);
   }
   if (props.length !== 75) issues.push(`properties: ${props.length}/75`);
+  const requiredProps: ReadonlyArray<Pick<CreatePropOptions, "name" | "type">> = [
+    ...CORE_PROPERTIES,
+    { name: "Show menu label", type: "boolean" },
+    { name: "Show backdrop", type: "boolean" },
+    { name: "Show primary navigation", type: "boolean" },
+    { name: "Show CTA", type: "boolean" },
+    { name: "Show secondary navigation", type: "boolean" },
+    { name: "Show socials", type: "boolean" },
+    { name: "Show social labels", type: "boolean" },
+    { name: "Show contact links", type: "boolean" },
+    { name: "Show contact labels", type: "boolean" },
+    { name: "Show submenu arrows", type: "boolean" },
+    { name: "CTA text", type: "textContent" },
+    { name: "Menu label", type: "textContent" },
+    ...["Distance", "Easing", "Opening duration", "Closing duration", "Item stagger", "Icon duration", "Icon lines"].map((name) => ({ name, type: "string" as const })),
+  ];
+  for (const expected of requiredProps) {
+    if (props.filter((prop) => prop.name === expected.name && prop.type === expected.type).length !== 1) {
+      issues.push(`missing or duplicated ${expected.type} property ${expected.name}`);
+    }
+  }
   const iconKeys = Object.keys(ICON_SOURCES);
   for (const key of iconKeys) if (assetNames.filter((name) => name === `SmashBurger App — ${key} icon.svg`).length !== 1) issues.push(`asset ${key} missing or duplicated`);
   const iconElements = markers.get("data-mwp-secondary-icon") ?? [];
