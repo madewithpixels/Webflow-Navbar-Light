@@ -378,7 +378,11 @@ async function auditInstalledAlpha(): Promise<string> {
     component.getVariants(), component.getProps(), Promise.all(assets.map((asset) => asset.getName())),
   ]);
   const wantedVariants = ["Never", "Tablet", "Mobile landscape", "Mobile portrait", "Always"];
-  for (const name of wantedVariants) if (!variants.some((variant) => variant.name === name)) issues.push(`missing variant ${name}`);
+  if (variants.length !== wantedVariants.length) issues.push(`variants: ${variants.length}/${wantedVariants.length}`);
+  for (const name of wantedVariants) {
+    if (variants.filter((variant) => variant.name === name).length !== 1) issues.push(`missing or duplicated variant ${name}`);
+  }
+  if (props.length !== 75) issues.push(`properties: ${props.length}/75`);
   const iconKeys = Object.keys(ICON_SOURCES);
   for (const key of iconKeys) if (assetNames.filter((name) => name === `SmashBurger App — ${key} icon.svg`).length !== 1) issues.push(`asset ${key} missing or duplicated`);
   const iconElements = markers.get("data-mwp-secondary-icon") ?? [];
