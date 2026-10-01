@@ -326,6 +326,65 @@ async function checkAlphaLinkDefaults(): Promise<string> {
   return `Alpha link defaults: ${ALPHA_DESTINATION_NAMES.length - missing.length}/${ALPHA_DESTINATION_NAMES.length} properties found; ${placeholders.length} placeholder destinations (# or empty). ${missing.length ? `Missing: ${missing.join(", ")}. ` : ""}${placeholders.length ? `Placeholders: ${placeholders.join(", ")}. ` : ""}Component defaults only; instance overrides are not checked. Read-only check.`;
 }
 
+async function auditInstalledAlpha(): Promise<string> {
+  const [page, components, elements, assets] = await Promise.all([
+    webflow.getCurrentPage(), webflow.getAllComponents(), webflow.getAllElements(), webflow.getAllAssets(),
+  ]);
+  const names = await Promise.all(components.map((item) => item.getName()));
+  const matches = components.filter((_, index) => names[index] === ALPHA_NAME);
+  if (matches.length !== 1) return `Alpha audit: expected one component, found ${matches.length}. Read only.`;
+  const component = matches[0];
+  const root = await component.getRootElement();
+  const issues: string[] = [];
+  if (!await page.isDraft()) issues.push("current page is not a draft");
+  if (component.library || component.readOnly || component.codeComponent !== false) issues.push("component is not editable native content");
+  if (!root?.attributes || await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") issues.push("root marker missing");
+  const instances = elements.filter((item) => item.type === "ComponentInstance");
+  const instanceIds = await Promise.all(instances.map(async (item) => (await item.getComponent()).id));
+  if (instanceIds.filter((id) => id === component.id).length !== 1 || await component.getInstanceCount() !== 1) {
+    issues.push("expected one instance on current page and site");
+  }
+  const markers = new Map<string, AnyElement[]>();
+  const visit = async (element: AnyElement): Promise<void> => {
+    if (element.attributes) for (const marker of ["data-mwp-navbar", "data-mwp-menu", "data-mwp-trigger", "data-mwp-panel", "data-mwp-backdrop", "data-mwp-secondary-icon", "data-mwp-canvas-bar-filler"]) {
+      if (await element.getResolvedAttributeValue(marker) !== null) markers.set(marker, [...(markers.get(marker) ?? []), element]);
+    }
+    if (element.children) for (const child of await element.getChildren()) await visit(child);
+  };
+  if (root) await visit(root);
+  for (const [marker, expected] of Object.entries({ "data-mwp-navbar": 1, "data-mwp-menu": 1, "data-mwp-trigger": 1, "data-mwp-panel": 1, "data-mwp-backdrop": 1, "data-mwp-secondary-icon": 9, "data-mwp-canvas-bar-filler": 5 })) {
+    if ((markers.get(marker)?.length ?? 0) !== expected) issues.push(`${marker}: ${markers.get(marker)?.length ?? 0}/${expected}`);
+  }
+  const [variants, props, assetNames] = await Promise.all([
+    component.getVariants(), component.getProps(), Promise.all(assets.map((asset) => asset.getName())),
+  ]);
+  const wantedVariants = ["Never", "Tablet", "Mobile landscape", "Mobile portrait", "Always"];
+  for (const name of wantedVariants) if (!variants.some((variant) => variant.name === name)) issues.push(`missing variant ${name}`);
+  const iconKeys = Object.keys(ICON_SOURCES);
+  for (const key of iconKeys) if (assetNames.filter((name) => name === `SmashBurger App — ${key} icon.svg`).length !== 1) issues.push(`asset ${key} missing or duplicated`);
+  const iconElements = markers.get("data-mwp-secondary-icon") ?? [];
+  const boundIconProps = new Set<string>();
+  for (const [index, icon] of iconElements.entries()) {
+    if (icon.type !== "Image") { issues.push(`icon ${index + 1} is not a native Image`); continue; }
+    const settings = await icon.getSettings();
+    const prop = props.find((item) => item.type === "image" && isBoundTo(settings.assetId, item.id));
+    if (!prop || boundIconProps.has(prop.id) || !assets.some((asset, assetIndex) =>
+      iconKeys.some((key) => assetNames[assetIndex] === `SmashBurger App — ${key} icon.svg`) && prop.defaultValue === asset.id)) {
+      issues.push(`icon ${index + 1} has no unique bundled image-property binding`);
+    } else boundIconProps.add(prop.id);
+  }
+  for (const name of ALPHA_DESTINATION_NAMES) if (!props.some((prop) => prop.name === name && prop.type === "link")) issues.push(`missing link property ${name}`);
+  const embed: HtmlEmbedElement[] = [];
+  const gatherEmbeds = async (element: AnyElement): Promise<void> => {
+    if (element.type === "HtmlEmbed") embed.push(element);
+    if (element.children) for (const child of await element.getChildren()) await gatherEmbeds(child);
+  };
+  if (root) await gatherEmbeds(root);
+  if (embed.length !== 1 || !embed[0].elementSettings) issues.push(`runtime Embeds: ${embed.length}/1`);
+  else if ((await embed[0].getSettings()).code !== LIGHT_ALPHA_EMBED_CODE) issues.push("runtime Embed differs from the fresh light alpha version");
+  return `Alpha structural audit: ${issues.length ? `needs attention: ${issues.join("; ")}` : "passed"}. One editable component, ${variants.length} variants, ${props.length} properties, ${markers.get("data-mwp-secondary-icon")?.length ?? 0} native icons, ${iconKeys.filter((key) => assetNames.includes(`SmashBurger App — ${key} icon.svg`)).length}/9 bundled assets. Read only; link destinations and Preview are separate checks.`;
+}
+
 async function checkSelectedAlphaLinks(): Promise<string> {
   const selected = await webflow.getSelectedElement();
   if (selected?.type !== "ComponentInstance") {
@@ -2823,6 +2882,12 @@ const App: React.FC = () => {
     catch (error) { setMessage(`Alpha link audit stopped: ${describeError(error)}`); }
     finally { setBusy(false); }
   };
+  const auditAlpha = async (): Promise<void> => {
+    setBusy(true);
+    try { setMessage(await auditInstalledAlpha()); }
+    catch (error) { setMessage(`Alpha structural audit stopped: ${describeError(error)}`); }
+    finally { setBusy(false); }
+  };
   const checkInstanceLinks = async (): Promise<void> => {
     setBusy(true);
     try { setMessage(await checkSelectedAlphaLinks()); }
@@ -2984,6 +3049,7 @@ const App: React.FC = () => {
     <div className="actions">
       <button disabled={busy} onClick={() => { void refresh(); }}>Inspect selection</button>
       <button className="secondary" disabled={busy} onClick={() => { void checkInstallTarget(); }}>Check install target (read only)</button>
+      <button className="secondary" disabled={busy} onClick={() => { void auditAlpha(); }}>Audit installed alpha (read only)</button>
       <button className="secondary" disabled={busy} onClick={() => { void checkAlphaLinks(); }}>Check alpha link defaults (read only)</button>
       <button className="secondary" disabled={busy} onClick={() => { void checkInstanceLinks(); }}>Check selected alpha links (read only)</button>
       <button disabled={busy} onClick={() => { void installAllAlpha(); }}>Install complete alpha on clean draft</button>
