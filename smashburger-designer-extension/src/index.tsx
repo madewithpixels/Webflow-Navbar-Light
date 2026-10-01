@@ -16,6 +16,8 @@ const PROOF_NAME = "SmashBurger API proof";
 const LAB_PAGE_SLUG = "smashburger-app-api-lab";
 const CORE_NAME = "SmashBurger native core trial";
 const ALPHA_NAME = "SmashBurger native alpha";
+const ALPHA_SCHEMA_VERSION = "alpha-1";
+const ALPHA_RUNTIME_VERSION = "0.2.3";
 const ALPHA_DESTINATION_GROUPS: ReadonlyArray<{ title: string; names: ReadonlyArray<string> }> = [
   { title: "Main navigation", names: ["Brand destination", "Link 1 destination", "Link 2 destination", "Link 3 destination", "CTA destination"] },
   { title: "Submenu", names: ["Submenu link 1 destination", "Submenu link 2 destination"] },
@@ -339,6 +341,11 @@ async function auditInstalledAlpha(): Promise<string> {
   if (!await page.isDraft()) issues.push("current page is not a draft");
   if (component.library || component.readOnly || component.codeComponent !== false) issues.push("component is not editable native content");
   if (!root?.attributes || await root.getResolvedAttributeValue("data-mwp-prototype") !== "native-core-v1") issues.push("root marker missing");
+  const schemaVersion = root?.attributes ? await root.getResolvedAttributeValue("data-mwp-schema-version") : null;
+  const runtimeVersion = root?.attributes ? await root.getResolvedAttributeValue("data-mwp-runtime-version") : null;
+  if (schemaVersion !== null && schemaVersion !== ALPHA_SCHEMA_VERSION) issues.push(`unrecognized schema version ${schemaVersion}`);
+  if (runtimeVersion !== null && runtimeVersion !== ALPHA_RUNTIME_VERSION) issues.push(`unrecognized runtime version ${runtimeVersion}`);
+  if ((schemaVersion === null) !== (runtimeVersion === null)) issues.push("only one version marker is present");
   const instances = elements.filter((item) => item.type === "ComponentInstance");
   const instanceIds = await Promise.all(instances.map(async (item) => (await item.getComponent()).id));
   if (instanceIds.filter((id) => id === component.id).length !== 1 || await component.getInstanceCount() !== 1) {
@@ -382,7 +389,7 @@ async function auditInstalledAlpha(): Promise<string> {
   if (root) await gatherEmbeds(root);
   if (embed.length !== 1 || !embed[0].elementSettings) issues.push(`runtime Embeds: ${embed.length}/1`);
   else if ((await embed[0].getSettings()).code !== LIGHT_ALPHA_EMBED_CODE) issues.push("runtime Embed differs from the fresh light alpha version");
-  return `Alpha structural audit: ${issues.length ? `needs attention: ${issues.join("; ")}` : "passed"}. One editable component, ${variants.length} variants, ${props.length} properties, ${markers.get("data-mwp-secondary-icon")?.length ?? 0} native icons, ${iconKeys.filter((key) => assetNames.includes(`SmashBurger App — ${key} icon.svg`)).length}/9 bundled assets. Read only; link destinations and Preview are separate checks.`;
+  return `Alpha structural audit: ${issues.length ? `needs attention: ${issues.join("; ")}` : "passed"}. One editable component, ${variants.length} variants, ${props.length} properties, ${markers.get("data-mwp-secondary-icon")?.length ?? 0} native icons, ${iconKeys.filter((key) => assetNames.includes(`SmashBurger App — ${key} icon.svg`)).length}/9 bundled assets. ${schemaVersion === null ? "Legacy alpha without explicit version markers." : `Schema ${schemaVersion}; runtime ${runtimeVersion}.`} Read only; link destinations and Preview are separate checks.`;
 }
 
 async function checkSelectedAlphaLinks(): Promise<string> {
@@ -2576,6 +2583,14 @@ async function createNativeCore(report: (message: string) => void, alpha = false
   const root = await body.append(webflow.elementPresets.DivBlock);
   await root.setAttribute("data-mwp-prototype", "native-core-v1");
   await root.setAttribute("data-mwp-navbar", "");
+  if (alpha) {
+    await root.setAttribute("data-mwp-schema-version", ALPHA_SCHEMA_VERSION);
+    await root.setAttribute("data-mwp-runtime-version", ALPHA_RUNTIME_VERSION);
+    if (await root.getResolvedAttributeValue("data-mwp-schema-version") !== ALPHA_SCHEMA_VERSION ||
+      await root.getResolvedAttributeValue("data-mwp-runtime-version") !== ALPHA_RUNTIME_VERSION) {
+      throw new Error("Alpha version markers did not pass Designer readback; no component was registered.");
+    }
+  }
   await root.setTag("header");
   await root.setStyles([rootStyle]);
   for (const [name, value] of Object.entries({

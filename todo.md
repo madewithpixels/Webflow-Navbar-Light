@@ -262,7 +262,7 @@ The preferred app form is a Webflow Designer Extension that installs and configu
 - [ ] Expose duration, easing, distance, stagger, icon and accessibility/behaviour settings.
 - [ ] Generate a reusable native Webflow component whose semantic `sb-*` classes remain visible in the Navigator, with no custom structural display names masking them; keep property groups clear and purposeful.
 - [ ] Add installation diagnostics for missing structure, classes, attributes, props and runtime version. A new read-only audit passed on the clean draft after an Extension refresh: one editable component and on-page instance, five variants, 75 properties, expected structural markers, five Canvas bar fillers, nine native Images uniquely bound to bundled asset-backed image properties, 9/9 site assets, 16 link properties and one exact light runtime Embed. Extend it to class bindings and negative fixtures before treating it as a full installer diagnostic.
-- [ ] Store an explicit SmashBurger schema/runtime version marker while preserving compatibility with established runtime hooks.
+- [ ] Store an explicit SmashBurger schema/runtime version marker while preserving compatibility with established runtime hooks. Future fresh alpha roots now get `data-mwp-schema-version="alpha-1"` and `data-mwp-runtime-version="0.2.3"`, with Designer readback before component registration. The read-only audit accepts existing unmarked fixtures as legacy and flags partial/unknown markers. The clean fixture's legacy path passed live; a second clean install is needed to verify the new marker write.
 
 ### Make local / project adoption
 
