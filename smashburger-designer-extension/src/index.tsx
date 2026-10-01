@@ -3059,13 +3059,16 @@ const App: React.FC = () => {
       <p className="toolbox-note">Load the alpha component defaults, edit the links you need, and save. Only changed fields are written. Instance overrides may take precedence; this does not publish the page.</p>
       <button className="secondary" disabled={busy} onClick={() => { void loadLinkDefaults(); }}>Load current defaults</button>
       {linkDefaults && <div className="link-fields">
+        <p className="link-placeholder-summary" role="status">{ALPHA_DESTINATION_NAMES.filter((name) => !linkDefaults[name]?.trim() || linkDefaults[name]?.trim() === "#").length} of 16 component defaults still use placeholder destinations. Set destinations for links you show before publishing; selected-instance overrides may use different values.</p>
         {linkOverrides && <p className="toolbox-note">Selected instance: {linkOverrides.length ? `${linkOverrides.length} link override(s). Fields marked below will continue to use their instance value.` : "no link overrides."}</p>}
         {ALPHA_DESTINATION_GROUPS.map((group) => <fieldset key={group.title}>
           <legend>{group.title}</legend>
           {group.names.map((name) => <label key={name}>
             <span>{name.replace(" destination", "")}</span>
             <input type="text" value={linkDefaults[name] ?? ""} placeholder="/page or https://example.com"
+              aria-invalid={!linkDefaults[name]?.trim() || linkDefaults[name]?.trim() === "#"}
               disabled={busy} onChange={(event) => setLinkDefaults((current) => current ? { ...current, [name]: event.target.value } : current)} />
+            {(!linkDefaults[name]?.trim() || linkDefaults[name]?.trim() === "#") && <span className="link-placeholder">Placeholder destination</span>}
             {linkOverrides?.includes(name) && <span className="link-override">Instance override: this menu uses its own value.</span>}
           </label>)}
         </fieldset>)}

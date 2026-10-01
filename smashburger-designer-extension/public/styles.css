@@ -18,6 +18,9 @@ p { margin: 0 0 16px; }
 .link-fields input { width: 100%; padding: 8px; border: 1px solid #9bac9e; border-radius: 4px; background: #fff; color: #17251e; font: inherit; }
 .link-fields input:focus-visible { outline: 2px solid #ad5839; outline-offset: 2px; }
 .link-fields .link-override { margin-top: 3px; color: #8c431e; font-size: 12px; }
+.link-fields .link-placeholder-summary { padding: 10px; border-radius: 4px; background: #fff2e4; color: #743713; font-size: 13px; line-height: 1.4; }
+.link-fields input[aria-invalid="true"] { border-color: #b45b32; }
+.link-fields .link-placeholder { margin-top: 3px; color: #8c431e; font-size: 12px; }
 button { padding: 9px 12px; border: 1px solid #17251e; border-radius: 4px; background: #17251e; color: white; font: inherit; cursor: pointer; }
 button.secondary { color: #17251e; background: transparent; }
 button:disabled { opacity: .45; cursor: not-allowed; }
