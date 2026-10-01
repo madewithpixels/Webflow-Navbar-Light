@@ -52,6 +52,40 @@ test('enhanced panel state works after wrapping the trigger while native sibling
   native.window.close();
 });
 
+test('native details and enhanced wrapped trigger both reveal the panel through CSS', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  const fixture = new JSDOM(`<style>${css}</style>
+    <header data-mwp-navbar data-collapse="always">
+      <details data-mwp-menu><summary data-mwp-trigger>Menu</summary></details>
+      <nav data-mwp-panel>Native links</nav>
+    </header>
+    <header data-mwp-navbar data-mwp-collapsed="true" data-state="closed">
+      <div><details data-mwp-menu><summary data-mwp-trigger>Menu</summary></details></div>
+      <nav data-mwp-panel data-state="closed">Wrapped links</nav>
+    </header>`);
+  const [nativeRoot, wrappedRoot] = fixture.window.document.querySelectorAll('[data-mwp-navbar]');
+  const nativePanel = nativeRoot.querySelector('[data-mwp-panel]');
+  const wrappedPanel = wrappedRoot.querySelector('[data-mwp-panel]');
+  const appearance = (panel) => {
+    const style = fixture.window.getComputedStyle(panel);
+    return [style.opacity, style.visibility, style.pointerEvents];
+  };
+
+  assert.deepEqual(appearance(nativePanel), ['0', 'hidden', 'none']);
+  assert.deepEqual(appearance(wrappedPanel), ['0', 'hidden', 'none']);
+
+  nativeRoot.querySelector('[data-mwp-menu]').open = true;
+  assert.deepEqual(appearance(nativePanel), ['1', 'visible', 'auto']);
+
+  wrappedRoot.dataset.state = 'opening';
+  wrappedPanel.dataset.state = 'opening';
+  assert.deepEqual(appearance(wrappedPanel), ['1', 'visible', 'auto']);
+  wrappedRoot.dataset.state = 'open';
+  wrappedPanel.dataset.state = 'open';
+  assert.deepEqual(appearance(wrappedPanel), ['1', 'visible', 'auto']);
+  fixture.window.close();
+});
+
 test('Dropdown and Full width backdrops require an explicit source opt-in', () => {
   const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
   const optIn = '[data-mwp-navbar][data-mwp-collapsed="true"][data-backdrop="true"]:where([data-layout="dropdown"], [data-layout="full-width"]):is([data-state="opening"], [data-state="open"]) [data-mwp-backdrop]';
