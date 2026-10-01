@@ -4,21 +4,21 @@
 
 - Site: `MWP Component Library`
 - Site ID: `6a0351de7c4e42148a81db6f`
-- Self-contained test page: `Navbar Light`
+- Self-contained test page: `SmashBurger NavBar`
 - Self-contained page ID: `6a7cbbc9a6f261aef1113d91`
 - Self-contained component: `Navbar Light`
 - Self-contained component ID: `5e7a8748-7a91-3b5a-7978-b6a45d39743d`
 - Self-contained instance ID: `b515420b-9d87-fa20-e8ef-c40cc492eb86`
-- Published acceptance URL: `https://mwp-component-library.webflow.io/navbar-light`
-- CDN test page: `Navbar Light CDN`
+- Published acceptance URL: `https://mwp-component-library.webflow.io/smashburger-navbar`
+- CDN test page: `SmashBurger NavBar CDN`
 - CDN page ID: `6a7cf1904621e5d95556557d`
 - CDN component: `Navbar Light CDN`
 - CDN component ID: `d095c22c-0919-f8ea-3180-d7c64046c04d`
 - CDN instance ID: `9d211567-5ea9-bf0b-144d-4e9962401e75`
 - CDN Embed ID: `d095c22c-0919-f8ea-3180-d7c64046c06f`
-- Intended CDN URL: `https://mwp-component-library.webflow.io/navbar-light-cdn`
+- Published CDN URL: `https://mwp-component-library.webflow.io/smashburger-navbar-cdn`
 
-The obsolete `CSS Navbar — Details` test component and instance were removed by the user after creating a backup. `Navbar Light` remains the sole acceptance component on the original test page. The optional CDN edition lives alone on its separate page and differs only in its Canvas-visible Embed. Before that structural addition, the user created backup `V1.0.0 First Release`.
+The obsolete `CSS Navbar — Details` test component and instance were removed by the user after creating a backup. The self-contained component remains the sole acceptance component on its test page. The optional CDN edition lives alone on its separate page and differs only in its Canvas-visible Embed. Before that structural addition, the user created backup `V1.0.0 First Release`. Page names and slugs now use SmashBurger; some underlying component and element names still use Navbar Light pending the naming migration.
 
 ## Native structure
 
@@ -147,4 +147,4 @@ Native layout classes:
 
 `webflow/navbar-light-embed.html` and `demo/navbar-light.browser.js` are generated from `src/navbar-light.css` and `src/navbar-light.js`. Never edit generated output as the source of truth; run `npm run build:webflow`, then synchronize the Embed output to Webflow.
 
-`webflow/navbar-light-cdn-loader.html` is generated from the package version and built release files. The `SmashBurger CDN` component stores that exact loader, pinned to `v0.2.1` with matching SHA-384 integrity values. It is a separate component so the dependable self-contained edition remains available without an external runtime request.
+`webflow/navbar-light-cdn-loader.html` is generated from the package version and built release files. The current generated loader references `v0.2.3` with matching SHA-384 integrity values. The `SmashBurger CDN` component is separate so the self-contained edition remains available without an external runtime request.
