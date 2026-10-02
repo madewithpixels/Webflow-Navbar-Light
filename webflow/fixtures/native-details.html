@@ -1,0 +1,27 @@
+<section class="sb-native-proof" aria-labelledby="sb-native-proof-title">
+  <h1 id="sb-native-proof-title">SmashBurger native CSS proof</h1>
+  <p>This fixture intentionally contains no SmashBurger JavaScript. Its menu uses native details and summary elements.</p>
+  <header data-mwp-navbar data-collapse="always" data-motion="dropdown" aria-label="Native CSS-only navigation">
+    <div class="mwp-css-nav_inner">
+      <strong>SmashBurger</strong>
+      <details data-mwp-menu>
+        <summary data-mwp-trigger>Menu</summary>
+      </details>
+      <nav data-mwp-panel aria-label="Proof links">
+        <a href="#proof-first">First link</a>
+        <a href="#proof-second">Second link</a>
+      </nav>
+    </div>
+  </header>
+  <p id="proof-first">First destination</p>
+  <p id="proof-second">Second destination</p>
+</section>
+<style>
+  .sb-native-proof { box-sizing: border-box; font: 16px/1.5 Arial, sans-serif; padding: 2rem; }
+  .sb-native-proof [data-mwp-navbar] { background: #17231d; color: #fff; max-width: 32rem; padding: 1rem; }
+  .sb-native-proof .mwp-css-nav_inner { align-items: center; display: flex; justify-content: space-between; }
+  .sb-native-proof summary { cursor: pointer; }
+  .sb-native-proof [data-mwp-panel] { background: #fff; border: 1px solid #bbb; color: #1d2022; display: grid; gap: 0.5rem; padding: 1rem; }
+  .sb-native-proof [data-mwp-panel] a { color: inherit; }
+  .sb-native-proof > p[id] { margin-top: 5rem; }
+</style>
