@@ -49,7 +49,7 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Add an optional visible Menu label.
 - [x] Transform the burger into a close icon without pseudo-elements.
 - [ ] Refactor open icon geometry so the first and final native line Divs converge on the same centre without relying on one fixed `--mwp-nav-icon-shift`. The maintained enhanced source now measures bar thickness and gap, and a local browser fixture verified both two- and three-line modes at 2px/5px and 3px/7px. The CSS-only fallback and released Webflow assets still use the fixed shift; real source/consumer checks remain. See `webflow/icon-geometry-regression.md`.
-- [ ] Add visual regression checks for the open two-line and three-line icons at common device-pixel ratios, including odd/even line thicknesses and project-overridden spacing. The local 1x geometry and rendered appearance passed; higher pixel ratios and real Webflow source/consumer remain.
+- [ ] Add visual regression checks for the open two-line and three-line icons at common device-pixel ratios, including odd/even line thicknesses and project-overridden spacing. The local 1x candidate passed; SB Test Five's linked released default passed both icon modes at emulated 2x and 3x with 2px bars and a 5px gap. Candidate Webflow source/consumer, odd thickness and overridden gap remain. See `webflow/icon-geometry-regression.md`.
 - [x] Synchronize native open state, lifecycle state, ARIA and panel inertness.
 - [x] Close on Escape and return focus to the trigger.
 - [x] Add optional first-link focus, outside close and link close.
