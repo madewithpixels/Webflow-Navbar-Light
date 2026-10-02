@@ -1,6 +1,6 @@
 # Reduced-motion transition regression
 
-## Published runtime finding, 2026-10-02
+## Designer Preview finding, 2026-10-02
 
 On SB Test Five's clean linked CDN import, Chrome DevTools emulated `prefers-reduced-motion: reduce` at the 393px Mobile breakpoint. Readback inside the Preview canvas confirmed `matchMedia` was true. With the pinned `v0.2.3` CSS, opening the Dropdown menu changed its accessible state immediately, but the open panel computed `transition-duration: 0.28s, 0.28s, 0s`; an item computed `0.28s`. The closed panel used `0s`, and the burger lines, backdrop and submenu icon used `0.01ms` as intended. Escape closed the menu and returned focus to the trigger. The browser emulation was reset to **No emulation** and DevTools was closed after the check.
 
