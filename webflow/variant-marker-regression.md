@@ -8,7 +8,9 @@ The self-contained source page uses `data-wf--smashburger--variant`. Both curren
 
 ## Verification and release boundary
 
-The automated suite covers the old marker, both current markers, a namespaced Library marker, explicit override precedence in JavaScript and CSS, the fresh CDN instance's desktop expansion, and CSS-only `Always` open/closed state. All 35 tests and the JavaScript syntax check pass locally. The draft CDN proof remains unpublished and still runs the pinned `v0.2.3` assets, so its live behavior has **not** been repaired yet. Rebuild and version the candidate, update the source component Embeds, then repeat Desktop, Tablet and mobile Preview/published checks on a fresh linked CDN instance before claiming this fixed in distribution.
+The automated suite covers the old marker, both current markers, a namespaced Library marker, explicit override precedence in JavaScript and CSS, the fresh CDN instance's desktop expansion, and CSS-only `Always` open/closed state. The tests and JavaScript syntax check pass locally. The draft CDN proof remains unpublished and still runs the pinned `v0.2.3` assets, so its live behavior has **not** been repaired yet. Rebuild and version the candidate, update the source component Embeds, then repeat Desktop, Tablet and mobile Preview/published checks on a fresh linked CDN instance before claiming this fixed in distribution.
+
+After the icon geometry addition, `npm run build` still completed successfully. The generated outputs changed as expected, and `check:dist` flagged those differences against committed `v0.2.3`. The temporary generated outputs were restored; a release must first receive a new version and matching immutable CDN URL/integrity values. The full current source suite is 36/36 passing.
 
 A temporary localhost fixture using the actual CDN marker and maintained source files also passed a rendered browser check. At 2057px and 820px it expanded with a hidden trigger; at 767px, 600px and 400px it collapsed with the trigger visible. At 600px, opening exposed the panel and set `aria-expanded="true"`; Escape returned it to `false`. The temporary fixture and server were removed after the check.
 
