@@ -77,7 +77,7 @@ The v0.2.3 delivery stylesheet positions the root and gives it a default z-index
 
 ## Backdrop behavior
 
-In the current release, the optional Backdrop is activated by the built-in Left drawer, Right drawer and Overlay layouts. It dims the page, sits behind the panel and closes the menu when selected. Dropdown and Full-width backdrop support is planned so the existing `Show backdrop` choice behaves consistently across every collapsed layout; enabling it will not implicitly enable scroll locking.
+In the current v0.2.3 release, the optional Backdrop is activated by the built-in Left drawer, Right drawer and Overlay layouts. It dims the page, sits behind the panel and closes the menu when selected. The next source candidate supports opt-in Dropdown and Full-width backdrops through `data-backdrop="True"` or `"true"`; enabling either does not implicitly lock page scroll. Both MWP Component Library source editions now bind `Show backdrop` to the native Backdrop visibility and this root attribute, but their Embeds still use v0.2.3 until the candidate is released. See [the published enhanced fixture](enhanced-layout-regression.md).
 
 The Backdrop should remain a sibling within the SmashBurger root and retain `[data-mwp-backdrop]` plus `aria-hidden="true"`. Keep it non-blocking while closed. After unlinking, it can be removed when the destination project will never use it.
 

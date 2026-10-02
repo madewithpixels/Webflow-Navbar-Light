@@ -88,12 +88,14 @@ test('native details and enhanced wrapped trigger both reveal the panel through 
 
 test('Dropdown and Full width backdrops require an explicit source opt-in', () => {
   const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
-  const optIn = '[data-mwp-navbar][data-mwp-collapsed="true"][data-backdrop="true"]:where([data-layout="dropdown"], [data-layout="full-width"]):is([data-state="opening"], [data-state="open"]) [data-mwp-backdrop]';
+  const optIn = '[data-mwp-navbar][data-mwp-collapsed="true"][data-backdrop="true" i]:where([data-layout="dropdown"], [data-layout="full-width"]):is([data-state="opening"], [data-state="open"]) [data-mwp-backdrop]';
   assert.ok(css.includes(`${optIn},`));
   const fixture = new JSDOM('<header data-mwp-navbar data-mwp-collapsed="true" data-layout="dropdown" data-state="open"><div data-mwp-backdrop></div></header>');
   const backdrop = fixture.window.document.querySelector('[data-mwp-backdrop]');
   assert.equal(backdrop.matches(optIn), false);
   fixture.window.document.querySelector('header').dataset.backdrop = 'true';
+  assert.equal(backdrop.matches(optIn), true);
+  fixture.window.document.querySelector('header').dataset.backdrop = 'True';
   assert.equal(backdrop.matches(optIn), true);
   fixture.window.document.querySelector('header').dataset.layout = 'full-width';
   assert.equal(backdrop.matches(optIn), true);
