@@ -64,6 +64,7 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Reset native open state safely when crossing between collapsed and expanded layouts.
 - [x] Complete a visual pass of all five native Webflow variants at all four core Webflow breakpoints (20/20 live Canvas cases).
 - [x] Verify all five collapse modes across the four core widths in the local reference matrix (20/20 functional state cases).
+- [x] Repeat a browser sweep of all five layouts and five collapse choices at 1280px, 820px, 600px and 400px against the current source candidate. Both 20-case sweeps passed after a demo-only expanded-row wrap correction at narrow widths; see `webflow/browser-matrix.md`.
 
 ## 4. Layouts and content
 

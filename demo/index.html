@@ -770,6 +770,13 @@
     @media (max-width: 767px) {
       .brand-mini { display: none; }
       .mwp-css-nav_panel { width: min(24rem, 100vw); }
+      [data-mwp-collapsed="false"] .mwp-css-nav_inner { flex-wrap: wrap; }
+      [data-mwp-collapsed="false"] .mwp-css-nav_panel {
+        flex-basis: 100%;
+        padding: 0 0 1rem;
+        width: 100%;
+      }
+      [data-mwp-collapsed="false"] .mwp-css-nav_primary { flex-wrap: wrap; }
       .section-heading { align-items: start; flex-direction: column; }
       .burger-card { display: grid; grid-template-columns: 1fr; }
       .ingredient-stack { margin-top: 4rem; min-height: 12rem; }

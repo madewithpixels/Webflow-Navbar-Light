@@ -1,0 +1,11 @@
+# Candidate browser matrix
+
+On 2026-10-02, the current source CSS and local interactive demo ran in a browser at 1280px, 820px, 600px and 400px. The local demo served the repository files directly; it did not load released `dist` assets.
+
+With collapse set to `Always` and motion `none`, all five layouts opened at each width: Dropdown, Full width, Left drawer, Right drawer and Overlay (20 cases). The panel was visible, `aria-expanded` was true and the page had no horizontal overflow. Left, Right and Overlay locked page scrolling; Dropdown and Full width did not. Escape returned the final case to a hidden panel, `aria-expanded="false"`, unlocked scrolling and focus on the trigger.
+
+The five collapse choices were then checked at the same four widths (20 cases). Expanded and collapsed state, trigger visibility, panel visibility and page width matched the expected breakpoint threshold in every case. Motion `none` was used for this state sweep so readings were not taken during a close transition.
+
+The first sweep exposed an 8px demo overflow at 600px when `Never` kept its richly styled navigation expanded. The demo's own primary row and CTA were wider than the available space. Its destination-style CSS now wraps the inner, panel and primary row at 767px and below **only when expanded**. The repeat sweep found no overflow, including `Never` at 400px and `Mobile portrait` at 600px. This change is in `demo/index.html`; it does not change the reusable functional stylesheet or Webflow source classes.
+
+The published [native details](native-details-regression.md) and [enhanced layout](enhanced-layout-regression.md) fixtures provide separate Webflow staging evidence. The local browser matrix does not replace a Webflow Preview/published acceptance pass for a new versioned release.
