@@ -98,6 +98,7 @@ Webflow emits the selected marker as `data-wf--navbar-light--variant`. The CSS f
 | Show menu label | `f75aee9a-81ff-58ae-64fd-e85355895e01` | `true` |
 | Icon lines | `6cf61d70-aee7-639c-bc80-f9585c8a4e21` | `3` |
 | Show backdrop | `9871e897-6fd5-0f74-6cb5-99605db04a36` | `true` |
+| Show brand | component-specific source property | `true` |
 | Show CTA | `7b69f228-da14-643d-f422-a3f1c6ceb79f` | `true` |
 | Show secondary navigation | `6ef12627-487b-0aa3-a20a-4fc4d08bddad` | `true` |
 | Focus first link | `3b9ea944-640f-6d21-c69f-42b92487c106` | `false` |
