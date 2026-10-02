@@ -1,0 +1,7 @@
+# Burger X geometry candidate
+
+The released `v0.2.3` CSS uses a fixed 7px shift (or half that for two bars). That matches only the original 2px bars and 5px gap. The maintained source now measures the rendered bar height plus the icon's row gap and sets `--mwp-nav-icon-auto-shift` on the root. The existing transform transition remains intact, so the bars still move and rotate smoothly. An explicit `--mwp-nav-icon-shift` remains a manual override, and its 7px fallback remains available without JavaScript.
+
+On 2026-10-02 a localhost browser fixture loaded the maintained CSS and JavaScript, used native summary/icon/line markup and exercised three and two visible lines. At 2px bars with a 5px gap the measured shift was 7px; at 3px bars with a 7px gap it was 10px. After the opening transition settled, the first and final line centres matched exactly in all four cases: 8px and 11.5px for three lines, 4.5px and 6.5px for two lines, measured from the icon top. The browser's rendered sample showed symmetric Xs. The automated suite additionally verifies recalculation when the gap changes, and all 36 tests pass.
+
+This is a source candidate, not a released Webflow component change. Before release, visually inspect the native two-line and three-line icons on the source component and linked consumer at device-pixel ratios above 1, with odd and even bar thicknesses. Verify that Webflow's native icon classes expose their computed gap and bar height in Preview. Then run the full release matrix against exact versioned assets.

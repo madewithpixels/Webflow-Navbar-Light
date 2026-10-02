@@ -229,6 +229,22 @@ test('initialises a collapsed navbar in a closed accessible state', () => {
   navbar.destroy();
 });
 
+test('measures native icon thickness and gap for a centred open X', () => {
+  const root = document.querySelector('[data-mwp-navbar]');
+  root.querySelector('[data-mwp-trigger]').innerHTML = `<span data-mwp-icon style="row-gap: 7px">
+    <span data-mwp-line style="height: 3px"></span>
+    <span data-mwp-line style="height: 3px"></span>
+    <span data-mwp-line style="height: 3px"></span>
+  </span>`;
+  const navbar = new NavbarLight(root);
+  assert.equal(root.style.getPropertyValue('--mwp-nav-icon-auto-shift'), '10px');
+
+  root.querySelector('[data-mwp-icon]').style.rowGap = '9px';
+  navbar.syncIconGeometry();
+  assert.equal(root.style.getPropertyValue('--mwp-nav-icon-auto-shift'), '12px');
+  navbar.destroy();
+});
+
 test('opens, emits lifecycle events and exposes public controls', async () => {
   const root = document.querySelector('[data-mwp-navbar]');
   const navbar = new NavbarLight(root);
