@@ -22,4 +22,7 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run check
+      # Main can contain next-release source while the published version stays immutable.
+      # Require generated artifacts to match source when a new version is tagged.
       - run: npm run check:dist
+        if: startsWith(github.ref, 'refs/tags/v')

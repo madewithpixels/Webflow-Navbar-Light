@@ -183,7 +183,7 @@ npm run build
 npm run check:dist
 ```
 
-Open [demo/index.html](demo/index.html) directly or through a local web server. Its controls exercise every layout and motion combination. `npm run build` regenerates the self-contained Webflow Embed, the demo's classic browser script and the release-ready `dist` files from the maintained source files. `npm run check:dist` fails when committed CDN artifacts no longer match the source.
+Open [demo/index.html](demo/index.html) directly or through a local web server. Its controls exercise every layout and motion combination. `npm run build` regenerates the self-contained Webflow Embed, the demo's classic browser script and the release-ready `dist` files from the maintained source files. `npm run check:dist` fails when committed CDN artifacts no longer match the source. CI runs the source tests and syntax check on every push and pull request; it runs `check:dist` on version tags so a release cannot contain stale generated assets. Between releases, maintained source may intentionally differ from the committed immutable version.
 
 ## Optional CDN distribution
 
