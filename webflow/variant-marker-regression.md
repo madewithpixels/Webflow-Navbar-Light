@@ -9,3 +9,5 @@ The self-contained source page uses `data-wf--smashburger--variant`. Both curren
 ## Verification and release boundary
 
 The automated suite covers the old marker, both current markers, a namespaced Library marker, explicit override precedence, the fresh CDN instance's desktop expansion, and CSS-only `Always` open/closed state. All 34 tests and the JavaScript syntax check pass locally. The draft CDN proof remains unpublished and still runs the pinned `v0.2.3` assets, so its live behavior has **not** been repaired yet. Rebuild and version the candidate, update the source component Embeds, then repeat Desktop, Tablet and mobile Preview/published checks on a fresh linked CDN instance before claiming this fixed in distribution.
+
+A temporary localhost fixture using the actual CDN marker and maintained source files also passed a rendered browser check. At 2057px and 820px it expanded with a hidden trigger; at 767px, 600px and 400px it collapsed with the trigger visible. At 600px, opening exposed the panel and set `aria-expanded="true"`; Escape returned it to `false`. The temporary fixture and server were removed after the check.
