@@ -101,6 +101,20 @@ test('current Webflow component markers retain CSS-only Always behavior', () => 
   }
 });
 
+test('an explicit collapse setting overrides a conflicting Webflow marker in CSS', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  const fixture = new JSDOM(`<style>${css}</style>
+    <header data-mwp-navbar data-collapse="never" data-mwp-collapsed="false" data-wf--smashburger-cdn--variant="always">
+      <details data-mwp-menu><summary data-mwp-trigger>Menu</summary></details>
+      <nav data-mwp-panel>Links</nav>
+    </header>`);
+  const panel = fixture.window.document.querySelector('[data-mwp-panel]');
+  const trigger = fixture.window.document.querySelector('[data-mwp-trigger]');
+  assert.equal(fixture.window.getComputedStyle(panel).visibility, 'visible');
+  assert.equal(fixture.window.getComputedStyle(trigger).display, 'none');
+  fixture.window.close();
+});
+
 test('Dropdown and Full width backdrops require an explicit source opt-in', () => {
   const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
   const optIn = '[data-mwp-navbar][data-mwp-collapsed="true"][data-backdrop="true" i]:where([data-layout="dropdown"], [data-layout="full-width"]):is([data-state="opening"], [data-state="open"]) [data-mwp-backdrop]';

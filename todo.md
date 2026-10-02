@@ -111,7 +111,7 @@ This checklist is the implementation plan and status record. Completed work is c
 - [x] Submenu arrow visibility and motion values.
 - [x] Named social/contact link destinations, replaceable icon Images and individual visibility toggles; keep labels as ordinary native text.
 - [x] Focus, outside close, link close and scroll-lock behavior.
-- [ ] Add a `Show brand` boolean property to both delivery editions, on by default, which fully hides the Brand from layout, keyboard and accessibility navigation when disabled.
+- [x] Add a `Show brand` boolean property to both delivery editions, on by default, which fully hides the Brand from layout, keyboard and accessibility navigation when disabled. Both MWP source editions and the linked SB Test Four self-contained instance passed Designer and published hidden/restored checks; the fresh CDN instance also exposed and applied the switch in Designer. See the linked-component notes below.
 - [x] Add clear property groups and tooltips.
 - [x] Keep non-attribute-bindable values visible through native Text Blocks.
 - [x] Convert `.mwp-css-nav_config` into a compact native Details-based `Smashburger settings` inspector: collapsed by default so it stays out of the author's working Canvas, expandable for a real-time property summary, readable in the Navigator, and hidden after runtime initialization in Preview and published output.
