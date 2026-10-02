@@ -106,9 +106,8 @@ export class NavbarLight {
 
     this.items.forEach((item, index) => item.style.setProperty('--mwp-item-index', index));
 
-    this.root.dataset.mwpReady = 'true';
-
     const collapse = this.collapsePreset();
+    this.root.dataset.mwpReady = 'true';
     if (COLLAPSE_QUERIES[collapse]) {
       this.mediaQuery = globalThis.matchMedia(COLLAPSE_QUERIES[collapse]);
       this.mediaQuery.addEventListener?.('change', this.onBreakpointChange);
@@ -129,7 +128,14 @@ export class NavbarLight {
   }
 
   collapsePreset() {
-    return this.root.dataset.collapse || this.root.getAttribute('data-wf--navbar-light--variant') || '';
+    if (this.root.dataset.collapse) return this.root.dataset.collapse;
+    for (const attribute of this.root.attributes) {
+      if (/^data-wf--.+--variant$/.test(attribute.name) &&
+        (attribute.value === 'always' || attribute.value === 'never' || COLLAPSE_QUERIES[attribute.value])) {
+        return attribute.value;
+      }
+    }
+    return '';
   }
 
   publicApi() {

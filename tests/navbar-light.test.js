@@ -86,6 +86,21 @@ test('native details and enhanced wrapped trigger both reveal the panel through 
   fixture.window.close();
 });
 
+test('current Webflow component markers retain CSS-only Always behavior', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  for (const marker of ['data-wf--smashburger--variant', 'data-wf--smashburger-cdn--variant']) {
+    const fixture = new JSDOM(`<style>${css}</style><header data-mwp-navbar ${marker}="always">
+      <details data-mwp-menu><summary data-mwp-trigger>Menu</summary></details>
+      <nav data-mwp-panel>Links</nav>
+    </header>`);
+    const panel = fixture.window.document.querySelector('[data-mwp-panel]');
+    assert.equal(fixture.window.getComputedStyle(panel).visibility, 'hidden');
+    fixture.window.document.querySelector('[data-mwp-menu]').open = true;
+    assert.equal(fixture.window.getComputedStyle(panel).visibility, 'visible');
+    fixture.window.close();
+  }
+});
+
 test('Dropdown and Full width backdrops require an explicit source opt-in', () => {
   const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
   const optIn = '[data-mwp-navbar][data-mwp-collapsed="true"][data-backdrop="true" i]:where([data-layout="dropdown"], [data-layout="full-width"]):is([data-state="opening"], [data-state="open"]) [data-mwp-backdrop]';
@@ -375,14 +390,50 @@ test('infers expanded mode from the variant-controlled menu wrapper', () => {
   navbar.destroy();
 });
 
-test('uses Webflow native variant markers for collapse detection', () => {
+for (const marker of [
+  'data-wf--navbar-light--variant',
+  'data-wf--smashburger--variant',
+  'data-wf--smashburger-cdn--variant',
+  'data-wf--mwp-component-library--smashburger--variant'
+]) {
+  test(`uses ${marker} for collapse detection`, () => {
+    const root = document.querySelector('[data-mwp-navbar]');
+    root.removeAttribute('data-collapse');
+    root.setAttribute(marker, 'mobile-landscape');
+    globalThis.matchMedia = (query) => ({
+      matches: query === '(max-width: 767px)',
+      addEventListener() {},
+      removeEventListener() {}
+    });
+    const navbar = new NavbarLight(root);
+
+    assert.equal(root.hasAttribute('data-collapse'), false);
+    assert.equal(root.dataset.mwpCollapsed, 'true');
+    assert.equal(root.dataset.state, 'closed');
+    navbar.destroy();
+  });
+}
+
+test('a fresh CDN Mobile landscape instance expands at desktop width', () => {
   const root = document.querySelector('[data-mwp-navbar]');
   root.removeAttribute('data-collapse');
-  root.setAttribute('data-wf--navbar-light--variant', 'tablet');
+  root.setAttribute('data-wf--smashburger-cdn--variant', 'mobile-landscape');
   const navbar = new NavbarLight(root);
 
   assert.equal(root.dataset.mwpCollapsed, 'false');
   assert.equal(root.dataset.state, 'expanded');
+  assert.equal(root.querySelector('[data-mwp-menu]').open, true);
+  navbar.destroy();
+});
+
+test('explicit collapse setting takes precedence over a Webflow variant marker', () => {
+  const root = document.querySelector('[data-mwp-navbar]');
+  root.dataset.collapse = 'never';
+  root.setAttribute('data-wf--smashburger-cdn--variant', 'always');
+  const navbar = new NavbarLight(root);
+
+  assert.equal(root.dataset.collapse, 'never');
+  assert.equal(root.dataset.mwpCollapsed, 'false');
   navbar.destroy();
 });
 
