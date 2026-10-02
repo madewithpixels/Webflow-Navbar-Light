@@ -424,7 +424,8 @@ for (const marker of [
   'data-wf--navbar-light--variant',
   'data-wf--smashburger--variant',
   'data-wf--smashburger-cdn--variant',
-  'data-wf--mwp-component-library--smashburger--variant'
+  'data-wf--mwp-component-library--smashburger--variant',
+  'data-wf--mwp-component-library--smashburger-cdn--variant'
 ]) {
   test(`uses ${marker} for collapse detection`, () => {
     const root = document.querySelector('[data-mwp-navbar]');
