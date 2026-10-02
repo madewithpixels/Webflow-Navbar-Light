@@ -61,7 +61,7 @@
 :where([data-mwp-line]) {
   display: block;
   transform-origin: center;
-  transition-duration: var(--mwp-nav-icon-duration);
+  transition-duration: var(--mwp-nav-icon-effective-duration, var(--mwp-nav-icon-duration));
   transition-property: opacity, transform;
   transition-timing-function: var(--mwp-nav-ease);
 }
@@ -107,7 +107,7 @@
 :where([data-mwp-submenu-icon]) {
   pointer-events: none;
   transform-origin: center;
-  transition-duration: var(--mwp-nav-submenu-icon-duration);
+  transition-duration: var(--mwp-nav-submenu-icon-effective-duration, var(--mwp-nav-submenu-icon-duration));
   transition-property: transform;
   transition-timing-function: var(--mwp-nav-submenu-icon-ease);
 }
@@ -126,7 +126,7 @@
 [data-mwp-backdrop] {
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--mwp-nav-duration-close) var(--mwp-nav-ease), visibility 0s linear var(--mwp-nav-duration-close);
+  transition: opacity var(--mwp-nav-effective-duration-close, var(--mwp-nav-duration-close)) var(--mwp-nav-ease), visibility 0s linear var(--mwp-nav-effective-duration-close, var(--mwp-nav-duration-close));
   visibility: hidden;
 }
 
@@ -186,8 +186,8 @@
   opacity: 0;
   pointer-events: none;
   transform: translateY(calc(var(--mwp-nav-distance) * -1));
-  transition-delay: 0s, 0s, var(--mwp-nav-duration-close);
-  transition-duration: var(--mwp-nav-duration-close), var(--mwp-nav-duration-close), 0s;
+  transition-delay: 0s, 0s, var(--mwp-nav-effective-duration-close, var(--mwp-nav-duration-close));
+  transition-duration: var(--mwp-nav-effective-duration-close, var(--mwp-nav-duration-close)), var(--mwp-nav-effective-duration-close, var(--mwp-nav-duration-close)), 0s;
   transition-property: opacity, transform, visibility;
   transition-timing-function: var(--mwp-nav-ease);
   visibility: hidden;
@@ -209,7 +209,7 @@
   pointer-events: auto;
   transform: none;
   transition-delay: 0s;
-  transition-duration: var(--mwp-nav-duration-open), var(--mwp-nav-duration-open), 0s;
+  transition-duration: var(--mwp-nav-effective-duration-open, var(--mwp-nav-duration-open)), var(--mwp-nav-effective-duration-open, var(--mwp-nav-duration-open)), 0s;
   visibility: visible;
 }
 
@@ -539,7 +539,7 @@
   opacity: 1;
   pointer-events: auto;
   transition-delay: 0s;
-  transition-duration: var(--mwp-nav-duration-open), 0s;
+  transition-duration: var(--mwp-nav-effective-duration-open, var(--mwp-nav-duration-open)), 0s;
   visibility: visible;
 }
 
@@ -601,7 +601,7 @@
   pointer-events: auto;
   transform: none;
   transition-delay: 0s;
-  transition-duration: var(--mwp-nav-duration-open), var(--mwp-nav-duration-open), 0s;
+  transition-duration: var(--mwp-nav-effective-duration-open, var(--mwp-nav-duration-open)), var(--mwp-nav-effective-duration-open, var(--mwp-nav-duration-open)), 0s;
   visibility: visible;
 }
 
@@ -609,7 +609,7 @@
 [data-mwp-navbar][data-mwp-collapsed="true"] [data-mwp-item] {
   opacity: 0;
   transform: translateY(0.5rem);
-  transition-duration: var(--mwp-nav-duration-close);
+  transition-duration: var(--mwp-nav-effective-duration-close, var(--mwp-nav-duration-close));
   transition-property: opacity, transform;
   transition-timing-function: var(--mwp-nav-ease);
   transition-delay: 0ms;
@@ -618,8 +618,8 @@
 [data-mwp-navbar][data-mwp-collapsed="true"]:where([data-state="opening"], [data-state="open"]) [data-mwp-item] {
   opacity: 1;
   transform: none;
-  transition-duration: var(--mwp-nav-duration-open);
-  transition-delay: calc(var(--mwp-item-index, 0) * var(--mwp-nav-stagger));
+  transition-duration: var(--mwp-nav-effective-duration-open, var(--mwp-nav-duration-open));
+  transition-delay: calc(var(--mwp-item-index, 0) * var(--mwp-nav-effective-stagger, var(--mwp-nav-stagger)));
 }
 
 [data-mwp-navbar]:where([data-motion="none"], [data-motion="custom"]) [data-mwp-item] {
@@ -644,6 +644,14 @@ html[data-mwp-scroll-locked="true"] body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  [data-mwp-navbar] {
+    --mwp-nav-effective-duration-open: 0.01ms;
+    --mwp-nav-effective-duration-close: 0.01ms;
+    --mwp-nav-icon-effective-duration: 0.01ms;
+    --mwp-nav-submenu-icon-effective-duration: 0.01ms;
+    --mwp-nav-effective-stagger: 0ms;
+  }
+
   [data-mwp-navbar] [data-mwp-panel],
   [data-mwp-navbar] [data-mwp-backdrop],
   [data-mwp-navbar] [data-mwp-line],
