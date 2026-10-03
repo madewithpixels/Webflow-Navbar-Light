@@ -1,4 +1,4 @@
-/*! Navbar Light v0.2.3 */
+/*! Navbar Light v0.2.4 */
 (() => {
   // src/navbar-light.js
   var ROOT_SELECTOR = "[data-mwp-navbar]";
@@ -33,6 +33,7 @@
       this.root = root;
       this.menu = root.querySelector("[data-mwp-menu], [data-mwp-css-nav]");
       this.trigger = this.menu?.querySelector("[data-mwp-trigger], summary");
+      this.icon = this.trigger?.querySelector("[data-mwp-icon]");
       this.panel = root.querySelector("[data-mwp-panel], .mwp-css-nav_panel");
       this.backdrop = root.querySelector("[data-mwp-backdrop]");
       this.items = [...root.querySelectorAll("[data-mwp-item]")];
@@ -48,6 +49,7 @@
       this.onPanelClick = this.onPanelClick.bind(this);
       this.onToggle = this.onToggle.bind(this);
       this.onBreakpointChange = this.onBreakpointChange.bind(this);
+      this.syncIconGeometry = this.syncIconGeometry.bind(this);
       if (!this.menu || !this.trigger || !this.panel) return;
       this.configure();
       this.bind();
@@ -93,8 +95,9 @@
       if (validCss("transition-timing-function", submenuIconEasing)) rootStyle.setProperty("--mwp-nav-submenu-icon-ease", submenuIconEasing);
       if (validCss("transform", `rotate(${submenuIconRotation})`)) rootStyle.setProperty("--mwp-nav-submenu-icon-rotation", submenuIconRotation);
       this.items.forEach((item, index) => item.style.setProperty("--mwp-item-index", index));
-      this.root.dataset.mwpReady = "true";
+      this.syncIconGeometry();
       const collapse = this.collapsePreset();
+      this.root.dataset.mwpReady = "true";
       if (COLLAPSE_QUERIES[collapse]) {
         this.mediaQuery = globalThis.matchMedia(COLLAPSE_QUERIES[collapse]);
         this.mediaQuery.addEventListener?.("change", this.onBreakpointChange);
@@ -109,9 +112,28 @@
       document.addEventListener("keydown", this.onKeydown);
       this.panel.addEventListener("click", this.onPanelClick);
       if (!this.mediaQuery) window.addEventListener("resize", this.onBreakpointChange, { passive: true });
+      if (this.icon && typeof ResizeObserver !== "undefined") {
+        this.iconObserver = new ResizeObserver(this.syncIconGeometry);
+        this.iconObserver.observe(this.icon);
+      }
+    }
+    syncIconGeometry() {
+      const firstLine = this.icon?.querySelector("[data-mwp-line]");
+      if (!firstLine) return;
+      const lineHeight = Number.parseFloat(getComputedStyle(firstLine).height);
+      const gap = Number.parseFloat(getComputedStyle(this.icon).rowGap) || 0;
+      if (Number.isFinite(lineHeight) && lineHeight > 0) {
+        this.root.style.setProperty("--mwp-nav-icon-auto-shift", `${lineHeight + gap}px`);
+      }
     }
     collapsePreset() {
-      return this.root.dataset.collapse || this.root.getAttribute("data-wf--navbar-light--variant") || "";
+      if (this.root.dataset.collapse) return this.root.dataset.collapse;
+      for (const attribute of this.root.attributes) {
+        if (/^data-wf--.+--variant$/.test(attribute.name) && (attribute.value === "always" || attribute.value === "never" || COLLAPSE_QUERIES[attribute.value])) {
+          return attribute.value;
+        }
+      }
+      return "";
     }
     publicApi() {
       const navbar = this;
@@ -195,6 +217,7 @@
       else this.transitionToClosed(notify);
     }
     transitionToOpen(notify = true) {
+      this.syncIconGeometry();
       this.clearStateTimer();
       this.setState("opening", notify);
       if (this.usesScrollLock()) this.lockScroll();
@@ -294,6 +317,7 @@
       this.panel.removeEventListener("click", this.onPanelClick);
       window.removeEventListener("resize", this.onBreakpointChange);
       this.mediaQuery?.removeEventListener?.("change", this.onBreakpointChange);
+      this.iconObserver?.disconnect();
       delete this.root.mwpNavbarLight;
       delete this.menu.mwpNav;
     }
@@ -308,5 +332,5 @@
   }
   globalThis.NavbarLight = NavbarLight;
   globalThis.initNavbarLight = initNavbarLight;
-  globalThis.MWP_NAVBAR_LIGHT_VERSION = "0.2.3";
+  globalThis.MWP_NAVBAR_LIGHT_VERSION = "0.2.4";
 })();

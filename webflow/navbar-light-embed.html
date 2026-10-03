@@ -18,10 +18,9 @@
   --mwp-nav-submenu-icon-rotation: 180deg;
   --mwp-nav-stagger: 0ms;
   --mwp-nav-backdrop-opacity: 0.45;
-  --mwp-nav-z-index: 100;
   position: relative;
   isolation: isolate;
-  z-index: var(--mwp-nav-z-index);
+  z-index: var(--mwp-nav-z-index, 100);
 }
 
 :where([data-mwp-navbar] .mwp-css-nav_inner) {
@@ -63,15 +62,15 @@
 :where([data-mwp-line]) {
   display: block;
   transform-origin: center;
-  transition-duration: var(--mwp-nav-icon-duration);
+  transition-duration: var(--mwp-nav-icon-effective-duration, var(--mwp-nav-icon-duration));
   transition-property: opacity, transform;
   transition-timing-function: var(--mwp-nav-ease);
 }
 
-/* Default shift matches the native bar thickness plus its vertical gap.
- * Set --mwp-nav-icon-shift when a destination project changes that spacing. */
+/* The enhancement measures the rendered bar thickness and gap before opening.
+ * The legacy shift token still provides an explicit override and no-JS fallback. */
 [data-mwp-menu][open] [data-mwp-line]:nth-child(1) {
-  transform: translateY(var(--mwp-nav-icon-shift, 0.4375rem)) rotate(45deg);
+  transform: translateY(var(--mwp-nav-icon-shift, var(--mwp-nav-icon-auto-shift, 0.4375rem))) rotate(45deg);
 }
 
 [data-mwp-menu][open] [data-mwp-line]:nth-child(2) {
@@ -79,7 +78,7 @@
 }
 
 [data-mwp-menu][open] [data-mwp-line]:nth-child(3) {
-  transform: translateY(calc(var(--mwp-nav-icon-shift, 0.4375rem) * -1)) rotate(-45deg);
+  transform: translateY(calc(var(--mwp-nav-icon-shift, var(--mwp-nav-icon-auto-shift, 0.4375rem)) * -1)) rotate(-45deg);
 }
 
 [data-mwp-navbar][data-icon-lines="2"] [data-mwp-line]:nth-child(2) {
@@ -87,11 +86,11 @@
 }
 
 [data-mwp-navbar][data-icon-lines="2"] [data-mwp-menu][open] [data-mwp-line]:nth-child(1) {
-  transform: translateY(calc(var(--mwp-nav-icon-shift, 0.4375rem) * 0.5)) rotate(45deg);
+  transform: translateY(calc(var(--mwp-nav-icon-shift, var(--mwp-nav-icon-auto-shift, 0.4375rem)) * 0.5)) rotate(45deg);
 }
 
 [data-mwp-navbar][data-icon-lines="2"] [data-mwp-menu][open] [data-mwp-line]:nth-child(3) {
-  transform: translateY(calc(var(--mwp-nav-icon-shift, 0.4375rem) * -0.5)) rotate(-45deg);
+  transform: translateY(calc(var(--mwp-nav-icon-shift, var(--mwp-nav-icon-auto-shift, 0.4375rem)) * -0.5)) rotate(-45deg);
 }
 
 :where([data-mwp-panel]) {
@@ -109,7 +108,7 @@
 :where([data-mwp-submenu-icon]) {
   pointer-events: none;
   transform-origin: center;
-  transition-duration: var(--mwp-nav-submenu-icon-duration);
+  transition-duration: var(--mwp-nav-submenu-icon-effective-duration, var(--mwp-nav-submenu-icon-duration));
   transition-property: transform;
   transition-timing-function: var(--mwp-nav-submenu-icon-ease);
 }
@@ -128,7 +127,7 @@
 [data-mwp-backdrop] {
   opacity: 0;
   pointer-events: none;
-  transition: opacity var(--mwp-nav-duration-close) var(--mwp-nav-ease), visibility 0s linear var(--mwp-nav-duration-close);
+  transition: opacity var(--mwp-nav-effective-duration-close, var(--mwp-nav-duration-close)) var(--mwp-nav-ease), visibility 0s linear var(--mwp-nav-effective-duration-close, var(--mwp-nav-duration-close));
   visibility: hidden;
 }
 
@@ -162,7 +161,7 @@
 :where(
   [data-mwp-navbar][data-mwp-collapsed="true"],
   [data-mwp-navbar][data-collapse="always"],
-  [data-mwp-navbar][data-wf--navbar-light--variant="always"]
+  [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="always"], [data-wf--smashburger--variant="always"], [data-wf--smashburger-cdn--variant="always"])
 ) [data-mwp-trigger] {
   display: flex;
 }
@@ -170,7 +169,7 @@
 :where(
   [data-mwp-navbar][data-mwp-collapsed="true"] [data-mwp-panel],
   [data-mwp-navbar][data-collapse="always"] [data-mwp-panel],
-  [data-mwp-navbar][data-wf--navbar-light--variant="always"] [data-mwp-panel]
+  [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="always"], [data-wf--smashburger--variant="always"], [data-wf--smashburger-cdn--variant="always"]) [data-mwp-panel]
 ) {
   display: grid;
   position: absolute;
@@ -183,13 +182,13 @@
 :where(
   [data-mwp-navbar][data-mwp-collapsed="true"],
   [data-mwp-navbar][data-collapse="always"],
-  [data-mwp-navbar][data-wf--navbar-light--variant="always"]
+  [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="always"], [data-wf--smashburger--variant="always"], [data-wf--smashburger-cdn--variant="always"])
 ) [data-mwp-panel] {
   opacity: 0;
   pointer-events: none;
   transform: translateY(calc(var(--mwp-nav-distance) * -1));
-  transition-delay: 0s, 0s, var(--mwp-nav-duration-close);
-  transition-duration: var(--mwp-nav-duration-close), var(--mwp-nav-duration-close), 0s;
+  transition-delay: 0s, 0s, var(--mwp-nav-effective-duration-close, var(--mwp-nav-duration-close));
+  transition-duration: var(--mwp-nav-effective-duration-close, var(--mwp-nav-duration-close)), var(--mwp-nav-effective-duration-close, var(--mwp-nav-duration-close)), 0s;
   transition-property: opacity, transform, visibility;
   transition-timing-function: var(--mwp-nav-ease);
   visibility: hidden;
@@ -205,39 +204,39 @@
 :where(
   [data-mwp-navbar][data-mwp-collapsed="true"],
   [data-mwp-navbar][data-collapse="always"],
-  [data-mwp-navbar][data-wf--navbar-light--variant="always"]
+  [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="always"], [data-wf--smashburger--variant="always"], [data-wf--smashburger-cdn--variant="always"])
 ) [data-mwp-menu][open] + [data-mwp-panel] {
   opacity: 1;
   pointer-events: auto;
   transform: none;
   transition-delay: 0s;
-  transition-duration: var(--mwp-nav-duration-open), var(--mwp-nav-duration-open), 0s;
+  transition-duration: var(--mwp-nav-effective-duration-open, var(--mwp-nav-duration-open)), var(--mwp-nav-effective-duration-open, var(--mwp-nav-duration-open)), 0s;
   visibility: visible;
 }
 
-/* CSS-only collapse choices. Webflow emits the variant marker used below;
- * data-collapse provides the same behaviour in standalone markup. */
+/* CSS-only collapse choices. The source and CDN components have different
+ * Webflow variant attribute names; data-collapse remains portable markup. */
 @media screen and (max-width: 991px) {
   :where(
     [data-mwp-navbar][data-collapse="tablet"],
-    [data-mwp-navbar][data-wf--navbar-light--variant="tablet"]
+    [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="tablet"], [data-wf--smashburger--variant="tablet"], [data-wf--smashburger-cdn--variant="tablet"])
   ) [data-mwp-trigger] { display: flex; }
   :where(
     [data-mwp-navbar][data-collapse="tablet"] [data-mwp-panel],
-    [data-mwp-navbar][data-wf--navbar-light--variant="tablet"] [data-mwp-panel]
+    [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="tablet"], [data-wf--smashburger--variant="tablet"], [data-wf--smashburger-cdn--variant="tablet"]) [data-mwp-panel]
   ) {
     display: grid; position: absolute; right: 0; top: 100%; width: var(--mwp-nav-panel-width);
   }
   :where(
     [data-mwp-navbar][data-collapse="tablet"],
-    [data-mwp-navbar][data-wf--navbar-light--variant="tablet"]
+    [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="tablet"], [data-wf--smashburger--variant="tablet"], [data-wf--smashburger-cdn--variant="tablet"])
   ) [data-mwp-panel] {
     opacity: 0; pointer-events: none;
     transform: translateY(calc(var(--mwp-nav-distance) * -1)); visibility: hidden;
   }
   :where(
     [data-mwp-navbar][data-collapse="tablet"],
-    [data-mwp-navbar][data-wf--navbar-light--variant="tablet"]
+    [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="tablet"], [data-wf--smashburger--variant="tablet"], [data-wf--smashburger-cdn--variant="tablet"])
   ) [data-mwp-menu][open] + [data-mwp-panel] {
     opacity: 1; pointer-events: auto; transform: none; visibility: visible;
   }
@@ -246,24 +245,24 @@
 @media screen and (max-width: 767px) {
   :where(
     [data-mwp-navbar][data-collapse="mobile-landscape"],
-    [data-mwp-navbar][data-wf--navbar-light--variant="mobile-landscape"]
+    [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="mobile-landscape"], [data-wf--smashburger--variant="mobile-landscape"], [data-wf--smashburger-cdn--variant="mobile-landscape"])
   ) [data-mwp-trigger] { display: flex; }
   :where(
     [data-mwp-navbar][data-collapse="mobile-landscape"] [data-mwp-panel],
-    [data-mwp-navbar][data-wf--navbar-light--variant="mobile-landscape"] [data-mwp-panel]
+    [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="mobile-landscape"], [data-wf--smashburger--variant="mobile-landscape"], [data-wf--smashburger-cdn--variant="mobile-landscape"]) [data-mwp-panel]
   ) {
     display: grid; position: absolute; right: 0; top: 100%; width: var(--mwp-nav-panel-width);
   }
   :where(
     [data-mwp-navbar][data-collapse="mobile-landscape"],
-    [data-mwp-navbar][data-wf--navbar-light--variant="mobile-landscape"]
+    [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="mobile-landscape"], [data-wf--smashburger--variant="mobile-landscape"], [data-wf--smashburger-cdn--variant="mobile-landscape"])
   ) [data-mwp-panel] {
     opacity: 0; pointer-events: none;
     transform: translateY(calc(var(--mwp-nav-distance) * -1)); visibility: hidden;
   }
   :where(
     [data-mwp-navbar][data-collapse="mobile-landscape"],
-    [data-mwp-navbar][data-wf--navbar-light--variant="mobile-landscape"]
+    [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="mobile-landscape"], [data-wf--smashburger--variant="mobile-landscape"], [data-wf--smashburger-cdn--variant="mobile-landscape"])
   ) [data-mwp-menu][open] + [data-mwp-panel] {
     opacity: 1; pointer-events: auto; transform: none; visibility: visible;
   }
@@ -272,24 +271,24 @@
 @media screen and (max-width: 479px) {
   :where(
     [data-mwp-navbar][data-collapse="mobile-portrait"],
-    [data-mwp-navbar][data-wf--navbar-light--variant="mobile-portrait"]
+    [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="mobile-portrait"], [data-wf--smashburger--variant="mobile-portrait"], [data-wf--smashburger-cdn--variant="mobile-portrait"])
   ) [data-mwp-trigger] { display: flex; }
   :where(
     [data-mwp-navbar][data-collapse="mobile-portrait"] [data-mwp-panel],
-    [data-mwp-navbar][data-wf--navbar-light--variant="mobile-portrait"] [data-mwp-panel]
+    [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="mobile-portrait"], [data-wf--smashburger--variant="mobile-portrait"], [data-wf--smashburger-cdn--variant="mobile-portrait"]) [data-mwp-panel]
   ) {
     display: grid; position: absolute; right: 0; top: 100%; width: var(--mwp-nav-panel-width);
   }
   :where(
     [data-mwp-navbar][data-collapse="mobile-portrait"],
-    [data-mwp-navbar][data-wf--navbar-light--variant="mobile-portrait"]
+    [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="mobile-portrait"], [data-wf--smashburger--variant="mobile-portrait"], [data-wf--smashburger-cdn--variant="mobile-portrait"])
   ) [data-mwp-panel] {
     opacity: 0; pointer-events: none;
     transform: translateY(calc(var(--mwp-nav-distance) * -1)); visibility: hidden;
   }
   :where(
     [data-mwp-navbar][data-collapse="mobile-portrait"],
-    [data-mwp-navbar][data-wf--navbar-light--variant="mobile-portrait"]
+    [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="mobile-portrait"], [data-wf--smashburger--variant="mobile-portrait"], [data-wf--smashburger-cdn--variant="mobile-portrait"])
   ) [data-mwp-menu][open] + [data-mwp-panel] {
     opacity: 1; pointer-events: auto; transform: none; visibility: visible;
   }
@@ -303,7 +302,7 @@
 :where(
   [data-mwp-navbar][data-mwp-collapsed="true"][data-align="center"] [data-mwp-panel],
   [data-mwp-navbar][data-collapse="always"][data-align="center"] [data-mwp-panel],
-  [data-mwp-navbar][data-wf--navbar-light--variant="always"][data-align="center"] [data-mwp-panel]
+  [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="always"], [data-wf--smashburger--variant="always"], [data-wf--smashburger-cdn--variant="always"])[data-align="center"] [data-mwp-panel]
 ) {
   translate: -50% 0;
 }
@@ -311,21 +310,21 @@
 @media screen and (max-width: 991px) {
   :where(
     [data-mwp-navbar][data-collapse="tablet"][data-align="center"] [data-mwp-panel],
-    [data-mwp-navbar][data-wf--navbar-light--variant="tablet"][data-align="center"] [data-mwp-panel]
+    [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="tablet"], [data-wf--smashburger--variant="tablet"], [data-wf--smashburger-cdn--variant="tablet"])[data-align="center"] [data-mwp-panel]
   ) { translate: -50% 0; }
 }
 
 @media screen and (max-width: 767px) {
   :where(
     [data-mwp-navbar][data-collapse="mobile-landscape"][data-align="center"] [data-mwp-panel],
-    [data-mwp-navbar][data-wf--navbar-light--variant="mobile-landscape"][data-align="center"] [data-mwp-panel]
+    [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="mobile-landscape"], [data-wf--smashburger--variant="mobile-landscape"], [data-wf--smashburger-cdn--variant="mobile-landscape"])[data-align="center"] [data-mwp-panel]
   ) { translate: -50% 0; }
 }
 
 @media screen and (max-width: 479px) {
   :where(
     [data-mwp-navbar][data-collapse="mobile-portrait"][data-align="center"] [data-mwp-panel],
-    [data-mwp-navbar][data-wf--navbar-light--variant="mobile-portrait"][data-align="center"] [data-mwp-panel]
+    [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="mobile-portrait"], [data-wf--smashburger--variant="mobile-portrait"], [data-wf--smashburger-cdn--variant="mobile-portrait"])[data-align="center"] [data-mwp-panel]
   ) { translate: -50% 0; }
 }
 
@@ -535,12 +534,13 @@
   transform: none;
 }
 
+[data-mwp-navbar][data-mwp-collapsed="true"][data-backdrop="true" i]:where([data-layout="dropdown"], [data-layout="full-width"]):is([data-state="opening"], [data-state="open"]) [data-mwp-backdrop],
 [data-mwp-navbar][data-mwp-collapsed="true"]:where([data-layout="left"], [data-layout="right"], [data-layout="overlay"])[data-state="open"] [data-mwp-backdrop],
 [data-mwp-navbar][data-mwp-collapsed="true"]:where([data-layout="left"], [data-layout="right"], [data-layout="overlay"])[data-state="opening"] [data-mwp-backdrop] {
   opacity: 1;
   pointer-events: auto;
   transition-delay: 0s;
-  transition-duration: var(--mwp-nav-duration-open), 0s;
+  transition-duration: var(--mwp-nav-effective-duration-open, var(--mwp-nav-duration-open)), 0s;
   visibility: visible;
 }
 
@@ -594,11 +594,23 @@
   visibility: visible;
 }
 
+/* Enhanced menus expose state on the panel itself, so a project layout
+ * wrapper around the trigger need not be adjacent to the panel. The native
+ * details sibling rules above remain the no-script fallback. */
+[data-mwp-navbar][data-mwp-collapsed="true"]:not([data-motion="custom"]) [data-mwp-panel]:is([data-state="opening"], [data-state="open"]) {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+  transition-delay: 0s;
+  transition-duration: var(--mwp-nav-effective-duration-open, var(--mwp-nav-duration-open)), var(--mwp-nav-effective-duration-open, var(--mwp-nav-duration-open)), 0s;
+  visibility: visible;
+}
+
 /* Optional item stagger. The script assigns --mwp-item-index. */
 [data-mwp-navbar][data-mwp-collapsed="true"] [data-mwp-item] {
   opacity: 0;
   transform: translateY(0.5rem);
-  transition-duration: var(--mwp-nav-duration-close);
+  transition-duration: var(--mwp-nav-effective-duration-close, var(--mwp-nav-duration-close));
   transition-property: opacity, transform;
   transition-timing-function: var(--mwp-nav-ease);
   transition-delay: 0ms;
@@ -607,8 +619,8 @@
 [data-mwp-navbar][data-mwp-collapsed="true"]:where([data-state="opening"], [data-state="open"]) [data-mwp-item] {
   opacity: 1;
   transform: none;
-  transition-duration: var(--mwp-nav-duration-open);
-  transition-delay: calc(var(--mwp-item-index, 0) * var(--mwp-nav-stagger));
+  transition-duration: var(--mwp-nav-effective-duration-open, var(--mwp-nav-duration-open));
+  transition-delay: calc(var(--mwp-item-index, 0) * var(--mwp-nav-effective-stagger, var(--mwp-nav-stagger)));
 }
 
 [data-mwp-navbar]:where([data-motion="none"], [data-motion="custom"]) [data-mwp-item] {
@@ -633,6 +645,14 @@ html[data-mwp-scroll-locked="true"] body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  [data-mwp-navbar] {
+    --mwp-nav-effective-duration-open: 0.01ms;
+    --mwp-nav-effective-duration-close: 0.01ms;
+    --mwp-nav-icon-effective-duration: 0.01ms;
+    --mwp-nav-submenu-icon-effective-duration: 0.01ms;
+    --mwp-nav-effective-stagger: 0ms;
+  }
+
   [data-mwp-navbar] [data-mwp-panel],
   [data-mwp-navbar] [data-mwp-backdrop],
   [data-mwp-navbar] [data-mwp-line],
@@ -684,6 +704,7 @@ class NavbarLight {
     this.root = root;
     this.menu = root.querySelector('[data-mwp-menu], [data-mwp-css-nav]');
     this.trigger = this.menu?.querySelector('[data-mwp-trigger], summary');
+    this.icon = this.trigger?.querySelector('[data-mwp-icon]');
     this.panel = root.querySelector('[data-mwp-panel], .mwp-css-nav_panel');
     this.backdrop = root.querySelector('[data-mwp-backdrop]');
     this.items = [...root.querySelectorAll('[data-mwp-item]')];
@@ -699,6 +720,7 @@ class NavbarLight {
     this.onPanelClick = this.onPanelClick.bind(this);
     this.onToggle = this.onToggle.bind(this);
     this.onBreakpointChange = this.onBreakpointChange.bind(this);
+    this.syncIconGeometry = this.syncIconGeometry.bind(this);
 
     if (!this.menu || !this.trigger || !this.panel) return;
     this.configure();
@@ -752,10 +774,10 @@ class NavbarLight {
     if (validCss('transform', `rotate(${submenuIconRotation})`)) rootStyle.setProperty('--mwp-nav-submenu-icon-rotation', submenuIconRotation);
 
     this.items.forEach((item, index) => item.style.setProperty('--mwp-item-index', index));
-
-    this.root.dataset.mwpReady = 'true';
+    this.syncIconGeometry();
 
     const collapse = this.collapsePreset();
+    this.root.dataset.mwpReady = 'true';
     if (COLLAPSE_QUERIES[collapse]) {
       this.mediaQuery = globalThis.matchMedia(COLLAPSE_QUERIES[collapse]);
       this.mediaQuery.addEventListener?.('change', this.onBreakpointChange);
@@ -773,10 +795,31 @@ class NavbarLight {
     this.panel.addEventListener('click', this.onPanelClick);
 
     if (!this.mediaQuery) window.addEventListener('resize', this.onBreakpointChange, { passive: true });
+    if (this.icon && typeof ResizeObserver !== 'undefined') {
+      this.iconObserver = new ResizeObserver(this.syncIconGeometry);
+      this.iconObserver.observe(this.icon);
+    }
+  }
+
+  syncIconGeometry() {
+    const firstLine = this.icon?.querySelector('[data-mwp-line]');
+    if (!firstLine) return;
+    const lineHeight = Number.parseFloat(getComputedStyle(firstLine).height);
+    const gap = Number.parseFloat(getComputedStyle(this.icon).rowGap) || 0;
+    if (Number.isFinite(lineHeight) && lineHeight > 0) {
+      this.root.style.setProperty('--mwp-nav-icon-auto-shift', `${lineHeight + gap}px`);
+    }
   }
 
   collapsePreset() {
-    return this.root.dataset.collapse || this.root.getAttribute('data-wf--navbar-light--variant') || '';
+    if (this.root.dataset.collapse) return this.root.dataset.collapse;
+    for (const attribute of this.root.attributes) {
+      if (/^data-wf--.+--variant$/.test(attribute.name) &&
+        (attribute.value === 'always' || attribute.value === 'never' || COLLAPSE_QUERIES[attribute.value])) {
+        return attribute.value;
+      }
+    }
+    return '';
   }
 
   publicApi() {
@@ -872,6 +915,7 @@ class NavbarLight {
   }
 
   transitionToOpen(notify = true) {
+    this.syncIconGeometry();
     this.clearStateTimer();
     this.setState('opening', notify);
     if (this.usesScrollLock()) this.lockScroll();
@@ -981,6 +1025,7 @@ class NavbarLight {
     this.panel.removeEventListener('click', this.onPanelClick);
     window.removeEventListener('resize', this.onBreakpointChange);
     this.mediaQuery?.removeEventListener?.('change', this.onBreakpointChange);
+    this.iconObserver?.disconnect();
     delete this.root.mwpNavbarLight;
     delete this.menu.mwpNav;
   }
