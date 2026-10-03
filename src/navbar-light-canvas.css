@@ -49,7 +49,13 @@ html.wf-design-mode :is(
 }
 
 html.wf-design-mode [data-mwp-navbar] > [data-mwp-config] {
+  background-color: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 0.25);
+  color: #111827;
+  max-height: 70vh;
   max-width: min(22rem, 100%);
+  overflow-y: auto;
   position: absolute;
   right: 0;
   top: 100%;
