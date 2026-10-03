@@ -12,6 +12,23 @@ collapsed. Expanded navigation remains an ordinary horizontal Webflow header.
 | Right drawer | Same drawer from the right. |
 | Overlay | Viewport-filling dark panel with large, centred links and a visible close button. |
 
+## Layout presets switch (v0.2.5)
+
+The collapsed presentation has two parts. **Structural** rules always apply:
+placement, width and height, viewport-bounded scrolling, stacking, the grid
+tracks for Full width and the drawers, and keeping the close button reachable
+while a drawer or overlay is open. **Visual** preset rules can be switched off:
+panel surface, border, shadow and ink; panel, group and link spacing; link row
+sizing; the Full-width and secondary dividers; overlay typography, centring and
+icon filter; and the drawer/overlay close-button styling.
+
+Set `data-presets="false"` on the navbar root, or turn off the `Layout presets`
+component property (Webflow emits `False`; the match is case-insensitive), to
+let ordinary Webflow classes own the entire collapsed look. Presets are on
+when the attribute is absent, so existing installs keep their appearance.
+Use Off for a custom-designed site; use On, plus the tokens below, for a quick
+neutral result.
+
 The neutral baseline uses these optional CSS custom properties on the navbar
 root or a project wrapper: `--mwp-nav-panel-surface`,
 `--mwp-nav-panel-ink`, `--mwp-nav-panel-border`,

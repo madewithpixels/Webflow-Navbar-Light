@@ -82,7 +82,7 @@ The native `/style-guide` page is both a visual reference and a class-retention 
 
 ## Layout and motion presets
 
-Version 0.2.3 gives each collapsed layout a usable default presentation. See [layout presets](webflow/layout-presets.md) for the five shapes and styling tokens. A linked Webflow Library site receives these defaults when its Library update is accepted.
+Version 0.2.5 adds a `Layout presets` switch (`data-presets="false"`) that removes the visual preset styling while keeping the structural layout, so a custom-designed site's own Webflow classes own the collapsed look. Version 0.2.3 gives each collapsed layout a usable default presentation. See [layout presets](webflow/layout-presets.md) for the five shapes and styling tokens. A linked Webflow Library site receives these defaults when its Library update is accepted.
 
 Layouts:
 

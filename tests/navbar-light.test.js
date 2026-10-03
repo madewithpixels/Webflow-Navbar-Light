@@ -552,3 +552,29 @@ test('reads Canvas-visible configuration values and normalises presets', () => {
   assert.equal(root.dataset.mwpReady, 'true');
   navbar.destroy();
 });
+
+test('Layout presets can be switched off so destination classes own the collapsed look', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  const visualPanel = '[data-mwp-navbar][data-mwp-collapsed="true"]:not([data-presets="false" i]) [data-mwp-panel]';
+  const structuralPanel = '[data-mwp-navbar][data-mwp-collapsed="true"] [data-mwp-panel]';
+  assert.ok(css.includes(`${visualPanel} {`));
+  assert.ok(css.includes(`${structuralPanel} {`));
+  const structuralBody = css.split(`${structuralPanel} {`)[1].split('}')[0];
+  assert.match(structuralBody, /overflow-y:\s*auto/);
+  assert.doesNotMatch(structuralBody, /(^|;|\s)(background|border|box-shadow|padding|color)(-[a-z]+)?\s*:/);
+
+  // Webflow emits booleans as True/False; the switch is case-insensitive and on by default.
+  for (const [presets, expectPreset] of [['', true], ['data-presets="True"', true], ['data-presets="False"', false], ['data-presets="false"', false]]) {
+    const fixture = new JSDOM(`<header data-mwp-navbar data-mwp-collapsed="true" ${presets}><nav data-mwp-panel></nav></header>`);
+    const panel = fixture.window.document.querySelector('[data-mwp-panel]');
+    assert.equal(panel.matches(visualPanel), expectPreset, presets || 'default');
+    assert.equal(panel.matches(structuralPanel), true);
+  }
+
+  // Every visual preset declaration on a collapsed navbar must sit behind the switch.
+  const ungated = [...css.matchAll(/([^{}]+)\{([^}]*)\}/g)]
+    .filter(([, selector, body]) => /data-mwp-collapsed="true"/.test(selector) && !/data-presets/.test(selector)
+      && /(^|;|\s)(background|border(-top|-left|-right)?|box-shadow|color|padding(-top|-left)?|gap|font-size|filter|text-align)\s*:/.test(body))
+    .map(([, selector]) => selector.trim());
+  assert.deepEqual(ungated, []);
+});
