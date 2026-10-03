@@ -92,7 +92,8 @@ Fix, step 3: Michael asked why a label that does nothing is shown at all. It
 is not needed: the inspector only carries prop values for the runtime script,
 and the props panel already shows them. On the Canvas it is now `display:
 none`, and it stays selectable in the Navigator. Written to both source helper
-Embeds; awaiting Michael's screenshot.
+Embeds. Michael's Desktop screenshot confirmed it: no label, no dashed
+shapes, and nothing covers the second instance.
 
 MCP authoring notes for the future Designer Extension: `data_element_builder`
 created `TextBlock` as a Div whose text stayed Webflow's placeholder, so use

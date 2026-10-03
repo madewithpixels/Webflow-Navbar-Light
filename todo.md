@@ -217,8 +217,8 @@ Keep the current Canvas-visible, self-contained Embed as the dependable default.
 - [x] Add a `Canvas: show open menu` component switch (default Off) so a collapsed panel can be shown and styled on the Canvas without affecting Preview or published output. Verified at Tablet on the source page. See `webflow/canvas-authoring-fixture.md`.
 - [x] Build a dedicated Navbar workbench page with separate closed-state and forced-open authoring instances. Shared classes should let designers style both states without repeatedly changing production-instance settings or leaving a menu open over page content. Built as the draft `SmashBurger workbench` page in MWP Component Library with closed and Canvas-open `Always` instances; verified by Michael at Desktop and Tablet. See `webflow/canvas-authoring-fixture.md`.
 - [x] Include a small backdrop style swatch/reference on the workbench instead of making the fixed runtime Backdrop cover the Canvas while it is styled. A class-only swatch Div (no runtime hook) styles the real backdrop without covering the Canvas; verified in Preview. See `webflow/canvas-authoring-fixture.md`.
-- [ ] Stop the floating Canvas settings card overlapping the content after its instance (seen on the workbench: it covers the next instance trigger).
-  - Now hidden on the Canvas entirely (it only carries prop values; the props panel shows them). Tick once Michael's screenshot confirms.
+- [x] Stop the floating Canvas settings card overlapping the content after its instance (seen on the workbench: it covers the next instance trigger).
+  - Now hidden on the Canvas entirely (it only carries prop values; the props panel shows them). Michael's Desktop screenshot confirmed it (2026-10-03).
 - [ ] Treat visible open/closed buttons inside production element settings as a fallback, not the preferred SmashBurger authoring experience.
 - [ ] In the future Designer Extension prototype, investigate whether open/closed/isolate authoring controls can be genuinely temporary and non-publishing before promising app-managed state.
 
@@ -334,3 +334,4 @@ Treat a mega-menu as a separate component or extension-installed premium feature
 - [x] Verify the published `Smashburger` clean install at 1280px, 984px, 767px and 393px: correct collapse state, zero overflow, loaded icons, hidden runtime settings, ARIA/inert synchronization, nested/outer Escape focus restoration and clean console.
 - [x] Compare the MWP Library source and destination component schemas: the same five variants and 57 property IDs/defaults remain linked, with destination-local icon asset remapping intact.
 - [x] Declare the Navbar Light/SmashBurger POC ready to hand over to the Webflow Designer Extension phase; keep Windows NVDA and the first real version rollback/upgrade as explicit product-phase validation.
+- [ ] Decide whether to hide Webflow's grey runtime-Embed placeholder bar on the Canvas (it adds about 70px under each instance header).
