@@ -48,40 +48,13 @@ html.wf-design-mode :is(
   }
 }
 
-/* The Designer intercepts Canvas clicks for selection, so the inspector's
- * details element cannot be opened there. On the Canvas it becomes a compact,
- * text-width label centred at the top edge of the header row, and its rows are
- * hidden. Their values are shown in the component Properties panel, and the rows
- * remain selectable in the Navigator. Structural selectors are used because a
- * linked Library instance prefixes the inspector's class names. */
+/* The settings inspector only carries prop values for the runtime script. On
+ * the Canvas it has no use (the Designer intercepts clicks, so it cannot open)
+ * and it covered the content after the instance, so it is hidden there. Read
+ * and change the settings in the component Properties panel; the element stays
+ * selectable in the Navigator. Structural selectors are used because a linked
+ * Library instance prefixes the inspector's class names. */
 html.wf-design-mode [data-mwp-navbar] > [data-mwp-config] {
-  background-color: #fff;
-  border-radius: 999px;
-  box-shadow: 0 0.25rem 1rem rgb(0 0 0 / 0.25);
-  color: #111827;
-  left: 50%;
-  max-width: calc(100% - 1rem);
-  position: absolute;
-  top: 0.25rem;
-  transform: translateX(-50%);
-  width: max-content;
-  z-index: 5;
-}
-
-html.wf-design-mode [data-mwp-navbar] > [data-mwp-config] > :not(summary) {
-  display: none;
-}
-
-html.wf-design-mode [data-mwp-navbar] > [data-mwp-config] > summary {
-  padding: 0.25rem 0.625rem;
-}
-
-html.wf-design-mode [data-mwp-navbar] > [data-mwp-config] > summary > * {
-  font-size: 0.6875rem;
-  line-height: 1.2;
-}
-
-html.wf-design-mode [data-mwp-navbar] > [data-mwp-config] > summary > :not(:first-child) {
   display: none;
 }
 

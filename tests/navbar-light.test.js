@@ -602,7 +602,7 @@ test('Canvas helper hides a closed collapsed panel only on the Designer Canvas',
     const fixture = new JSDOM(`<html class="${htmlClass}"><body><header data-mwp-navbar ${rootAttrs}><nav data-mwp-panel></nav></header></body></html>`);
     assert.equal(fixture.window.document.querySelector('[data-mwp-panel]').matches(always), hidden, `${htmlClass} ${rootAttrs}`);
   }
-  assert.ok(rules.some(({ selector, body }) => selector.endsWith('> [data-mwp-config]') && /position:\s*absolute/.test(body)));
+  assert.ok(rules.some(({ selector, body }) => selector.endsWith('> [data-mwp-config]') && /display:\s*none/.test(body)));
   assert.doesNotMatch(css.replaceAll(/\/\*[\s\S]*?\*\//g, ''), /!important/);
   // Webflow shows a placeholder for any Embed whose code contains this text, even in a comment.
   assert.doesNotMatch(css, /<script/i);

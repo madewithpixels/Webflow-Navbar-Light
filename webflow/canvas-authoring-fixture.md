@@ -86,8 +86,13 @@ selected the hidden rows, which showed as green dashed placeholder shapes.
 Fix, step 2: on the Canvas the inspector is now a non-interactive,
 text-width label (`Smashburger settings`). Its rows and summary hint are hidden
 with `display: none`, and the open-state styles are gone. The settings
-themselves are read in the Designer's component props panel. Written to both
-source helper Embeds; awaiting Michael's Desktop screenshot.
+themselves are read in the Designer's component props panel.
+
+Fix, step 3: Michael asked why a label that does nothing is shown at all. It
+is not needed: the inspector only carries prop values for the runtime script,
+and the props panel already shows them. On the Canvas it is now `display:
+none`, and it stays selectable in the Navigator. Written to both source helper
+Embeds; awaiting Michael's screenshot.
 
 MCP authoring notes for the future Designer Extension: `data_element_builder`
 created `TextBlock` as a Div whose text stayed Webflow's placeholder, so use
