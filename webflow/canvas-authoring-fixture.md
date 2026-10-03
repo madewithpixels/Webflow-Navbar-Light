@@ -53,3 +53,31 @@ Embed is present but inert. The page has no `wf-design-mode` class and the root
 emits `data-canvas-open="False"`. The settings inspector stays runtime-hidden
 (`display: none`, `position: static`). At 600px the closed panel keeps its
 runtime `grid`, and opening shows all 9 links with the backdrop and no overflow.
+
+## Navbar workbench page (2026-10-03)
+
+MWP Component Library draft page `SmashBurger workbench`
+(`/smashburger-workbench`, page `6ac107a07a294c4436ac576a`). It holds three
+labelled native sections, created through MCP without new classes:
+
+1. Closed instance (`514649f7-ee9a-2345-bae5-01a561700a8e`): `Always` variant,
+   `Canvas: show open menu` Off. The Canvas shows only Brand and the `MENU` trigger.
+2. Open instance (`dcbde88f-7757-82c1-0005-1424d96bcff8`): `Always` variant,
+   `Canvas: show open menu` On. The Canvas shows the full panel (primary links,
+   CTA, socials, contacts) for styling; Preview behaves like a normal closed menu.
+3. Backdrop swatch (`aabdb11b-c887-e8b6-e3ac-ea4d7b55d6a5`): a plain Div with
+   the `mwp-css-nav_backdrop` class but no `data-mwp-backdrop` hook, so it never
+   becomes fixed or covers the Canvas.
+
+Michael verified the page in the Designer at Desktop and Tablet. He gave the
+swatch's class a red background, and both real menus' backdrops turned red in
+Preview, so styling the swatch styles the runtime backdrop as intended.
+
+Found: on the Canvas, each instance's floating settings card hangs below its
+own root and overlaps the following content. Instance 1's card covers instance
+2's header and trigger; instance 2's card covers the backdrop label.
+
+MCP authoring notes for the future Designer Extension: `data_element_builder`
+created `TextBlock` as a Div whose text stayed Webflow's placeholder, so use
+`Paragraph`. Elements cannot be created or moved with a component instance as
+the anchor; reorder by moving the instance relative to ordinary siblings.
