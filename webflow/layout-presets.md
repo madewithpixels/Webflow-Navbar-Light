@@ -40,6 +40,16 @@ native `mwp-css-nav_panel` class styling showed through (transparent, 4px
 padding, 2px gap, no shadow, plain trigger), while the structure was
 unchanged: fixed, full height, 384px wide, scrollable.
 
+After the `v0.2.5` tag was pushed and the Library update was shared and
+accepted, the published CDN source page, SB Test Five
+`/smashburger-cdn-import-proof` and Smashburger `/` all loaded both `v0.2.5`
+assets with SRI enforced. Each emitted `data-presets="True"` and had Primary
+before Secondary. On SB Test Five (Dropdown, 600px), On gave the white surface,
+shadow and 16px padding; switching the attribute to `False` in a test frame
+gave the linked class styling (transparent, 4px padding, no shadow), with the
+panel still 384px wide, right-anchored and scrollable, and no overflow.
+Smashburger's Dropdown opened with the preset look and no overflow.
+
 The neutral baseline uses these optional CSS custom properties on the navbar
 root or a project wrapper: `--mwp-nav-panel-surface`,
 `--mwp-nav-panel-ink`, `--mwp-nav-panel-border`,

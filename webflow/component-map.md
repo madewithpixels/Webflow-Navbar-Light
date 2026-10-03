@@ -105,6 +105,7 @@ Webflow emits the selected marker as `data-wf--navbar-light--variant`. The CSS f
 | Close on outside click | `76b3f040-5c5f-50ec-0b79-960d070ce9b6` | `true` |
 | Close on link click | `3e2a98bd-1b72-4f1c-134e-8b456c698593` | `true` |
 | Lock page scroll | `43909a2f-ec89-bc03-e6ad-ddd4dd63e2fc` | `auto` |
+| Layout presets | self-contained `4eec2e32-eff5-80f8-5368-2785eae1af7a`, CDN `1cfa4e51-4af3-d818-6c5b-a56df6f3b79a` (root `data-presets`) | `true` |
 
 The v0.2.0 additions use component-specific generated property IDs. Both editions expose `Show submenu arrows`, `Submenu icon duration`, `Submenu icon easing` and `Submenu icon rotation`. The `Social links` and `Contact links` groups expose a destination, replaceable icon Image and visibility toggle for each named entry: Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email.
 
@@ -150,4 +151,4 @@ Native layout classes:
 
 `webflow/navbar-light-embed.html` and `demo/navbar-light.browser.js` are generated from `src/navbar-light.css` and `src/navbar-light.js`. Never edit generated output as the source of truth; run `npm run build:webflow`, then synchronize the Embed output to Webflow.
 
-`webflow/navbar-light-cdn-loader.html` is generated from the package version and built release files. The current generated loader references `v0.2.4` with matching SHA-384 integrity values; both source component Embeds were updated to `v0.2.4` on 2026-10-03. The `SmashBurger CDN` component is separate so the self-contained edition remains available without an external runtime request.
+`webflow/navbar-light-cdn-loader.html` is generated from the package version and built release files. The current generated loader references `v0.2.5` with matching SHA-384 integrity values; both source component Embeds were updated to `v0.2.5` on 2026-10-03. The `SmashBurger CDN` component is separate so the self-contained edition remains available without an external runtime request.

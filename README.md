@@ -187,16 +187,16 @@ Open [demo/index.html](demo/index.html) directly or through a local web server. 
 
 ## Optional CDN distribution
 
-The CDN route uses exact semantic-version GitHub tags through jsDelivr. The `v0.2.4` production files are:
+The CDN route uses exact semantic-version GitHub tags through jsDelivr. The `v0.2.5` production files are:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.2.4/dist/navbar-light.min.css">
-<script defer src="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.2.4/dist/navbar-light.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.2.5/dist/navbar-light.min.css">
+<script defer src="https://cdn.jsdelivr.net/gh/madewithpixels/Webflow-Navbar-Light@v0.2.5/dist/navbar-light.min.js"></script>
 ```
 
 Never use `latest`, a branch name or a version range in a production Webflow project. Exact jsDelivr versions are permanently cached, so a correction must receive a new version and tag. The generated [webflow/navbar-light-cdn-loader.html](webflow/navbar-light-cdn-loader.html) includes the exact URLs, SHA-384 integrity values, a readable runtime version and load/error state on the native link/script elements. A failed asset dispatches `mwp-navbar-light:cdn-error` and logs a diagnostic without hiding the native navigation content.
 
-The `v0.2.4` build fixes the reduced-motion panel/item duration cascade, measures the native burger bars so the open X stays centred, recognises current and namespaced Webflow variant markers, and accepts Webflow's capitalised `True` for `Show backdrop`. `v0.2.3` added neutral layouts and timed custom motion. Sites pinned to earlier versions keep their files until their exact CDN URLs are updated.
+The `v0.2.5` build adds the `Layout presets` switch. The `v0.2.4` build fixes the reduced-motion panel/item duration cascade, measures the native burger bars so the open X stays centred, recognises current and namespaced Webflow variant markers, and accepts Webflow's capitalised `True` for `Show backdrop`. `v0.2.3` added neutral layouts and timed custom motion. Sites pinned to earlier versions keep their files until their exact CDN URLs are updated.
 
 Sites with a Content Security Policy must allow `https://cdn.jsdelivr.net` in `style-src` and `script-src`. The loader's inline diagnostic handlers also need the site's permitted inline-handler policy; blocking those handlers suppresses the custom diagnostic but does not itself block the external CSS or JavaScript. The CDN necessarily receives ordinary request metadata needed to serve the files. Use the self-contained Embed or self-hosted files when third-party requests or the required CSP allowances are unsuitable.
 
