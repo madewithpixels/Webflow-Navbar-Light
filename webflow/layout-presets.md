@@ -85,3 +85,17 @@ navbar root for Dropdown and Full width. It does not change the existing
 drawer/overlay backdrop behavior or enable scroll locking. This source hook
 is not yet bound to a native Webflow property or included in pinned v0.2.3;
 verify it in Preview and on a published test page before distribution.
+
+## First custom-styled upgrade: madewithpixels (2026-10-03)
+
+The unlinked `SB Header` navbar on madewithpixels went from `v0.2.2` to
+`v0.2.5`. The changes were: a static root `data-presets="false"`, the v0.2.5
+CDN loader, and Primary moved before Secondary. All were read back through MCP,
+then the dev site was published. The open panel on
+`madewithpixels-dev.webflow.io` matched the v0.2.2 baseline exactly: rect
+(226, 120, 1568 × 291), transparent surface, no border or shadow, 1px/0
+padding, 2px gap, `rgb(230 230 230)` ink, and identical link positions and
+typography. The only differences were structural: the panel is now
+viewport-bounded and scrollable (`max-height`, `overflow-y: auto`), stacks at
+`z-index: 2`, and the burger X auto-measures (`7px`). Compare the v0.2.4
+attempt without the switch in `v0.2.4-release-verification.md`.
