@@ -47,10 +47,13 @@ Navbar Light [header.mwp-css-nav, data-mwp-navbar]
     │       │   └── Facebook, Instagram, LinkedIn, TikTok, Threads, X and WhatsApp [native Link Blocks + replaceable Images + div.mwp-css-nav_secondary-label]
     │       └── Contact links [div.mwp-css-nav_contacts]
     │           └── Telephone and Email [native Link Blocks + replaceable Images + label Divs]
-├── Navbar Light CSS + enhancement [visible Embed]
-├── Navbar Light settings [visible native Text Blocks, data-mwp-config]
+├── SmashBurger runtime [visible Embed; `SmashBurger CDN loader` in the CDN edition]
+├── SmashBurger Canvas helper [style-only Embed, Designer Canvas only]
+├── Settings inspector [details.mwp-css-nav_settings, data-mwp-config; hidden at runtime and on the Canvas]
 └── Backdrop [native Div, data-mwp-backdrop]
 ```
+
+Navigator labels (2026-10-03): structural elements in both source components use Webflow's default class-based labels; the custom display names were removed. Only the two class-less Embeds keep descriptive names. The descriptive names in the tree above are documentation labels, not Navigator names.
 
 The panel is the single source of navigation content for desktop and collapsed layouts. Its Base/Desktop native style is `display: flex`, keeping every link visible on Canvas. The v0.2.3 candidate removes the native `position: static` declaration so runtime layout placement can work on linked Library instances. The embed and settings are root-level siblings below the navbar row: they remain visible in Designer without inflating the panel, and the settings block is hidden only after runtime initialization.
 

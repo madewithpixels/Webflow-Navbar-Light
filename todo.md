@@ -206,7 +206,8 @@ Keep the current Canvas-visible, self-contained Embed as the dependable default.
 
 ### Canvas authoring experience
 
-- [ ] Remove custom Navigator display names from portable Webflow release elements so Webflow shows the actual `sb-*` class names authors need for styling and structural work. Make the class names themselves clear enough to describe the element.
+- [x] Remove custom Navigator display names from portable Webflow release elements so Webflow shows the actual `sb-*` class names authors need for styling and structural work. Make the class names themselves clear enough to describe the element.
+  - Done on both MWP Library source components (2026-10-03): 21 structural names reset per edition; Embeds renamed `SmashBurger runtime` / `SmashBurger CDN loader` and `SmashBurger Canvas helper`. Class clarity is the later `sb-*` rename.
 - [ ] Verify the source Library, linked clean-install instance, unlinked/local instance and public clonable all expose the expected class names directly in the Navigator, without friendly labels masking their selectors.
 - [ ] Prototype moving the Canvas-visible Code Embed inside one compact `SmashBurger infrastructure` or settings Details element, collapsed by default, and verify that its style/script output still executes and its property-bound configuration remains readable in Preview and published output.
 - [x] Remove the settings inspector Div from normal Canvas flow when it is not being used. Keep it compact/collapsible, selectable from the Navigator and available on demand without letting its summary or property rows push page content down while the navigation is styled. Done via the style-only Canvas helper: the inspector floats as a readable card on the Canvas only. See `webflow/canvas-authoring-fixture.md`.
