@@ -29,6 +29,17 @@ when the attribute is absent, so existing installs keep their appearance.
 Use Off for a custom-designed site; use On, plus the tokens below, for a quick
 neutral result.
 
+Both MWP Component Library source components expose this as `Layout` →
+`Layout presets` (default On), bound to the root `data-presets` attribute
+(property IDs: self-contained `4eec2e32-eff5-80f8-5368-2785eae1af7a`, CDN
+`1cfa4e51-4af3-d818-6c5b-a56df6f3b79a`). Published check, 2026-10-03, on the
+self-contained source page (Left drawer, 600px): the rendered Embed hashed to
+the v0.2.5 build. With `True`, the open panel had the preset white surface,
+shadow, 16px padding and gap, and the dark close button. With `False`, the
+native `mwp-css-nav_panel` class styling showed through (transparent, 4px
+padding, 2px gap, no shadow, plain trigger), while the structure was
+unchanged: fixed, full height, 384px wide, scrollable.
+
 The neutral baseline uses these optional CSS custom properties on the navbar
 root or a project wrapper: `--mwp-nav-panel-surface`,
 `--mwp-nav-panel-ink`, `--mwp-nav-panel-border`,
