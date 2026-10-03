@@ -338,5 +338,5 @@ Treat a mega-menu as a separate component or extension-installed premium feature
 - [x] Verify the Canvas helper for every collapse variant at its own breakpoint (Tablet, Mobile landscape, Mobile portrait, Always) on the self-contained source; screenshots 2026-10-03.
 - [x] Verify the Canvas helper on the CDN edition in a linked consumer site (Smashburger `/demo`, 2026-10-03).
 - [x] Update the Smashburger demo pages' version copy to v0.2.5 (Overview card via MCP; six `sb-demo-footer` Divs by hand, since MCP `set_text` cannot edit a Div's direct text). 2026-10-03.
-- [ ] Decide whether to hide Webflow's grey runtime-Embed placeholder bar on the Canvas (it adds about 70px under each instance header).
-  - Michael: it's in the way. The helper now hides the component's direct-child `.w-embed` elements on the Canvas (no extra control; select the Embeds in the Navigator). Awaiting a screenshot to confirm Webflow's placeholder lives inside that wrapper.
+- [x] Decide whether to hide Webflow's grey runtime-Embed placeholder bar on the Canvas (it adds about 70px under each instance header).
+  - Michael: it's in the way. The helper now hides the component's direct-child `.w-embed` elements on the Canvas (no extra control; select the Embeds in the Navigator). Michael's Desktop screenshot confirmed the bars are gone and both instances are otherwise unchanged (2026-10-03).

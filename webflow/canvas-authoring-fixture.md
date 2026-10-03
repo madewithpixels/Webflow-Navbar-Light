@@ -135,3 +135,15 @@ Library instance.
 
 Noted, not changed: the demo page's own copy still says the component is
 "pinned to v0.2.3"; it is page content outside the component.
+
+## Script placeholder bar hidden (2026-10-03)
+
+Webflow shows a grey "script embed only displays in preview" bar for a
+script-bearing Code Embed, about 70px under every instance header. Michael
+found it in the way. The helper now hides the root's direct-child `.w-embed`
+elements on the Canvas. Webflow's placeholder renders inside that wrapper.
+Style elements inside a hidden Embed still apply, so the helper keeps working,
+and the Embeds stay selectable in the Navigator. There is no separate control,
+because nobody needs the bar back. Verified on the workbench at Desktop:
+both bars are gone, the closed instance shows Brand + MENU, and the open
+instance shows its panel.
