@@ -13,8 +13,7 @@
  * exactly the breakpoints where its collapse choice applies, so it does not push
  * page content around while the page is designed. Expanded layouts stay fully
  * visible. Set data-canvas-open="true" on the root (the Canvas open preview switch) to
- * style the panel on the Canvas. The settings inspector floats instead of
- * taking up page flow. Every element stays selectable in the Navigator. */
+ * style the panel on the Canvas. Every element stays selectable in the Navigator. */
 html.wf-design-mode :is(
   [data-mwp-navbar][data-collapse="always"]:not([data-canvas-open="true" i]),
   [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="always"], [data-wf--smashburger--variant="always"], [data-wf--smashburger-cdn--variant="always"], [data-wf--mwp-component-library--smashburger--variant="always"], [data-wf--mwp-component-library--smashburger-cdn--variant="always"]):not([data-canvas-open="true" i])
@@ -49,18 +48,40 @@ html.wf-design-mode :is(
   }
 }
 
+/* The settings inspector becomes a small chip centred at the top edge of the
+ * header row, where it rarely covers the brand or trigger. Opening it shows the
+ * full read-out as a floating card. Structural selectors are used because a
+ * linked Library instance prefixes the inspector's class names. */
 html.wf-design-mode [data-mwp-navbar] > [data-mwp-config] {
   background-color: #fff;
   border-radius: 0.5rem;
-  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 0.25);
+  box-shadow: 0 0.25rem 1rem rgb(0 0 0 / 0.25);
   color: #111827;
+  left: 50%;
   max-height: 70vh;
-  max-width: min(22rem, 100%);
+  max-width: min(22rem, calc(100% - 1rem));
   overflow-y: auto;
   position: absolute;
-  right: 0;
-  top: 100%;
+  top: 0.25rem;
+  transform: translateX(-50%);
   z-index: 5;
+}
+
+html.wf-design-mode [data-mwp-navbar] > [data-mwp-config]:not([open]) {
+  border-radius: 999px;
+}
+
+html.wf-design-mode [data-mwp-navbar] > [data-mwp-config]:not([open]) > summary {
+  padding: 0.25rem 0.625rem;
+}
+
+html.wf-design-mode [data-mwp-navbar] > [data-mwp-config]:not([open]) > summary > * {
+  font-size: 0.6875rem;
+  line-height: 1.2;
+}
+
+html.wf-design-mode [data-mwp-navbar] > [data-mwp-config]:not([open]) > summary > :not(:first-child) {
+  display: none;
 }
 
 html.wf-design-mode [data-mwp-navbar] [data-mwp-backdrop] {
