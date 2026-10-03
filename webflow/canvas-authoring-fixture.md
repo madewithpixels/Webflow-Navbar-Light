@@ -45,8 +45,8 @@ Michael's Designer screenshots of the self-contained acceptance page
   now has a white surface, dark ink, shadow and a 70vh scroll limit (Canvas only).
 
 The switch was reset to its default afterwards. Still to verify: the CDN
-source component and a linked consumer after the Library update is shared;
-and the Mobile landscape, Mobile portrait and Always variants on the Canvas.
+source component and a linked consumer (the Mobile and Always variants were
+verified later the same day; see below).
 
 Published check (Library staging, `/smashburger-navbar`, same day): the helper
 Embed is present but inert. The page has no `wf-design-mode` class and the root
@@ -99,3 +99,21 @@ MCP authoring notes for the future Designer Extension: `data_element_builder`
 created `TextBlock` as a Div whose text stayed Webflow's placeholder, so use
 `Paragraph`. Elements cannot be created or moved with a component instance as
 the anchor; reorder by moving the instance relative to ordinary siblings.
+
+## Mobile variant Canvas check (2026-10-03)
+
+On the workbench page, instance 1 was temporarily set to `Mobile landscape`
+(the base variant) and instance 2 to `Mobile portrait` with `Canvas: show open
+menu` Off. Michael's Designer screenshots matched every expectation:
+
+| Width | Mobile landscape | Mobile portrait |
+|---|---|---|
+| Desktop (1279px) | expanded | expanded |
+| Tablet (820px) | expanded | expanded |
+| Mobile landscape (667px) | Brand + MENU | expanded |
+| Mobile portrait (393px) | Brand + MENU | Brand + MENU |
+
+With the Tablet and Always checks above, every collapse variant now hides its
+closed panel on the Canvas at exactly its own breakpoint. Both instances were
+restored afterwards (Always; instance 2 open-menu switch On). Still to verify:
+the CDN edition on a linked consumer.

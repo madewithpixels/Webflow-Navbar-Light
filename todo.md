@@ -335,4 +335,6 @@ Treat a mega-menu as a separate component or extension-installed premium feature
 - [x] Verify the published `Smashburger` clean install at 1280px, 984px, 767px and 393px: correct collapse state, zero overflow, loaded icons, hidden runtime settings, ARIA/inert synchronization, nested/outer Escape focus restoration and clean console.
 - [x] Compare the MWP Library source and destination component schemas: the same five variants and 57 property IDs/defaults remain linked, with destination-local icon asset remapping intact.
 - [x] Declare the Navbar Light/SmashBurger POC ready to hand over to the Webflow Designer Extension phase; keep Windows NVDA and the first real version rollback/upgrade as explicit product-phase validation.
+- [x] Verify the Canvas helper for every collapse variant at its own breakpoint (Tablet, Mobile landscape, Mobile portrait, Always) on the self-contained source; screenshots 2026-10-03.
+- [ ] Verify the Canvas helper on the CDN edition in a linked consumer site.
 - [ ] Decide whether to hide Webflow's grey runtime-Embed placeholder bar on the Canvas (it adds about 70px under each instance header).
