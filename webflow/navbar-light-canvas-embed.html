@@ -2,8 +2,9 @@
 /*
  * SmashBurger Canvas helper (Designer-only).
  * Install as a separate, style-only Code Embed inside the component. Webflow
- * never renders an Embed containing <script> on the Designer Canvas, so these
- * rules cannot live in the runtime Embed or CDN stylesheet. Every selector is
+ * replaces any Embed whose code mentions a script tag with a placeholder on
+ * the Designer Canvas, so these rules cannot live in the runtime Embed or CDN
+ * stylesheet, and this file must never contain that tag text, even in a comment. Every selector is
  * scoped to html.wf-design-mode, which exists only on the Canvas; Preview and
  * published output ignore this file entirely.
  */
