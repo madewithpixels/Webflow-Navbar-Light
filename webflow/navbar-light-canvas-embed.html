@@ -1,0 +1,62 @@
+<style>
+/*
+ * SmashBurger Canvas helper (Designer-only).
+ * Install as a separate, style-only Code Embed inside the component. Webflow
+ * never renders an Embed containing <script> on the Designer Canvas, so these
+ * rules cannot live in the runtime Embed or CDN stylesheet. Every selector is
+ * scoped to html.wf-design-mode, which exists only on the Canvas; Preview and
+ * published output ignore this file entirely.
+ */
+
+/* A closed collapsed menu shows only its brand and trigger, at
+ * exactly the breakpoints where its collapse choice applies, so it does not push
+ * page content around while the page is designed. Expanded layouts stay fully
+ * visible. Set data-canvas-open="true" on the root (the Canvas open preview switch) to
+ * style the panel on the Canvas. The settings inspector floats instead of
+ * taking up page flow. Every element stays selectable in the Navigator. */
+html.wf-design-mode :is(
+  [data-mwp-navbar][data-collapse="always"]:not([data-canvas-open="true" i]),
+  [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="always"], [data-wf--smashburger--variant="always"], [data-wf--smashburger-cdn--variant="always"], [data-wf--mwp-component-library--smashburger--variant="always"], [data-wf--mwp-component-library--smashburger-cdn--variant="always"]):not([data-canvas-open="true" i])
+) [data-mwp-panel] {
+  display: none;
+}
+
+@media screen and (max-width: 991px) {
+  html.wf-design-mode :is(
+  [data-mwp-navbar][data-collapse="tablet"]:not([data-canvas-open="true" i]),
+  [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="tablet"], [data-wf--smashburger--variant="tablet"], [data-wf--smashburger-cdn--variant="tablet"], [data-wf--mwp-component-library--smashburger--variant="tablet"], [data-wf--mwp-component-library--smashburger-cdn--variant="tablet"]):not([data-canvas-open="true" i])
+  ) [data-mwp-panel] {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  html.wf-design-mode :is(
+  [data-mwp-navbar][data-collapse="mobile-landscape"]:not([data-canvas-open="true" i]),
+  [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="mobile-landscape"], [data-wf--smashburger--variant="mobile-landscape"], [data-wf--smashburger-cdn--variant="mobile-landscape"], [data-wf--mwp-component-library--smashburger--variant="mobile-landscape"], [data-wf--mwp-component-library--smashburger-cdn--variant="mobile-landscape"]):not([data-canvas-open="true" i])
+  ) [data-mwp-panel] {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  html.wf-design-mode :is(
+  [data-mwp-navbar][data-collapse="mobile-portrait"]:not([data-canvas-open="true" i]),
+  [data-mwp-navbar]:not([data-collapse]):is([data-wf--navbar-light--variant="mobile-portrait"], [data-wf--smashburger--variant="mobile-portrait"], [data-wf--smashburger-cdn--variant="mobile-portrait"], [data-wf--mwp-component-library--smashburger--variant="mobile-portrait"], [data-wf--mwp-component-library--smashburger-cdn--variant="mobile-portrait"]):not([data-canvas-open="true" i])
+  ) [data-mwp-panel] {
+    display: none;
+  }
+}
+
+html.wf-design-mode [data-mwp-navbar] > [data-mwp-config] {
+  max-width: min(22rem, 100%);
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 5;
+}
+
+html.wf-design-mode [data-mwp-navbar] [data-mwp-backdrop] {
+  display: none;
+}
+</style>

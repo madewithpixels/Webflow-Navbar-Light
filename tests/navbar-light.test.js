@@ -578,3 +578,32 @@ test('Layout presets can be switched off so destination classes own the collapse
     .map(([, selector]) => selector.trim());
   assert.deepEqual(ungated, []);
 });
+
+test('Canvas helper hides a closed collapsed panel only on the Designer Canvas', () => {
+  const css = readFileSync(new URL('../src/navbar-light-canvas.css', import.meta.url), 'utf8');
+  const runtime = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  assert.doesNotMatch(runtime, /wf-design-mode/, 'Canvas rules must not ship in the runtime CSS');
+  const rules = [...css.matchAll(/([^{}@]+)\{([^{}]*)\}/g)]
+    .map(([, selector, body]) => ({ selector: selector.replaceAll(/\/\*[\s\S]*?\*\//g, '').trim(), body }));
+  assert.ok(rules.length >= 6);
+  for (const { selector } of rules) assert.match(selector, /^html\.wf-design-mode /, `Canvas-only selector: ${selector}`);
+  const always = rules.find(({ selector }) => selector.includes('variant="always"')).selector;
+  const cases = [
+    ['wf-design-mode', 'data-collapse="always"', true],
+    ['wf-design-mode', 'data-wf--smashburger--variant="always"', true],
+    ['wf-design-mode', 'data-wf--mwp-component-library--smashburger-cdn--variant="always"', true],
+    ['wf-design-mode', 'data-collapse="always" data-canvas-open="True"', false],
+    ['wf-design-mode', 'data-collapse="never"', false],
+    ['wf-design-mode', 'data-collapse="never" data-wf--smashburger--variant="always"', false],
+    ['wf-inactive', 'data-collapse="always"', false],
+    ['', 'data-wf--smashburger--variant="always"', false]
+  ];
+  for (const [htmlClass, rootAttrs, hidden] of cases) {
+    const fixture = new JSDOM(`<html class="${htmlClass}"><body><header data-mwp-navbar ${rootAttrs}><nav data-mwp-panel></nav></header></body></html>`);
+    assert.equal(fixture.window.document.querySelector('[data-mwp-panel]').matches(always), hidden, `${htmlClass} ${rootAttrs}`);
+  }
+  assert.ok(rules.some(({ selector, body }) => selector.endsWith('> [data-mwp-config]') && /position:\s*absolute/.test(body)));
+  assert.doesNotMatch(css.replaceAll(/\/\*[\s\S]*?\*\//g, ''), /!important|<script/);
+  const embed = readFileSync(new URL('../webflow/navbar-light-canvas-embed.html', import.meta.url), 'utf8');
+  assert.equal(embed, `<style>\n${css.trim()}\n</style>\n`);
+});

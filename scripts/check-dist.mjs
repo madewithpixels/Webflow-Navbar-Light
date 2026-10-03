@@ -8,6 +8,7 @@ const generated = [
   'demo/navbar-light.browser.js',
   'webflow/navbar-light-embed.html',
   'webflow/navbar-light-cdn-loader.html',
+  'webflow/navbar-light-canvas-embed.html',
   ...['navbar-light.css', 'navbar-light.min.css', 'navbar-light.js', 'navbar-light.min.js']
     .flatMap((name) => [`dist/${name}`, `dist/${name}.map`])
 ];
@@ -37,7 +38,8 @@ try {
       'dist',
       'demo/navbar-light.browser.js',
       'webflow/navbar-light-embed.html',
-      'webflow/navbar-light-cdn-loader.html'
+      'webflow/navbar-light-cdn-loader.html',
+      'webflow/navbar-light-canvas-embed.html'
     ], {
       cwd: projectRoot,
       encoding: 'utf8'

@@ -9,6 +9,7 @@
     "build:cdn": "node scripts/build-cdn-loader.mjs",
     "build:dist": "node scripts/build-dist.mjs",
     "build:webflow": "node scripts/build-webflow-embed.mjs",
+    "build:canvas": "node scripts/build-canvas-embed.mjs",
     "test": "node --test",
     "check": "node --check src/navbar-light.js",
     "check:dist": "node scripts/check-dist.mjs"
