@@ -58,6 +58,15 @@ html.wf-design-mode [data-mwp-navbar] > [data-mwp-config] {
   display: none;
 }
 
+/* Webflow replaces a script-bearing Code Embed with a grey placeholder bar on
+ * the Canvas. It sits under every instance header and is in the way while the
+ * page is designed, so the component's direct-child Embeds are hidden there.
+ * Style elements inside a hidden Embed still apply, so this helper keeps
+ * working. Select the Embeds in the Navigator. */
+html.wf-design-mode [data-mwp-navbar] > .w-embed {
+  display: none;
+}
+
 html.wf-design-mode [data-mwp-navbar] [data-mwp-backdrop] {
   display: none;
 }
