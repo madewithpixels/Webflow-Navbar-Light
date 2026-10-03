@@ -46,5 +46,10 @@ Michael's Designer screenshots of the self-contained acceptance page
 
 The switch was reset to its default afterwards. Still to verify: the CDN
 source component and a linked consumer after the Library update is shared;
-Mobile landscape, Mobile portrait and Always variants on the Canvas; and that
-Preview and published output are unaffected.
+and the Mobile landscape, Mobile portrait and Always variants on the Canvas.
+
+Published check (Library staging, `/smashburger-navbar`, same day): the helper
+Embed is present but inert. The page has no `wf-design-mode` class and the root
+emits `data-canvas-open="False"`. The settings inspector stays runtime-hidden
+(`display: none`, `position: static`). At 600px the closed panel keeps its
+runtime `grid`, and opening shows all 9 links with the backdrop and no overflow.
