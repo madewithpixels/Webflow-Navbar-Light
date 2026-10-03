@@ -49,10 +49,14 @@ test('demo initializes when opened directly from the filesystem', async () => {
   assert.notEqual(dom.window.getComputedStyle(submenuList).display, 'none');
   assert.ok(submenu.querySelector('[data-mwp-submenu-icon]'));
   const panelGroups = [...root.querySelector('[data-mwp-panel]').children];
+  // DOM order is the reading and Tab order; it must match the visual order
+  // (Primary first) so keyboard and screen-reader users meet the main links first.
   assert.deepEqual(panelGroups.map((element) => element.className), [
-    'mwp-css-nav_secondary',
-    'mwp-css-nav_primary'
+    'mwp-css-nav_primary',
+    'mwp-css-nav_secondary'
   ]);
+  const focusable = [...root.querySelectorAll('[data-mwp-panel] a[href]')];
+  assert.ok(focusable[0].closest('[data-mwp-primary]'), 'first panel link must be a primary link');
   assert.deepEqual([...root.querySelector('.mwp-css-nav_primary').children].map((element) => element.className), [
     'mwp-css-nav_links',
     'mwp-css-nav_cta'

@@ -36,17 +36,17 @@ Navbar Light [header.mwp-css-nav, data-mwp-navbar]
     │           ├── Icon line — middle [Div, data-mwp-line]
     │           └── Icon line — bottom [Div, data-mwp-line]
     └── Navigation panel [nav.mwp-css-nav_panel, data-mwp-panel]
-    │   ├── Secondary navigation [div.mwp-css-nav_secondary]
-    │   │   ├── Social links [div.mwp-css-nav_socials]
-    │   │   │   └── Facebook, Instagram, LinkedIn, TikTok, Threads, X and WhatsApp [native Link Blocks + replaceable Images + div.mwp-css-nav_secondary-label]
-    │   │   └── Contact links [div.mwp-css-nav_contacts]
-    │   │       └── Telephone and Email [native Link Blocks + replaceable Images + label Divs]
-    │   └── Primary navigation [div.mwp-css-nav_primary]
-    │       ├── Navigation links [div.mwp-css-nav_links]
-    │       │   ├── Primary Link elements [data-mwp-item]
-    │       │   └── Submenu details [nested details, data-mwp-submenu]
-    │       │       └── Submenu arrow [native Div + two Div lines, data-mwp-submenu-icon]
-    │       └── Call to action [native Link, final child]
+    │   ├── Primary navigation [div.mwp-css-nav_primary]
+    │   │   ├── Navigation links [div.mwp-css-nav_links]
+    │   │   │   ├── Primary Link elements [data-mwp-item]
+    │   │   │   └── Submenu details [nested details, data-mwp-submenu]
+    │   │   │       └── Submenu arrow [native Div + two Div lines, data-mwp-submenu-icon]
+    │   │   └── Call to action [native Link, final child]
+    │   └── Secondary navigation [div.mwp-css-nav_secondary]
+    │       ├── Social links [div.mwp-css-nav_socials]
+    │       │   └── Facebook, Instagram, LinkedIn, TikTok, Threads, X and WhatsApp [native Link Blocks + replaceable Images + div.mwp-css-nav_secondary-label]
+    │       └── Contact links [div.mwp-css-nav_contacts]
+    │           └── Telephone and Email [native Link Blocks + replaceable Images + label Divs]
 ├── Navbar Light CSS + enhancement [visible Embed]
 ├── Navbar Light settings [visible native Text Blocks, data-mwp-config]
 └── Backdrop [native Div, data-mwp-backdrop]
@@ -126,10 +126,10 @@ Behavior values are strings because the current Webflow binding surface does not
 
 Native layout classes:
 
-- `.mwp-css-nav_secondary`: first direct panel group and secondary master wrapper.
+- `.mwp-css-nav_primary`: first direct panel group (moved first on 2026-10-03 so focus order matches visual order).
+- `.mwp-css-nav_secondary`: second direct panel group and secondary master wrapper.
 - `.mwp-css-nav_socials`: seven social Link Blocks.
 - `.mwp-css-nav_contacts`: Telephone and Email Link Blocks.
-- `.mwp-css-nav_primary`: second direct panel group.
 - `.mwp-css-nav_links`: standard primary links and nested submenus.
 - `.mwp-css-nav_cta`: final child of Primary navigation.
 - `.mwp-css-nav_secondary-label`: seven social label Divs controlled by one property.

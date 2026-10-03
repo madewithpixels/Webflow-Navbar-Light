@@ -28,7 +28,7 @@ Webflow Libraries are the supported cross-project installation route. Ordinary c
 - Desktop remains expanded; Mobile landscape and Mobile portrait remain collapsed.
 - Nested `More` opens independently and uses two-stage Escape behavior.
 - The optional submenu arrow follows the native open state and its duration, easing and rotation properties.
-- Secondary navigation remains first and Primary navigation second in the panel; Social/Contact and Navigation links/CTA wrappers retain their nesting and native flex/grid editability.
+- Primary navigation remains first and Secondary navigation second in the panel (Tab order reaches the primary links before socials/contacts); Social/Contact and Navigation links/CTA wrappers retain their nesting and native flex/grid editability.
 - Facebook, Instagram, LinkedIn, TikTok, Threads, X, WhatsApp, Telephone and Email native labels, destination props, replaceable icon-image props and individual visibility toggles remain editable after installation.
 - Primary, CTA, secondary master, socials, social labels, contact group and contact-label visibility toggles remain bound after installation.
 - The settings block disappears only after runtime initialization.
