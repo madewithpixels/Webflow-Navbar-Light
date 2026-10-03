@@ -115,5 +115,23 @@ menu` Off. Michael's Designer screenshots matched every expectation:
 
 With the Tablet and Always checks above, every collapse variant now hides its
 closed panel on the Canvas at exactly its own breakpoint. Both instances were
-restored afterwards (Always; instance 2 open-menu switch On). Still to verify:
-the CDN edition on a linked consumer.
+restored afterwards (Always; instance 2 open-menu switch On).
+
+## Linked consumer check: CDN edition on Smashburger (2026-10-03)
+
+Smashburger `/demo` (page `6ab820b4510a44142d770a51`) holds a linked
+`SmashBurger CDN` instance (`867bf7f2-ed3c-a61e-09b8-9625881be9ec`, Tablet
+variant). This means the namespaced Library variant marker and prefixed classes
+are in play. Michael's Designer screenshots:
+
+- Desktop (1279px): full link row; no settings label; only the runtime Embed
+  placeholder below the header.
+- Tablet (820px), switch Off: Brand + MENU only.
+- Tablet, switch On: the panel shows under the header for styling.
+
+The switch was reset to its default (Off) through MCP afterwards. The Canvas
+helper is now verified on both editions, as a source component and as a linked
+Library instance.
+
+Noted, not changed: the demo page's own copy still says the component is
+"pinned to v0.2.3"; it is page content outside the component.

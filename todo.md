@@ -336,5 +336,6 @@ Treat a mega-menu as a separate component or extension-installed premium feature
 - [x] Compare the MWP Library source and destination component schemas: the same five variants and 57 property IDs/defaults remain linked, with destination-local icon asset remapping intact.
 - [x] Declare the Navbar Light/SmashBurger POC ready to hand over to the Webflow Designer Extension phase; keep Windows NVDA and the first real version rollback/upgrade as explicit product-phase validation.
 - [x] Verify the Canvas helper for every collapse variant at its own breakpoint (Tablet, Mobile landscape, Mobile portrait, Always) on the self-contained source; screenshots 2026-10-03.
-- [ ] Verify the Canvas helper on the CDN edition in a linked consumer site.
+- [x] Verify the Canvas helper on the CDN edition in a linked consumer site (Smashburger `/demo`, 2026-10-03).
+- [ ] Update the Smashburger demo pages' copy that still says "pinned to v0.2.3".
 - [ ] Decide whether to hide Webflow's grey runtime-Embed placeholder bar on the Canvas (it adds about 70px under each instance header).
