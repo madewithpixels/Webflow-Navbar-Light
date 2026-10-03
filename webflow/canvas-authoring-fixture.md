@@ -77,6 +77,18 @@ Found: on the Canvas, each instance's floating settings card hangs below its
 own root and overlaps the following content. Instance 1's card covers instance
 2's header and trigger; instance 2's card covers the backdrop label.
 
+Fix, step 1 (Michael chose a compact chip): the card became a pill centred at
+the top edge of the header row. Michael then found that clicking it on the
+Canvas opens nothing, because the Designer intercepts Canvas clicks for
+selection, so a `details` element cannot toggle there. Clicking it only
+selected the hidden rows, which showed as green dashed placeholder shapes.
+
+Fix, step 2: on the Canvas the inspector is now a non-interactive,
+text-width label (`Smashburger settings`). Its rows and summary hint are hidden
+with `display: none`, and the open-state styles are gone. The settings
+themselves are read in the Designer's component props panel. Written to both
+source helper Embeds; awaiting Michael's Desktop screenshot.
+
 MCP authoring notes for the future Designer Extension: `data_element_builder`
 created `TextBlock` as a Div whose text stayed Webflow's placeholder, so use
 `Paragraph`. Elements cannot be created or moved with a component instance as

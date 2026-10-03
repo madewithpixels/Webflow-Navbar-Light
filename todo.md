@@ -218,6 +218,7 @@ Keep the current Canvas-visible, self-contained Embed as the dependable default.
 - [x] Build a dedicated Navbar workbench page with separate closed-state and forced-open authoring instances. Shared classes should let designers style both states without repeatedly changing production-instance settings or leaving a menu open over page content. Built as the draft `SmashBurger workbench` page in MWP Component Library with closed and Canvas-open `Always` instances; verified by Michael at Desktop and Tablet. See `webflow/canvas-authoring-fixture.md`.
 - [x] Include a small backdrop style swatch/reference on the workbench instead of making the fixed runtime Backdrop cover the Canvas while it is styled. A class-only swatch Div (no runtime hook) styles the real backdrop without covering the Canvas; verified in Preview. See `webflow/canvas-authoring-fixture.md`.
 - [ ] Stop the floating Canvas settings card overlapping the content after its instance (seen on the workbench: it covers the next instance trigger).
+  - Now a non-interactive label at the header's top edge; rows hidden because `details` can't toggle on the Canvas. Tick once Michael's screenshot confirms no overlap and no dashed shapes.
 - [ ] Treat visible open/closed buttons inside production element settings as a fallback, not the preferred SmashBurger authoring experience.
 - [ ] In the future Designer Extension prototype, investigate whether open/closed/isolate authoring controls can be genuinely temporary and non-publishing before promising app-managed state.
 
