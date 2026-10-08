@@ -61,7 +61,7 @@ root or a project wrapper: `--mwp-nav-panel-surface`,
 dropdown and drawer width. Native Webflow classes remain editable for the
 brand, links, icons, CTA and project-specific typography.
 
-## Overlay and image icons (v0.2.6 candidate)
+## Overlay and image icons (v0.2.6)
 
 An open Overlay uses vertical grid rows for Primary and Secondary even when
 the panel also has a flex-based desktop Webflow class. This applies only while

@@ -2,6 +2,12 @@
 
 This checklist is the implementation plan and status record. Completed work is checked only after source or Webflow verification.
 
+Release status, 2026-10-08: v0.2.6 is tagged and deployed to the active Library,
+Smashburger, Voice Focus, madewithpixels and Lattice staging sites. Michael
+accepted the Preview results and excluded the old test sites from this rollout.
+See [the release record](webflow/v0.2.6-release-verification.md) for evidence,
+the Library global-style packaging finding, and remaining scope.
+
 ## Project constraints
 
 - [x] Build visible structure from native Webflow elements.
