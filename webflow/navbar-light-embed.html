@@ -486,6 +486,15 @@
   transform: translateY(100%);
 }
 
+/* Keep the primary links and secondary contacts in vertical grid rows even
+ * when a destination reuses a flex-based desktop navigation class. */
+[data-mwp-navbar][data-mwp-collapsed="true"][data-layout="overlay"] [data-mwp-panel] {
+  display: grid;
+  /* Panel alignment belongs to anchored layouts. A centred alignment on a
+   * viewport overlay otherwise translates it left by half its width. */
+  translate: none;
+}
+
 [data-mwp-navbar][data-mwp-collapsed="true"][data-layout="overlay"] [data-mwp-panel] {
   align-content: center;
   height: 100dvh;
@@ -496,6 +505,7 @@
 [data-mwp-navbar][data-mwp-collapsed="true"][data-layout="overlay"]:not([data-presets="false" i]) [data-mwp-panel] {
   background: var(--mwp-nav-overlay-surface, #1d2022);
   border: 0;
+  border-radius: 0;
   color: var(--mwp-nav-overlay-ink, #fff);
   gap: clamp(1.5rem, 4vw, 3rem);
   padding: clamp(5rem, 8vw, 8rem) clamp(1rem, 6vw, 5rem);
@@ -516,8 +526,18 @@
   justify-items: center;
 }
 
-[data-mwp-navbar][data-mwp-collapsed="true"][data-layout="overlay"]:not([data-presets="false" i]) [data-mwp-secondary] img {
-  filter: var(--mwp-nav-overlay-icon-filter, brightness(0) invert(1));
+/* Asset-backed icons cannot inherit currentColor from the page. Paint a copy
+ * from each image's alpha silhouette in the parent link's currentColor while
+ * retaining the replaceable native Image and its component property. Authors
+ * using multicolour images can set data-icon-mode="original" on the root. */
+[data-mwp-navbar]:not([data-presets="false" i]):not([data-icon-mode="original"]) [data-mwp-secondary] a[data-mwp-item] {
+  overflow: hidden;
+}
+
+[data-mwp-navbar]:not([data-presets="false" i]):not([data-icon-mode="original"]) [data-mwp-secondary] a[data-mwp-item] img {
+  color: inherit;
+  filter: drop-shadow(4rem 0 0 currentColor);
+  transform: translateX(-4rem);
 }
 
 /* Drawer close buttons move into the drawer. An overlay trigger stays in its

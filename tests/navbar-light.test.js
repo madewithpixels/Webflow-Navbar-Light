@@ -133,16 +133,23 @@ test('Dropdown and Full width backdrops require an explicit source opt-in', () =
 
 test('overlay keeps its trigger in the authored header position while drawers retain their close control', () => {
   const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
-  const fixture = new JSDOM(`<style>${css}</style>
-    <header data-mwp-navbar data-mwp-collapsed="true" data-layout="overlay" data-state="closed">
+  const fixture = new JSDOM(`<style>${css}</style><style>.desktop-pill { display: flex; }</style>
+    <header data-mwp-navbar data-mwp-collapsed="true" data-layout="overlay" data-align="center" data-state="closed">
       <div data-mwp-inner><details data-mwp-menu><summary data-mwp-trigger>Menu</summary></details>
-        <nav data-mwp-panel>Links</nav></div>
+        <nav data-mwp-panel class="desktop-pill">Links</nav></div>
     </header>`);
   const root = fixture.window.document.querySelector('[data-mwp-navbar]');
   const menu = root.querySelector('[data-mwp-menu]');
   const position = () => fixture.window.getComputedStyle(menu).position;
 
   assert.equal(position(), 'relative');
+  assert.equal(fixture.window.getComputedStyle(root.querySelector('[data-mwp-panel]')).display, 'grid');
+  assert.equal(fixture.window.getComputedStyle(root.querySelector('[data-mwp-panel]')).translate, 'none');
+  root.dataset.mwpCollapsed = 'false';
+  menu.open = true;
+  assert.equal(fixture.window.getComputedStyle(root.querySelector('[data-mwp-panel]')).display, 'flex', 'Expanded desktop panel lost its authored layout after the menu opened');
+  menu.open = false;
+  root.dataset.mwpCollapsed = 'true';
   for (const state of ['opening', 'open', 'closing']) {
     root.dataset.state = state;
     assert.equal(position(), 'relative', `Overlay trigger moved during ${state}`);
@@ -153,6 +160,28 @@ test('overlay keeps its trigger in the authored header position while drawers re
     root.dataset.layout = layout;
     assert.equal(position(), 'fixed', `${layout} drawer lost its close control`);
   }
+  fixture.window.close();
+});
+
+test('stock image icons inherit link colour unless original artwork or custom presets are requested', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  const fixture = new JSDOM(`<style>${css}</style>
+    <header data-mwp-navbar data-mwp-collapsed="true" data-layout="overlay">
+      <div data-mwp-secondary><a data-mwp-item style="color: #a5268f"><img alt="" src="icon.svg"></a></div>
+    </header>`);
+  const root = fixture.window.document.querySelector('[data-mwp-navbar]');
+  const icon = root.querySelector('img');
+  const appearance = () => {
+    const style = fixture.window.getComputedStyle(icon);
+    return [style.color, style.filter, style.transform];
+  };
+
+  assert.deepEqual(appearance(), ['rgb(165, 38, 143)', 'drop-shadow(4rem 0 0 currentColor)', 'translateX(-4rem)']);
+  root.dataset.iconMode = 'original';
+  assert.deepEqual(appearance(), ['rgb(165, 38, 143)', '', '']);
+  delete root.dataset.iconMode;
+  root.dataset.presets = 'false';
+  assert.deepEqual(appearance(), ['rgb(165, 38, 143)', '', '']);
   fixture.window.close();
 });
 
@@ -193,7 +222,8 @@ test('panel layout defaults stay below ordinary Webflow class styles', () => {
     .filter(({ selector, declarations }) => selector.includes('[data-mwp-panel]') && panelLayoutProperty.test(declarations));
 
   assert.ok(layoutRules.length > 0);
-  for (const { selector } of layoutRules) {
+  for (const { selector, declarations } of layoutRules) {
+    if (selector.includes('[data-layout="overlay"]') && /^\s*display:\s*grid\s*;\s*translate:\s*none\s*;?\s*$/.test(declarations.replaceAll(/\/\*[\s\S]*?\*\//g, ''))) continue;
     assert.match(selector, /^:where\(/, `Panel layout selector must have zero specificity: ${selector}`);
   }
   assert.doesNotMatch(css.replaceAll(/\/\*[\s\S]*?\*\//g, ''), /!important/);

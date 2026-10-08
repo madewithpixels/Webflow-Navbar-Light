@@ -19,8 +19,8 @@ placement, width and height, viewport-bounded scrolling, stacking, the grid
 tracks for Full width and the drawers, and keeping the close button reachable
 while a drawer or overlay is open. **Visual** preset rules can be switched off:
 panel surface, border, shadow and ink; panel, group and link spacing; link row
-sizing; the Full-width and secondary dividers; overlay typography, centring and
-icon filter; and the drawer/overlay close-button styling.
+sizing; the Full-width and secondary dividers; overlay typography and centring;
+automatic icon tint; and the drawer/overlay close-button styling.
 
 Set `data-presets="false"` on the navbar root, or turn off the `Layout presets`
 component property (Webflow emits `False`; the match is case-insensitive), to
@@ -56,11 +56,25 @@ root or a project wrapper: `--mwp-nav-panel-surface`,
 `--mwp-nav-panel-shadow`, `--mwp-nav-overlay-surface`,
 `--mwp-nav-overlay-ink`, `--mwp-nav-close-surface`,
 `--mwp-nav-close-ink`, `--mwp-nav-close-border`,
-`--mwp-nav-header-height`, `--mwp-nav-z-index`, and
-`--mwp-nav-overlay-icon-filter`. The existing
+`--mwp-nav-header-height`, and `--mwp-nav-z-index`. The existing
 `--mwp-nav-panel-width` controls the
 dropdown and drawer width. Native Webflow classes remain editable for the
 brand, links, icons, CTA and project-specific typography.
+
+## Overlay and image icons (v0.2.6 candidate)
+
+An open Overlay uses vertical grid rows for Primary and Secondary even when
+the panel also has a flex-based desktop Webflow class. This applies only while
+the navbar is collapsed, so the expanded desktop header keeps its authored
+layout in Preview. The overlay also clears anchored-panel centring translation,
+which would otherwise shift a viewport-width panel left by half its width.
+
+With Layout presets On, the stock social and contact Image icons follow their
+link's text colour in Preview and on the published site. Set the colour on the
+native secondary link class. Set `data-icon-mode="original"` on the navbar root
+to retain the original colours of a multicolour image, or turn Layout presets
+Off to let the site's styles control the icons. Inline SVGs that already use
+`currentColor` do not need this image treatment.
 
 The Library versions include `data-mwp-inner`, `data-mwp-primary`,
 `data-mwp-links`, and `data-mwp-secondary` hooks. These keep the preset CSS
