@@ -131,6 +131,31 @@ test('Dropdown and Full width backdrops require an explicit source opt-in', () =
   fixture.window.close();
 });
 
+test('overlay keeps its trigger in the authored header position while drawers retain their close control', () => {
+  const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
+  const fixture = new JSDOM(`<style>${css}</style>
+    <header data-mwp-navbar data-mwp-collapsed="true" data-layout="overlay" data-state="closed">
+      <div data-mwp-inner><details data-mwp-menu><summary data-mwp-trigger>Menu</summary></details>
+        <nav data-mwp-panel>Links</nav></div>
+    </header>`);
+  const root = fixture.window.document.querySelector('[data-mwp-navbar]');
+  const menu = root.querySelector('[data-mwp-menu]');
+  const position = () => fixture.window.getComputedStyle(menu).position;
+
+  assert.equal(position(), 'relative');
+  for (const state of ['opening', 'open', 'closing']) {
+    root.dataset.state = state;
+    assert.equal(position(), 'relative', `Overlay trigger moved during ${state}`);
+    assert.equal(fixture.window.getComputedStyle(menu).zIndex, '4');
+  }
+
+  for (const layout of ['left', 'right']) {
+    root.dataset.layout = layout;
+    assert.equal(position(), 'fixed', `${layout} drawer lost its close control`);
+  }
+  fixture.window.close();
+});
+
 test('optional backdrop is non-blocking until a collapsed layout opens', () => {
   const css = readFileSync(new URL('../src/navbar-light.css', import.meta.url), 'utf8');
   const fixture = new JSDOM(`<style>${css}</style>

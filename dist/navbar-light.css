@@ -1,4 +1,4 @@
-/*! Navbar Light v0.2.5 */
+/*! Navbar Light v0.2.6 */
 /* src/navbar-light.css */
 :where([data-mwp-navbar]) {
   --mwp-nav-duration-open: 280ms;
@@ -419,10 +419,13 @@
 [data-mwp-navbar][data-mwp-collapsed=true][data-layout=overlay]:not([data-presets=false i]) [data-mwp-secondary] img {
   filter: var(--mwp-nav-overlay-icon-filter, brightness(0) invert(1));
 }
-[data-mwp-navbar][data-mwp-collapsed=true]:is([data-layout=left], [data-layout=right], [data-layout=overlay]):is([data-state=opening], [data-state=open], [data-state=closing]) [data-mwp-menu] {
+[data-mwp-navbar][data-mwp-collapsed=true]:is([data-layout=left], [data-layout=right]):is([data-state=opening], [data-state=open], [data-state=closing]) [data-mwp-menu] {
   position: fixed;
   right: clamp(1rem, 2vw, 2rem);
   top: 1rem;
+  z-index: 4;
+}
+[data-mwp-navbar][data-mwp-collapsed=true][data-layout=overlay]:is([data-state=opening], [data-state=open], [data-state=closing]) [data-mwp-menu] {
   z-index: 4;
 }
 [data-mwp-navbar][data-mwp-collapsed=true][data-layout=left]:is([data-state=opening], [data-state=open], [data-state=closing]) [data-mwp-menu] {
