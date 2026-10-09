@@ -1,6 +1,6 @@
 # Replacing an existing Webflow Navbar with SmashBurger
 
-This guide covers the reusable lessons from replacing an already styled and rearranged native Webflow Navbar. The current published delivery assets are `v0.2.3`; source changes described as candidates below have not been released. Project-specific navigation content, destinations and visual design deliberately remain outside this guide.
+This guide covers the reusable lessons from replacing an already styled and rearranged native Webflow Navbar. The current released baseline is `v0.2.6` (see [release verification](v0.2.6-release-verification.md)). Project-specific navigation content, destinations and visual design deliberately remain outside this guide.
 
 ## Recommended workflow
 
@@ -17,6 +17,22 @@ This guide covers the reusable lessons from replacing an already styled and rear
 11. Complete the CSS work and full behavior check before creating a destination-project component.
 12. Remove the old reference Navbar before publishing.
 
+## Show the unlinked panel for Canvas styling
+
+After unlinking, the component's `Canvas: show open menu` property is no longer a reliable place to find the control. Use the native root element instead:
+
+1. In the Navigator, select the outer `header.mwp-css-nav` with `data-mwp-navbar`. Do not select the `details` trigger or the `nav` panel.
+2. Set the root's custom attribute **`data-collapse`** to the mode that was selected when you unlinked: `never`, `tablet`, `mobile-landscape`, `mobile-portrait` or `always`. A fresh Tablet unlink on 2026-10-08 removed the linked Webflow variant marker, so the Canvas helper could not infer its breakpoint until this static attribute was added. The runtime also reads this value. On a v0.2.6 unlink, changing this attribute alone does not replace the variant's Webflow layout classes; keep it aligned with the actual native layout.
+3. Set **`data-canvas-open` to a static `true`** on the same root. A fresh Tablet unlink left this attribute as a legacy component-property binding that resolved to `null`. In the purple value dropdown, choose **Disconnect**, then enter `true` as the ordinary value; do not add a second attribute with the same name. The existing `SmashBurger Canvas helper` Embed then shows the collapsed panel on the Designer Canvas at the selected collapse breakpoint. Its links remain native, selectable elements for styling.
+4. Set **`data-canvas-open` to `false`**, or remove the attribute, when finished. The collapsed Canvas view returns to Brand and trigger. Keep the helper Embed in the unlinked subtree.
+5. Check Designer Preview at Desktop, Tablet and Mobile after a refresh. The helper is scoped to `html.wf-design-mode`, so the custom attribute should not force a runtime-open menu. Open and close the actual menu in Preview to verify it.
+
+This is a **Canvas styling view**, not the menu's interactive `open` state. Do not force `open` on the native `details`, change `aria-expanded` or set `data-state` to style the panel. Those are runtime/accessibility state. The root attribute is a local, editable control that remains available after Library properties disappear; the current release does not recreate it as a grouped local component property.
+
+Changing the collapse mechanism in the shared Library is still a [separate candidate](unlink-hardening-candidate.md) requiring a fresh unlink and no-JavaScript check.
+
+If you turn an unlinked copy into a **site-local component**, check inherited Library bindings before using it as a new source. In the `Unlink test` trial, a later unlink converted a legacy-bound MENU label and 14 runtime settings values into Webflow placeholder text. Disconnect or replace those bindings with the intended static text (or deliberate new local props), then unlink a fresh duplicate to verify every value. Also preserve the root's `data-backdrop="true"` and `data-presets="true"` defaults: a blank `data-backdrop` removed the dropdown backdrop in Preview until the local component definition was corrected. The [trial record](unlink-hardening-candidate.md) lists the verified values and checks. Do not remove the native settings subtree simply to hide it; the runtime reads those values.
+
 ## Current structural contract
 
 The current release expects this functional relationship:
@@ -29,9 +45,9 @@ Navbar root
    └─ Navigation panel
 ```
 
-In the current v0.2.3 release, `Menu details` and `Navigation panel` must remain adjacent, direct children of `Navbar inner`. Wrapping `Menu details` in a project-specific layout Div can still allow JavaScript to update `aria-expanded`, `aria-hidden`, `inert` and `data-state`, while the released CSS selector leaves the panel visually closed. The next source candidate adds a panel-state rule that supports one ordinary trigger wrapper after enhancement; its published Webflow behavior still needs validation. The adjacent-sibling rule remains the native no-script baseline.
+In v0.2.6, the enhanced open-state CSS also responds to the panel's own runtime `data-state`, so one ordinary wrapper around `Menu details` can work after enhancement. Keep `Menu details` and `Navigation panel` adjacent direct children of `Navbar inner` for the CSS/native Details fallback without JavaScript.
 
-Keep the functional siblings intact and use Flex or Grid order, margins, gaps, alignment and positioning to achieve the required visual grouping. The roadmap includes changing the enhanced open-state CSS to target the panel's own runtime state, with regression coverage for a rewrapped trigger. The canonical sibling structure will remain the CSS/native no-script baseline.
+Keep the functional siblings intact and use Flex or Grid order, margins, gaps, alignment and positioning to achieve the required visual grouping. A published wrapped-trigger fixture verified the enhanced state rule; the adjacent-sibling structure remains the no-script baseline.
 
 ## Webflow-native restrictions
 
@@ -49,11 +65,17 @@ Unlinking a configured Library instance can create a long sequence of variant-de
 
 The first real-site audit found 35 materialized `Always` selectors across 102 individual element attachments. Thirty selectors and 97 attachments were declaration-free; five carried rules for the root, inner, menu, trigger or panel. On that instance, all 97 empty attachments were removed and the five functional declarations were transferred to the corresponding local base selectors, leaving no `Always` classes in the navigation subtree. Desktop and 393px Preview checks then passed pointer and keyboard activation, Escape focus return, ARIA/inert and backdrop state, panel containment and zero horizontal overflow. Those figures remain a useful fixture, not yet a guarantee for every configuration or Webflow release. The component-hardening roadmap includes repeating the audit on a fresh instance and fixing the source variants so future users do not need to repeat the cleanup. The planned clonable will start from a deliberately named local component rather than exposing this unlink-generated class trail to new users.
 
+A 2026-10-08 read of both source components found real variant declarations on the inner, native menu and panel at collapse breakpoints, while the sampled `.mwp-css-nav_links` variant styles had no declarations. This confirms that a blanket variant-style removal would discard authoring layout. It does **not** establish that removing empty overrides, or replacing variants with a collapse property, prevents Webflow from generating numbered combo classes. See [the reversible candidate and fresh-unlink checklist](unlink-hardening-candidate.md).
+
+The site-local one-Base-variant property candidate produced zero numbered selectors on five fresh unlinks, one selected to each collapse choice, in `Unlink test`. Fixture CSS supplies the authoring layout those variants formerly carried; linked and unlinked trial copies passed normal Preview and native Details checks. This is evidence for that local candidate, not a change to v0.2.6 or a guarantee for a future Library import.
+
 There is also a tooling trap after unlinking: the imported namespaced Library selector and its new local counterpart can retain the same display name. The current MCP element-style action accepts names rather than style IDs and can therefore assign the imported selector when the local one was intended. Do not use name-only automated style replacement for this cleanup. Work from a backup, remove only verified empty combo tokens through the Designer, and recheck the resulting element classes and computed layout before continuing.
+
+The Library currently shares `All Links` and `Body (All Pages)` tag styles alongside the component. The native Brand and navigation classes intentionally inherit typography and link presentation, so those tags can affect the appearance of a new destination site. Active consumers reported no visual regression at v0.2.6; preserve the tag styles during this hardening work and compare their cascade in any new clean-install fixture. Webflow's Asset settings only manages asset folders and cannot exclude tag styles.
 
 When a functional combo must be consolidated locally, remove that combo from the element before editing the base selector. Webflow's Style panel continues writing to the final combo while it remains attached even if the base token appears active. Temporarily remove later semantic project classes where necessary, edit and verify the unambiguous base, then restore only deliberately named classes such as the destination project's trigger or authoring helper class.
 
-The published `v0.2.3` delivery assets predate the `Show brand` control. The current MWP Component Library source components (CDN and self-contained) now have a default-on `Content / Show brand` Switch bound to the native Brand link's visibility. Designer readback in each edition showed `display: none` and a zero-size box when hidden, then restored the visible default. The two-component Library update was shared and accepted on SB Test Four: the linked self-contained instance exposed the new control and hid the Brand link from the Canvas accessibility tree when disabled. On a temporary published hidden-state test, Brand was absent from the DOM and the first Tab focused Facebook. The default was restored and republished; Brand returned as the first anchor and first Tab stop. The visible-default instance also passed a published mobile menu check at 600px with zero horizontal overflow. After unlinking, the Brand can still be deleted or hidden with ordinary Webflow controls without affecting the enhancement.
+The MWP Component Library source components (CDN and self-contained) have a default-on `Content / Show brand` Switch bound to the native Brand link's visibility. Designer readback in each edition showed `display: none` and a zero-size box when hidden, then restored the visible default. The two-component Library update was shared and accepted on SB Test Four: the linked self-contained instance exposed the new control and hid the Brand link from the Canvas accessibility tree when disabled. On a temporary published hidden-state test, Brand was absent from the DOM and the first Tab focused Facebook. The default was restored and republished; Brand returned as the first anchor and first Tab stop. The visible-default instance also passed a published mobile menu check at 600px with zero horizontal overflow. After unlinking, the Brand can still be deleted or hidden with ordinary Webflow controls without affecting the enhancement.
 
 Older Library copies used `background-color: inherit` on the navigation panel and submenu list. The current source Library gives the expanded panel an explicit transparent background and the submenu a white surface with dark ink; see [the background audit](background-audit.md). Both are ordinary Webflow class values for a destination to override. On a dark destination wrapper, choose a light main-navigation ink as part of the site's styling; the submenu retains its own contrast.
 

@@ -1,0 +1,26 @@
+/*
+ * Unreleased, fixture-only CSS for the base-variant unlinked copy on
+ * Smashburger /unlink-test. Add data-unlink-candidate and data-collapse="tablet"
+ * to that copy's root. Keep the v0.2.6 runtime and Canvas helper Embeds.
+ *
+ * The pinned runtime already understands data-collapse, but the base Webflow
+ * class hides the native Details menu above Mobile landscape. This rule makes
+ * the Tablet control visible in Preview and in the CSS/native Details fallback.
+ * It is deliberately scoped to one fixture root, not a production release.
+ */
+@media screen and (max-width: 991px) {
+  [data-mwp-navbar][data-unlink-candidate][data-collapse="tablet"] [data-mwp-menu] {
+    display: block;
+  }
+
+  /* Preserve the current Tablet variant's native Canvas authoring layout. */
+  html.wf-design-mode [data-mwp-navbar][data-unlink-candidate][data-collapse="tablet"] [data-mwp-inner] {
+    flex-wrap: wrap;
+  }
+
+  html.wf-design-mode [data-mwp-navbar][data-unlink-candidate][data-collapse="tablet"] [data-mwp-panel] {
+    display: grid;
+    flex-basis: 100%;
+    flex-shrink: 0;
+  }
+}

@@ -1,0 +1,83 @@
+/*
+ * Unreleased, site-local property trial for Smashburger /unlink-test.
+ * Scope every rule to data-unlink-candidate. Keep v0.2.6 runtime CSS/JS and
+ * the separate Designer Canvas helper; this file only replaces the native
+ * Webflow layout overrides formerly supplied by collapse variants.
+ */
+
+/* The runtime reads the hidden settings even when this element is not shown.
+ * Keep it out of Preview and the CSS/native Details fallback if JS is absent. */
+html:not(.wf-design-mode) [data-mwp-navbar][data-unlink-candidate] > [data-mwp-config] {
+  display: none;
+}
+
+/* Always: the Base variant is expanded above Mobile landscape. */
+[data-mwp-navbar][data-unlink-candidate][data-collapse="always"] [data-mwp-inner] {
+  flex-wrap: wrap;
+}
+
+[data-mwp-navbar][data-unlink-candidate][data-collapse="always"] [data-mwp-menu] {
+  display: block;
+}
+
+[data-mwp-navbar][data-unlink-candidate][data-collapse="always"] [data-mwp-panel] {
+  display: grid;
+  flex-basis: 100%;
+  flex-shrink: 0;
+}
+
+/* Tablet: extend the Base variant's Mobile landscape collapse to Tablet. */
+@media screen and (max-width: 991px) {
+  [data-mwp-navbar][data-unlink-candidate][data-collapse="tablet"] [data-mwp-inner] {
+    flex-wrap: wrap;
+  }
+
+  [data-mwp-navbar][data-unlink-candidate][data-collapse="tablet"] [data-mwp-menu] {
+    display: block;
+  }
+
+  [data-mwp-navbar][data-unlink-candidate][data-collapse="tablet"] [data-mwp-panel] {
+    display: grid;
+    flex-basis: 100%;
+    flex-shrink: 0;
+  }
+}
+
+/* Mobile landscape needs no extra rule: it is the native Base layout. */
+
+/* Never: undo the Base collapse at Mobile landscape and narrower widths. */
+@media screen and (max-width: 767px) {
+  [data-mwp-navbar][data-unlink-candidate][data-collapse="never"] [data-mwp-inner] {
+    flex-wrap: nowrap;
+  }
+
+  [data-mwp-navbar][data-unlink-candidate][data-collapse="never"] [data-mwp-menu] {
+    display: none;
+  }
+
+  [data-mwp-navbar][data-unlink-candidate][data-collapse="never"] [data-mwp-panel] {
+    display: flex;
+    flex-basis: auto;
+    flex-shrink: 1;
+    width: auto;
+  }
+}
+
+/* Mobile portrait: undo Base collapse from 480px through 767px. The Base
+ * layout already collapses at 479px and below. */
+@media screen and (min-width: 480px) and (max-width: 767px) {
+  [data-mwp-navbar][data-unlink-candidate][data-collapse="mobile-portrait"] [data-mwp-inner] {
+    flex-wrap: nowrap;
+  }
+
+  [data-mwp-navbar][data-unlink-candidate][data-collapse="mobile-portrait"] [data-mwp-menu] {
+    display: none;
+  }
+
+  [data-mwp-navbar][data-unlink-candidate][data-collapse="mobile-portrait"] [data-mwp-panel] {
+    display: flex;
+    flex-basis: auto;
+    flex-shrink: 1;
+    width: auto;
+  }
+}

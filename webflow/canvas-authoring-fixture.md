@@ -22,7 +22,7 @@ code contains the literal script-tag text with a "only displays in preview mode"
 placeholder on the Canvas. This applies even when the text appears only inside a
 CSS comment: the first helper attempt was swallowed this way. A test now rejects
 that text anywhere in the helper source. Runtime and CDN assets are unchanged by
-this work (still `v0.2.5`).
+that 2026-10-03 work (then `v0.2.5`; the current released baseline is `v0.2.6`).
 
 Installed as `SmashBurger Canvas helper` directly after the runtime Embed in
 both MWP Component Library source components (self-contained element
@@ -147,3 +147,27 @@ and the Embeds stay selectable in the Navigator. There is no separate control,
 because nobody needs the bar back. Verified on the workbench at Desktop:
 both bars are gone, the closed instance shows Brand + MENU, and the open
 instance shows its panel.
+
+## Unlinked local control (2026-10-08)
+
+On the fresh Smashburger `Unlink test` page, unlinking the Tablet Library
+variant removed its Webflow variant marker and left `data-canvas-open` bound to
+an obsolete component property. On the native root `header.mwp-css-nav`, Michael
+set static `data-collapse="tablet"`, chose **Disconnect** for the old purple
+`data-canvas-open` value, and confirmed static `true` exposes the collapsed
+panel for Designer styling while `false` hides it again. The separate Canvas
+helper Embed must remain in the unlinked subtree. Preview still starts closed
+and uses the actual MENU control. See the exact [editing steps](migration-guide.md#show-the-unlinked-panel-for-canvas-styling).
+
+The site-local `SB Unlink Property Trial` keeps `data-canvas-open="false"` as a
+static root attribute from the outset, so it survives unlinking without a
+legacy binding. Its one Base variant and `data-collapse` property are a
+Tablet-only proof: the trial's extra CSS supplies the Tablet layout that the
+released Library variant normally provides. A separate site-local
+`SB Unlink Property Modes Trial` uses one Base variant and fixture CSS for all
+five collapse choices. A fresh unlink selected to each choice had no numbered
+variant selectors. The Tablet and Mobile portrait copies kept the same static
+Canvas control and passed `true`/`false` Designer checks at their collapse
+breakpoints. The [trial record](unlink-hardening-candidate.md)
+separates the verified fixtures from remaining clean-destination work. The
+shared Library and v0.2.6 delivery assets were not changed.
